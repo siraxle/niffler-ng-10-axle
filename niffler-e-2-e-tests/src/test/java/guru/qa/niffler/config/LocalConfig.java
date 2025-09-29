@@ -9,7 +9,18 @@ package guru.qa.niffler.config;
   }
 
   @Override
+  public String spendUrl() {
+   return "http://localhost:8093/";
+  }
+
+  @Override
   public String spendJdbcUrl() {
    return "jdbc:postgresql://localhost:5432/niffler-spend";
   }
+
+  @Override
+  public String registerUrl() {
+   return "http://localhost:9000/register";
+  }
+
  }
