@@ -24,9 +24,7 @@ public class ProfileTest {
                 .login("cat", "123456")
                 .goToProfile()
                 .toggleShowArchived() // включаем показ архивных
-                .getCategories()
-                .findBy(text(category.name()))
-                .shouldBe(visible);
+                .verifyCategoryVisible(category.name());
     }
 
     @GenerateCategory(username = "dog", category = "", archived = false)
@@ -35,8 +33,6 @@ public class ProfileTest {
         Selenide.open(CFG.frontUrl(), LoginPage.class)
                 .login("dog", "123456")
                 .goToProfile()
-                .getCategories()
-                .findBy(text(category.name()))
-                .shouldBe(visible);
+                .verifyCategoryVisible(category.name());
     }
 }

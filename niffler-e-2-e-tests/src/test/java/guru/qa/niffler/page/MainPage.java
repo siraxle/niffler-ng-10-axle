@@ -31,8 +31,8 @@ public class MainPage {
   }
 
   public UserProfilePage goToProfile() {
-    labelBtn.shouldBe(visible).click();
-    profileBtn.shouldBe(visible).click();
+    labelBtn.click();
+    profileBtn.click();
     return new UserProfilePage();
   }
 }

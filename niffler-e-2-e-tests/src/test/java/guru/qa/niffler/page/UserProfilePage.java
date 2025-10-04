@@ -3,6 +3,8 @@ package guru.qa.niffler.page;
 import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.SelenideElement;
 
+import static com.codeborne.selenide.Condition.text;
+import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.*;
 
 public class UserProfilePage {
@@ -15,7 +17,6 @@ public class UserProfilePage {
     private final ElementsCollection categories = $$x("//h2[text()='Categories']/../following-sibling::div[contains(@class, 'MuiGrid-item')]");
     private final ElementsCollection editCategoriesButtons = $$x("//button[@aria-label='Edit category']");
     private final ElementsCollection archiveCategoriesButtons = $$x("//button[@aria-label='Archive category']");
-
 
     public UserProfilePage setUsername(String username) {
         usernameInput.setValue(username);
@@ -37,8 +38,12 @@ public class UserProfilePage {
         return this;
     }
 
-    public ElementsCollection getCategories() {
+    private ElementsCollection getCategories() {
         return categories;
+    }
+
+    public void verifyCategoryVisible(String categoryName) {
+        getCategories().findBy(text(categoryName)).shouldBe(visible);
     }
 
     public UserProfilePage editCategory(int index, String newName) {
@@ -51,5 +56,4 @@ public class UserProfilePage {
         archiveCategoriesButtons.get(index).click();
         return this;
     }
-
 }

@@ -21,8 +21,8 @@ public class RegistrationWebTest {
 
     @Test
     void shouldNotRegisterUserWithExistingUserName() {
-        RegisterPage registerPage = new RegisterPage();
-        Selenide.open(CFG.registerUrl(), RegisterPage.class)
+        RegisterPage registerPage = Selenide.open(CFG.registerUrl(), RegisterPage.class);
+        registerPage
                 .setUsername("cat")
                 .setPassword("123456")
                 .setSubmitPassword("123456")
@@ -33,8 +33,8 @@ public class RegistrationWebTest {
 
     @Test
     void shouldShowErrorIfPasswordAndConfirmPasswordAreNotEqual() {
-        RegisterPage registerPage = new RegisterPage();
-        Selenide.open(CFG.registerUrl(), RegisterPage.class)
+        RegisterPage registerPage = Selenide.open(CFG.registerUrl(), RegisterPage.class);
+        registerPage
                 .setUsername("user_" + System.currentTimeMillis())
                 .setPassword("12345")
                 .setSubmitPassword("different")

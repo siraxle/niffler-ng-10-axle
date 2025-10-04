@@ -12,6 +12,7 @@ public class RegisterPage {
     private final SelenideElement passwordInput = $("#password");
     private final SelenideElement submitPasswordInput = $("#passwordSubmit");
     private final SelenideElement signUpButton = $("#register-button");
+    private final SelenideElement errorForm = $("*.form__error");
 
     public RegisterPage setUsername(String username) {
         usernameInput.setValue(username);
@@ -46,7 +47,7 @@ public class RegisterPage {
     }
 
     public void checkError(String expectedError) {
-        $("*.form__error").shouldHave(text(expectedError));
+        errorForm.shouldHave(text(expectedError));
     }
 
     public RegisterPage checkThatRegisterPageContainsText(String... expectedTexts) {

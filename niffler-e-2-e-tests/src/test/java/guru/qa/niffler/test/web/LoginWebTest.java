@@ -17,7 +17,6 @@ public class LoginWebTest {
 
     @Test
     void mainPageShouldBeDisplayedAfterSuccessLogin() {
-
         MainPage mainPage = open(CFG.frontUrl(), LoginPage.class)
                 .login("cat", "123456");
 
