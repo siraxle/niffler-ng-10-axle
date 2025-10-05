@@ -28,7 +28,6 @@ public class GhApiClient {
 
         JsonNode response = ghApi.issue(
                 "Bearer " + System.getenv(GH_TOKEN_ENV),
-//                "Bearer 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",
                 issueNumber
         ).execute().body();
 
