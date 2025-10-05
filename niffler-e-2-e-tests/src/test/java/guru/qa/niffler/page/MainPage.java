@@ -12,6 +12,8 @@ public class MainPage {
   private final SelenideElement showArchivedSwitch = $("input[type='checkbox']");
   private final SelenideElement labelBtn = $x("//button[@aria-label='Menu']");
   private final SelenideElement profileBtn = $x("//a[@href='/profile']");
+  private final SelenideElement friendsBtn = $x("//a[@href='/people/friends']");
+  private final SelenideElement allPeopleBtn = $x("//a[@href='/people/all']");
 
   public EditSpendingPage editSpending(String description) {
     tableRows.find(text(description)).$$("td").get(5).click();
@@ -34,5 +36,17 @@ public class MainPage {
     labelBtn.click();
     profileBtn.click();
     return new UserProfilePage();
+  }
+
+  public FriendsPage goToFriendsPage() {
+    labelBtn.click();
+    friendsBtn.click();
+    return new FriendsPage();
+  }
+
+  public AllPeoplePage goToAllPeoplePage() {
+    labelBtn.click();
+    allPeopleBtn.click();
+    return new AllPeoplePage();
   }
 }

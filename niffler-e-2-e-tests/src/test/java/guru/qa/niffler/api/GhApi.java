@@ -1,0 +1,20 @@
+package guru.qa.niffler.api;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import retrofit2.Call;
+import retrofit2.http.GET;
+import retrofit2.http.Header;
+import retrofit2.http.Headers;
+import retrofit2.http.Path;
+
+public interface GhApi {
+    @GET("repos/siraxle/niffler-ng-10-axle/issues/{issue_number}")
+    @Headers({
+            "Accept: application/vnd.github+json",
+            "X-GitHub-Api-Version: 2022-11-28"
+    })
+    Call<JsonNode> issue(@Header("Authorization") String bearerToken,
+                         @Path("issue_number") String issueNumber);
+}
+
+//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
