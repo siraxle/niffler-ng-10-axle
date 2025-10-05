@@ -16,5 +16,3 @@ public interface GhApi {
     Call<JsonNode> issue(@Header("Authorization") String bearerToken,
                          @Path("issue_number") String issueNumber);
 }
-
-//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
