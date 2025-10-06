@@ -55,13 +55,8 @@ public class UsersQueueExtension implements BeforeEachCallback, AfterEachCallbac
                     StopWatch sw = StopWatch.createStarted();
                     // ОЖИДАНИЕ СВОБОДНОГО ПОЛЬЗОВАТЕЛЯ:
                     while (user.isEmpty() && sw.getTime(TimeUnit.SECONDS) < 30) {
-                        // ЗАМЕНЯЕМ ЛОГИКУ ВЫБОРА ОЧЕРЕДИ:
-                        user = switch (userType.value()) {
-                            case EMPTY -> Optional.ofNullable(EMPTY_USERS.poll());
-                            case WITH_FRIEND -> Optional.ofNullable(WITH_FRIEND_USERS.poll());
-                            case WITH_INCOME_REQUEST -> Optional.ofNullable(WITH_INCOME_REQUEST_USERS.poll());
-                            case WITH_OUTCOME_REQUEST -> Optional.ofNullable(WITH_OUTCOME_REQUEST_USERS.poll());
-                        };
+                        Queue<StaticUser> queue = getQueueByUserType(userType);
+                        user = Optional.ofNullable(queue.poll());
                     }
                     // ЕСЛИ ПОЛЬЗОВАТЕЛЬ НАЙДЕН - ДОБАВЛЯЕМ В MAP
                     user.ifPresentOrElse(
@@ -80,25 +75,27 @@ public class UsersQueueExtension implements BeforeEachCallback, AfterEachCallbac
         context.getStore(NAMESPACE).put(context.getUniqueId(), usersMap);
     }
 
+    private Queue<StaticUser> getQueueByUserType(UserType userType) {
+        return switch (userType.value()) {
+            case EMPTY -> EMPTY_USERS;
+            case WITH_FRIEND -> WITH_FRIEND_USERS;
+            case WITH_INCOME_REQUEST -> WITH_INCOME_REQUEST_USERS;
+            case WITH_OUTCOME_REQUEST -> WITH_OUTCOME_REQUEST_USERS;
+        };
+    }
+
 
     //тут кладем user обратно в очередь
     @Override
     public void afterEach(ExtensionContext context) throws Exception {
         Map<UserType, StaticUser> usersMap = context.getStore(NAMESPACE)
-                .getOrComputeIfAbsent(
-                        context.getUniqueId(),
-                        key -> new HashMap<UserType, StaticUser>(),
-                        Map.class
-                );
-        for (Map.Entry<UserType, StaticUser> user : usersMap.entrySet()) {
-            switch (user.getKey().value()) {
-                case EMPTY -> EMPTY_USERS.add(user.getValue());
-                case WITH_FRIEND -> WITH_FRIEND_USERS.add(user.getValue());
-                case WITH_INCOME_REQUEST -> WITH_INCOME_REQUEST_USERS.add(user.getValue());
-                case WITH_OUTCOME_REQUEST -> WITH_OUTCOME_REQUEST_USERS.add(user.getValue());
+                .get(context.getUniqueId(), Map.class);
+        if (usersMap != null) {
+            for (Map.Entry<UserType, StaticUser> entry : usersMap.entrySet()) {
+                Queue<StaticUser> queue = getQueueByUserType(entry.getKey());
+                queue.add(entry.getValue());
             }
         }
-
     }
 
     @Override
