@@ -7,7 +7,7 @@ import retrofit2.http.Header;
 import retrofit2.http.Headers;
 import retrofit2.http.Path;
 
-public interface GhAPI {
+public interface GhAPI_ {
     @GET("repos/siraxle/niffler-ng-10-axle/issues/{issue_number}")
     @Headers({
             "Accept: application/vnd.github+json",

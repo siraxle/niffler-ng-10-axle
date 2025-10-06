@@ -1,6 +1,6 @@
 package guru.qa.niffler.jupiter.annotation;
 
-import guru.qa.niffler.jupiter.extension.IssueExtension;
+import guru.qa.niffler.jupiter.extension.IssueExtension_;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.lang.annotation.ElementType;
@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.TYPE})
-@ExtendWith(IssueExtension.class)
+@ExtendWith(IssueExtension_.class)
 public @interface DisableByIssue {
     String value();
 }
