@@ -1,15 +1,15 @@
 package guru.qa.niffler.jupiter.extension;
 
 import guru.qa.niffler.jupiter.annotation.DisableByIssue;
-import guru.qa.niffler.service.GhAPIClient_;
+import guru.qa.niffler.service.GhAPIClient;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.api.extension.ExecutionCondition;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.platform.commons.support.AnnotationSupport;
 import org.junit.platform.commons.support.SearchOption;
 
-public class IssueExtension_ implements ExecutionCondition {
-    private final GhAPIClient_ ghApiClient = new GhAPIClient_();
+public class IssueExtension implements ExecutionCondition {
+    private final GhAPIClient ghApiClient = new GhAPIClient();
 
     @Override
     public ConditionEvaluationResult evaluateExecutionCondition(ExtensionContext context) {
