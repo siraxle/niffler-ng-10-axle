@@ -16,4 +16,8 @@ public interface Config {
 
     String ghUrl();
 
+    String authUrl();
+
+    String gatewayUrl();
+
 }

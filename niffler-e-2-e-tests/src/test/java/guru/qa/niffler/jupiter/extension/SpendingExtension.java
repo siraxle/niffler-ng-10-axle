@@ -1,9 +1,11 @@
 package guru.qa.niffler.jupiter.extension;
 
 import guru.qa.niffler.jupiter.annotation.Spending;
+import guru.qa.niffler.jupiter.annotation.User;
 import guru.qa.niffler.model.CategoryJson;
 import guru.qa.niffler.model.SpendJson;
 import guru.qa.niffler.service.SpendApiClient;
+import guru.qa.niffler.utils.RandomDataUtils;
 import org.junit.jupiter.api.extension.*;
 import org.junit.platform.commons.support.AnnotationSupport;
 
@@ -18,32 +20,38 @@ public class SpendingExtension implements BeforeEachCallback, ParameterResolver 
     public void beforeEach(ExtensionContext context) throws Exception {
         AnnotationSupport.findAnnotation(
                 context.getRequiredTestMethod(),
-                Spending.class
-        ).ifPresent(
-                anno -> {
-                    final SpendJson created = spendClient.createSpend(
-                            new SpendJson(
-                                    null,
-                                    new Date(),
-                                    new CategoryJson(
-                                            null,
-                                            anno.category(),
-                                            anno.username(),
-                                            false
-                                    ),
-                                    anno.currency(),
-                                    anno.amount(),
-                                    anno.description(),
-                                    anno.username()
-                            )
-                    );
-                    context.getStore(NAMESPACE).put(
-                            context.getUniqueId(),
-                            created
-                    );
-                }
-        );
+                User.class
+        ).ifPresent(userAnnotation -> {
+            if (userAnnotation.spendings().length > 0) {
+                Spending anno = userAnnotation.spendings()[0];
 
+                String username = userAnnotation.username().isEmpty()
+                        ? RandomDataUtils.randomUsername()
+                        : userAnnotation.username();
+
+                String description = anno.description().isEmpty()
+                        ? RandomDataUtils.randomeSentence(3)
+                        : anno.description();
+
+                final SpendJson created = spendClient.createSpend(
+                        new SpendJson(
+                                null,
+                                new Date(),
+                                new CategoryJson(
+                                        null,
+                                        anno.category(),
+                                        username,
+                                        false
+                                ),
+                                anno.currency(),
+                                anno.amount(),
+                                description,
+                                username
+                        )
+                );
+                context.getStore(NAMESPACE).put(context.getUniqueId(), created);
+            }
+        });
     }
 
     @Override

@@ -4,6 +4,7 @@ import com.codeborne.selenide.Selenide;
 import guru.qa.niffler.config.Config;
 import guru.qa.niffler.jupiter.annotation.DisableByIssue;
 import guru.qa.niffler.jupiter.annotation.Spending;
+import guru.qa.niffler.jupiter.annotation.User;
 import guru.qa.niffler.jupiter.extension.BrowserExtension;
 import guru.qa.niffler.jupiter.extension.TestMethodContextExtension;
 import guru.qa.niffler.model.CurrencyValues;
@@ -16,28 +17,29 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 @ExtendWith(BrowserExtension.class)
 public class SpendingWebTest {
 
-  private static final Config CFG = Config.getInstance();
+    private static final Config CFG = Config.getInstance();
 
-  @Spending(
-      username = "duck",
-      category = "Учеба",
-      amount = 89900,
-      currency = CurrencyValues.RUB,
-      description = "Обучение Niffler 2.0 юбилейный поток!"
-  )
+    @User(
+            username = "duck",
+            spendings = @Spending(
+                    category = "Учеба",
+                    amount = 89900,
+                    currency = CurrencyValues.RUB,
+                    description = "Обучение Niffler 2.0 юбилейный поток!"
+            )
+    )
+    @DisableByIssue("2")
+    @Test
+    void spendingDescriptionShouldBeEditedByTableAction(SpendJson spending) {
+        ExtensionContext ctx = TestMethodContextExtension.context();
 
-  @DisableByIssue("2")
-  @Test
-  void spendingDescriptionShouldBeEditedByTableAction(SpendJson spending) {
-    ExtensionContext ctx = TestMethodContextExtension.context();
+        final String newDescription = "Обучение Niffler Next Generation";
 
-    final String newDescription = "Обучение Niffler Next Generation";
-
-    Selenide.open(CFG.frontUrl(), LoginPage.class)
-        .login("duck", "12345")
-        .editSpending(spending.description())
-        .setNewSpendingDescription(newDescription)
-        .save()
-        .checkThatTableContains(newDescription);
-  }
+        Selenide.open(CFG.frontUrl(), LoginPage.class)
+                .login("duck", "12345")
+                .editSpending(spending.description())
+                .setNewSpendingDescription(newDescription)
+                .save()
+                .checkThatTableContains(newDescription);
+    }
 }
