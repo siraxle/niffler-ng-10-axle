@@ -48,7 +48,8 @@ public class UsersQueueExtension implements BeforeEachCallback, AfterEachCallbac
     public void beforeEach(ExtensionContext context) throws Exception {
         Map<UserType, StaticUser> usersMap = new HashMap<>();
         Arrays.stream(context.getRequiredTestMethod().getParameters())
-                .filter(parameter -> AnnotationSupport.isAnnotated(parameter, UserType.class))
+                .filter(parameter -> AnnotationSupport.isAnnotated(parameter, UserType.class)
+                        && parameter.getType().isAssignableFrom(StaticUser.class))
                 .forEach(parameter -> {
                     UserType userType = parameter.getAnnotation(UserType.class);
                     Optional<StaticUser> user = Optional.empty();

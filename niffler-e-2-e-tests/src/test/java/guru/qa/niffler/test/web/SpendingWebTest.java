@@ -5,11 +5,13 @@ import guru.qa.niffler.config.Config;
 import guru.qa.niffler.jupiter.annotation.DisableByIssue;
 import guru.qa.niffler.jupiter.annotation.Spending;
 import guru.qa.niffler.jupiter.extension.BrowserExtension;
+import guru.qa.niffler.jupiter.extension.TestMethodContextExtension;
 import guru.qa.niffler.model.CurrencyValues;
 import guru.qa.niffler.model.SpendJson;
 import guru.qa.niffler.page.LoginPage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.ExtensionContext;
 
 @ExtendWith(BrowserExtension.class)
 public class SpendingWebTest {
@@ -27,6 +29,8 @@ public class SpendingWebTest {
   @DisableByIssue("2")
   @Test
   void spendingDescriptionShouldBeEditedByTableAction(SpendJson spending) {
+    ExtensionContext ctx = TestMethodContextExtension.context();
+
     final String newDescription = "Обучение Niffler Next Generation";
 
     Selenide.open(CFG.frontUrl(), LoginPage.class)
