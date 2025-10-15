@@ -28,4 +28,14 @@ package guru.qa.niffler.config;
         return "https://api.github.com/";
     }
 
-}
+     @Override
+     public String authUrl() {
+         return "http://localhost:9000/login";
+     }
+
+     @Override
+     public String gatewayUrl() {
+         return "http://localhost:8090/";
+     }
+
+ }
