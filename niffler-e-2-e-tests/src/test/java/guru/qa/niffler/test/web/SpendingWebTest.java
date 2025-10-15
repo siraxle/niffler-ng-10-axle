@@ -22,13 +22,13 @@ public class SpendingWebTest {
     @User(
             username = "duck",
             spendings = @Spending(
-                    category = "Учеба",
+                    category = "Учеба5",
                     amount = 89900,
                     currency = CurrencyValues.RUB,
                     description = "Обучение Niffler 2.0 юбилейный поток!"
             )
     )
-    @DisableByIssue("2")
+//    @DisableByIssue("2")
     @Test
     void spendingDescriptionShouldBeEditedByTableAction(SpendJson spending) {
         ExtensionContext ctx = TestMethodContextExtension.context();
