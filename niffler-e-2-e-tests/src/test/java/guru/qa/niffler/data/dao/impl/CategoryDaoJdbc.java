@@ -115,15 +115,11 @@ public class CategoryDaoJdbc implements CategoryDao {
 
     @Override
     public void deleteCategory(CategoryEntity category) {
-        deleteCategoryById(category.getId());
-    }
-
-    public void deleteCategoryById(UUID id) {
         try (Connection connection = Databases.connection(CFG.spendJdbcUrl())) {
             try (PreparedStatement ps = connection.prepareStatement(
                     "DELETE FROM category WHERE id = ?"
             )) {
-                ps.setObject(1, id);
+                ps.setObject(1, category.getId());
                 ps.executeUpdate();
             }
         } catch (SQLException e) {

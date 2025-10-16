@@ -3,6 +3,7 @@ package guru.qa.niffler.data.dao.impl;
 import guru.qa.niffler.config.Config;
 import guru.qa.niffler.data.Databases;
 import guru.qa.niffler.data.dao.SpendDao;
+import guru.qa.niffler.data.entity.spend.CategoryEntity;
 import guru.qa.niffler.data.entity.spend.SpendEntity;
 import guru.qa.niffler.model.CurrencyValues;
 
@@ -51,7 +52,10 @@ public class SpendDaoJdbc implements SpendDao {
     public Optional<SpendEntity> findById(UUID uuid) {
         try (Connection connection = Databases.connection(CFG.spendJdbcUrl())) {
             try (PreparedStatement ps = connection.prepareStatement(
-                    "SELECT * FROM spend WHERE id = ?"
+                    "SELECT s.*, c.username as category_username, c.name as category_name, c.archived as category_archived " +
+                            "FROM spend s " +
+                            "JOIN category c ON s.category_id = c.id " +
+                            "WHERE s.id = ?"
             )) {
                 ps.setObject(1, uuid);
 
@@ -73,7 +77,10 @@ public class SpendDaoJdbc implements SpendDao {
         List<SpendEntity> spends = new ArrayList<>();
         try (Connection connection = Databases.connection(CFG.spendJdbcUrl())) {
             try (PreparedStatement ps = connection.prepareStatement(
-                    "SELECT * FROM spend WHERE username = ? ORDER BY spend_date DESC"
+                    "SELECT s.*, c.username as category_username, c.name as category_name, c.archived as category_archived " +
+                            "FROM spend s " +
+                            "JOIN category c ON s.category_id = c.id " +
+                            "WHERE s.username = ? ORDER BY s.spend_date DESC"
             )) {
                 ps.setString(1, username);
 
@@ -116,7 +123,14 @@ public class SpendDaoJdbc implements SpendDao {
         spend.setCurrency(CurrencyValues.valueOf(rs.getString("currency")));
         spend.setAmount(rs.getDouble("amount"));
         spend.setDescription(rs.getString("description"));
+
+        CategoryEntity category = new CategoryEntity();
+        category.setId(rs.getObject("category_id", UUID.class));
+        category.setUsername(rs.getString("category_username"));
+        category.setName(rs.getString("category_name"));
+        category.setArchived(rs.getBoolean("category_archived"));
+        spend.setCategory(category);
+
         return spend;
     }
-
 }

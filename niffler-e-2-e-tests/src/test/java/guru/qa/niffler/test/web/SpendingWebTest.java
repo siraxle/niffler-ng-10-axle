@@ -2,7 +2,6 @@ package guru.qa.niffler.test.web;
 
 import com.codeborne.selenide.Selenide;
 import guru.qa.niffler.config.Config;
-import guru.qa.niffler.jupiter.annotation.DisableByIssue;
 import guru.qa.niffler.jupiter.annotation.Spending;
 import guru.qa.niffler.jupiter.annotation.User;
 import guru.qa.niffler.jupiter.extension.BrowserExtension;
@@ -20,9 +19,9 @@ public class SpendingWebTest {
     private static final Config CFG = Config.getInstance();
 
     @User(
-            username = "duck",
+            username = "cat",
             spendings = @Spending(
-                    category = "Учеба5",
+                    category = "Учеба6",
                     amount = 89900,
                     currency = CurrencyValues.RUB,
                     description = "Обучение Niffler 2.0 юбилейный поток!"
@@ -36,7 +35,7 @@ public class SpendingWebTest {
         final String newDescription = "Обучение Niffler Next Generation";
 
         Selenide.open(CFG.frontUrl(), LoginPage.class)
-                .login("duck", "12345")
+                .login("cat", "123456")
                 .editSpending(spending.description())
                 .setNewSpendingDescription(newDescription)
                 .save()
