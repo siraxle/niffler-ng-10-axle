@@ -15,6 +15,7 @@ buildscript {
         kafkaClientsVersion = '4.1.0'
         saajVersion = '3.0.4'
         springDataCommonsVersion = '3.5.4'
+        atomicOsVersion = '6.0.0'
         wiremockVersion = '3.13.1'
         ashotVersion = '1.5.4'
         fakerVersion = '1.0.2'
@@ -87,6 +88,9 @@ dependencies {
     testImplementation "p6spy:p6spy:${p6spyVersion}"
     testImplementation "org.hibernate:hibernate-core:${hibernateVersion}"
     testImplementation "org.springframework.security:spring-security-crypto:${springCryptoVersion}"
+    testImplementation("com.atomikos:transactions-jta:${atomicOsVersion}:jakarta")
+    testImplementation("com.atomikos:transactions-hibernate4:${atomicOsVersion}:jakarta")
+    testImplementation("com.atomikos:transactions-jdbc:${atomicOsVersion}")
     // Allure
     testImplementation "io.qameta.allure:allure-attachments:${allureVersion}"
     testImplementation("io.qameta.allure:allure-junit5:${allureVersion}") {
