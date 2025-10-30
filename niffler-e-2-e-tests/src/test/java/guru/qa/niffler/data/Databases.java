@@ -105,29 +105,6 @@ public class Databases {
         }
     }
 
-//    public static void transaction(Consumer<Connection> consumer, String jdbcUrl, int isolationLevel) {
-//        Connection connection = null;
-//        try {
-//            connection = connection(jdbcUrl);
-//            connection.setTransactionIsolation(isolationLevel);
-//            connection.setAutoCommit(false);
-//            consumer.accept(connection);
-//            connection.commit();
-//            connection.setAutoCommit(true);
-//        } catch (SQLException e) {
-//            if (connection != null) {
-//                try {
-//                    connection.rollback();
-//                    connection.setAutoCommit(true);
-//                } catch (SQLException ex) {
-//                    throw new RuntimeException(ex);
-//                }
-//
-//            }
-//            throw new RuntimeException(e);
-//        }
-//    }
-
     public static void xaTransaction(int isolationLevel, XaConsumer... actions) {
         UserTransaction ut = new UserTransactionImp();
         try {

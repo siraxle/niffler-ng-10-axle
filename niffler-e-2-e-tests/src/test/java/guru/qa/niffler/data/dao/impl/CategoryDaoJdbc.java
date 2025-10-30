@@ -53,12 +53,7 @@ public class CategoryDaoJdbc implements CategoryDao {
 
             try (ResultSet rs = ps.getResultSet()) {
                 if (rs.next()) {
-                    CategoryEntity ce = new CategoryEntity();
-                    ce.setId(rs.getObject("id", UUID.class));
-                    ce.setUsername(rs.getString("username"));
-                    ce.setName(rs.getString("name"));
-                    ce.setArchived(rs.getBoolean("archived"));
-                    return Optional.of(ce);
+                    return Optional.of(mapResultSetToCategoryEntity(rs));
                 } else {
                     return Optional.empty();
                 }

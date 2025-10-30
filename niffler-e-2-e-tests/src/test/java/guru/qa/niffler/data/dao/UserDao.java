@@ -1,5 +1,6 @@
 package guru.qa.niffler.data.dao;
 
+import guru.qa.niffler.data.entity.auth.AuthUserEntity;
 import guru.qa.niffler.data.entity.user.UserEntity;
 
 import java.util.Optional;

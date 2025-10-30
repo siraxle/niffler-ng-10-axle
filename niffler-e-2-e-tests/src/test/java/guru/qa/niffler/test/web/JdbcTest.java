@@ -2,8 +2,7 @@ package guru.qa.niffler.test.web;
 
 import guru.qa.niffler.config.Config;
 import guru.qa.niffler.data.Databases.XaFunction;
-import guru.qa.niffler.data.dao.impl.AuthAuthorityDaoJdbc;
-import guru.qa.niffler.data.dao.impl.AuthUserDaoJdbc;
+import guru.qa.niffler.data.dao.impl.UserAuthorityDaoJdbc;
 import guru.qa.niffler.data.entity.auth.AuthAuthorityEntity;
 import guru.qa.niffler.data.entity.auth.AuthUserEntity;
 import guru.qa.niffler.model.Authority;
@@ -60,13 +59,13 @@ public class JdbcTest {
             user.setAccountNonExpired(true);
             user.setAccountNonLocked(true);
             user.setCredentialsNonExpired(true);
-            return new AuthUserDaoJdbc(con).createUser(user);
+            return new UserAuthorityDaoJdbc(con).createUser(user);
         }, CFG.authJdbcUrl());
 
         assertNotNull(createdUser.getId());
 
         Optional<AuthUserEntity> foundUser = transaction((Connection con) ->
-                        new AuthUserDaoJdbc(con).findUserById(createdUser.getId()),
+                        new UserAuthorityDaoJdbc(con).findUserById(createdUser.getId()),
                 CFG.authJdbcUrl()
         );
 
@@ -85,7 +84,7 @@ public class JdbcTest {
             user.setAccountNonExpired(true);
             user.setAccountNonLocked(true);
             user.setCredentialsNonExpired(true);
-            return new AuthUserDaoJdbc(con).createUser(user).getId();
+            return new UserAuthorityDaoJdbc(con).createUser(user).getId();
         }, CFG.authJdbcUrl(), Connection.TRANSACTION_READ_COMMITTED);
 
         transaction((Connection con) -> {
@@ -97,12 +96,12 @@ public class JdbcTest {
             authAuthorityWriteEntity.setUserId(userId);
             authAuthorityWriteEntity.setAuthority(Authority.WRITE);
 
-            new AuthAuthorityDaoJdbc(con).createAuthority(authAuthorityReadEntity);
-            new AuthAuthorityDaoJdbc(con).createAuthority(authAuthorityWriteEntity);
+            new UserAuthorityDaoJdbc(con).createAuthority(authAuthorityReadEntity);
+            new UserAuthorityDaoJdbc(con).createAuthority(authAuthorityWriteEntity);
         }, CFG.authJdbcUrl(), Connection.TRANSACTION_READ_COMMITTED);
 
         Optional<AuthUserEntity> userWithAuthorities = transaction((Connection con) ->
-                        new AuthUserDaoJdbc(con).findUserById(userId),
+                        new UserAuthorityDaoJdbc(con).findUserById(userId),
                 CFG.authJdbcUrl(),
                 Connection.TRANSACTION_READ_COMMITTED
         );
@@ -127,7 +126,7 @@ public class JdbcTest {
                                     authUser.setAccountNonExpired(true);
                                     authUser.setAccountNonLocked(true);
                                     authUser.setCredentialsNonExpired(true);
-                                    return new AuthUserDaoJdbc(con).createUser(authUser);
+                                    return new UserAuthorityDaoJdbc(con).createUser(authUser);
                                 },
                                 CFG.authJdbcUrl()
                         ),
