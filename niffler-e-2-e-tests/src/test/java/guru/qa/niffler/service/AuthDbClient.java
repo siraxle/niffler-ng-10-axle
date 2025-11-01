@@ -3,8 +3,10 @@ package guru.qa.niffler.service;
 import guru.qa.niffler.config.Config;
 import guru.qa.niffler.data.dao.impl.AuthAuthorityDaoJdbc;
 import guru.qa.niffler.data.dao.impl.AuthUserDaoJdbc;
+import guru.qa.niffler.data.dao.impl.UserdataUserDaoJdbc;
 import guru.qa.niffler.data.entity.auth.AuthAuthorityEntity;
 import guru.qa.niffler.data.entity.auth.AuthUserEntity;
+import guru.qa.niffler.data.entity.user.UserEntity;
 import guru.qa.niffler.model.Authority;
 import guru.qa.niffler.model.AuthorityJson;
 import guru.qa.niffler.model.UserAuthJson;
@@ -19,35 +21,53 @@ import static guru.qa.niffler.data.Databases.transaction;
 public class AuthDbClient {
     private static final Config CFG = Config.getInstance();
 
-    public UserAuthJson createUser(UserAuthJson user, String... authorities) {
+//    public UserAuthJson createUser(UserAuthJson user, String... authorities) {
+//        return transaction(connection -> {
+//            // Конвертируем JSON в Entity
+//            AuthUserEntity userEntity = new AuthUserEntity();
+//            userEntity.setUsername(user.username());
+//            userEntity.setPassword(user.password());
+//            userEntity.setEnabled(user.enabled());
+//            userEntity.setAccountNonExpired(user.accountNonExpired());
+//            userEntity.setAccountNonLocked(user.accountNonLocked());
+//            userEntity.setCredentialsNonExpired(user.credentialsNonExpired());
+//            // Создаем пользователя
+//            AuthUserEntity createdUser = new AuthUserDaoJdbc(connection).create(userEntity);
+//            // Создаем authorities если указаны
+//            if (authorities != null && authorities.length > 0) {
+//                for (String authority : authorities) {
+//                    AuthAuthorityEntity authAuthority = new AuthAuthorityEntity();
+//                    authAuthority.setUserId(createdUser.getId());
+//                    authAuthority.setAuthority(Authority.valueOf(authority));
+//                    new AuthAuthorityDaoJdbc(connection).createAuthority(authAuthority);
+//                }
+//            }
+//            // Возвращаем JSON модель
+//            return UserAuthJson.fromEntity(createdUser);
+//        }, CFG.authJdbcUrl());
+//    }
+
+    public UserAuthJson createUser(UserAuthJson user) {
         return transaction(connection -> {
-            // Конвертируем JSON в Entity
-            AuthUserEntity userEntity = new AuthUserEntity();
-            userEntity.setUsername(user.username());
-            userEntity.setPassword(user.password());
-            userEntity.setEnabled(user.enabled());
-            userEntity.setAccountNonExpired(user.accountNonExpired());
-            userEntity.setAccountNonLocked(user.accountNonLocked());
-            userEntity.setCredentialsNonExpired(user.credentialsNonExpired());
-            // Создаем пользователя
-            AuthUserEntity createdUser = new AuthUserDaoJdbc(connection).createUser(userEntity);
-            // Создаем authorities если указаны
-            if (authorities != null && authorities.length > 0) {
-                for (String authority : authorities) {
-                    AuthAuthorityEntity authAuthority = new AuthAuthorityEntity();
-                    authAuthority.setUserId(createdUser.getId());
-                    authAuthority.setAuthority(Authority.valueOf(authority));
-                    new AuthAuthorityDaoJdbc(connection).createAuthority(authAuthority);
-                }
-            }
-            // Возвращаем JSON модель
+            AuthUserEntity createdUser = new AuthUserDaoJdbc(connection).create(toAuthUserEntity(user));
+
+            AuthAuthorityEntity readAuthority = new AuthAuthorityEntity();
+            readAuthority.setUserId(createdUser.getId());
+            readAuthority.setAuthority(Authority.READ);
+
+            AuthAuthorityEntity writeAuthority = new AuthAuthorityEntity();
+            writeAuthority.setUserId(createdUser.getId());
+            writeAuthority.setAuthority(Authority.WRITE);
+
+            new AuthAuthorityDaoJdbc(connection).createAuthority(readAuthority, writeAuthority);
+
             return UserAuthJson.fromEntity(createdUser);
         }, CFG.authJdbcUrl());
     }
 
     public Optional<UserAuthJson> findUserByUsername(String username) {
         return transaction(connection -> {
-            Optional<AuthUserEntity> user = new AuthUserDaoJdbc(connection).findUserByUsername(username);
+            Optional<AuthUserEntity> user = new AuthUserDaoJdbc(connection).findByUsername(username);
             return user.map(UserAuthJson::fromEntity);
         }, CFG.authJdbcUrl());
     }
@@ -55,7 +75,7 @@ public class AuthDbClient {
     // Поиск пользователя по ID
     public Optional<UserAuthJson> findUserById(UUID id) {
         return transaction(connection -> {
-            Optional<AuthUserEntity> user = new AuthUserDaoJdbc(connection).findUserById(id);
+            Optional<AuthUserEntity> user = new AuthUserDaoJdbc(connection).findById(id);
             return user.map(UserAuthJson::fromEntity);
         }, CFG.authJdbcUrl());
     }
@@ -63,7 +83,7 @@ public class AuthDbClient {
     // Получение authorities пользователя
     public List<AuthorityJson> getUserAuthorities(String username) {
         return transaction(connection -> {
-            Optional<AuthUserEntity> user = new AuthUserDaoJdbc(connection).findUserByUsername(username);
+            Optional<AuthUserEntity> user = new AuthUserDaoJdbc(connection).findByUsername(username);
 
             if (user.isPresent()) {
                 List<AuthAuthorityEntity> authorities =
@@ -100,14 +120,14 @@ public class AuthDbClient {
             userEntity.setAccountNonLocked(user.accountNonLocked());
             userEntity.setCredentialsNonExpired(user.credentialsNonExpired());
 
-            AuthUserEntity updatedUser = new AuthUserDaoJdbc(connection).updateUser(userEntity);
+            AuthUserEntity updatedUser = new AuthUserDaoJdbc(connection).update(userEntity);
             return UserAuthJson.fromEntity(updatedUser);
         }, CFG.authJdbcUrl());
     }
 
     public void deleteUser(String username) {
         transaction(connection -> {
-            Optional<AuthUserEntity> user = new AuthUserDaoJdbc(connection).findUserByUsername(username);
+            Optional<AuthUserEntity> user = new AuthUserDaoJdbc(connection).findByUsername(username);
 
             if (user.isPresent()) {
                 // Сначала удаляем authorities
@@ -119,31 +139,39 @@ public class AuthDbClient {
                 }
 
                 // Затем удаляем пользователя
-                new AuthUserDaoJdbc(connection).deleteUser(user.get());
+                new AuthUserDaoJdbc(connection).delete(user.get());
             }
             return null; // Consumer требует возвращаемое значение
         }, CFG.authJdbcUrl());
-    }
 
-    public AuthorityJson createAuthority(String username, String authority) {
-        return transaction(connection -> {
-            Optional<AuthUserEntity> user = new AuthUserDaoJdbc(connection).findUserByUsername(username);
+        // Удаляем из userdata БД
+        transaction(connection -> {
+            Optional<UserEntity> user = new UserdataUserDaoJdbc(connection).findByUsername(username);
+            user.ifPresent(userEntity -> new UserdataUserDaoJdbc(connection).delete(userEntity));
+            return null;
+        }, CFG.userdataJdbcUrl());
 
-            if (user.isPresent()) {
-                AuthAuthorityEntity authAuthority = new AuthAuthorityEntity();
-                authAuthority.setUserId(user.get().getId());
-                authAuthority.setAuthority(Authority.valueOf(authority));
-
-                AuthAuthorityEntity createdAuthority = new AuthAuthorityDaoJdbc(connection).createAuthority(authAuthority);
-                return AuthorityJson.fromEntity(createdAuthority);
-            } else {
-                throw new RuntimeException("User not found: " + username);
-            }
-        }, CFG.authJdbcUrl());
     }
 
     public boolean userExists(String username) {
         return findUserByUsername(username).isPresent();
+    }
+
+    private AuthUserEntity toAuthUserEntity(UserAuthJson user) {
+        AuthUserEntity userEntity = new AuthUserEntity();
+        userEntity.setUsername(user.username());
+        userEntity.setPassword(user.password());
+        userEntity.setEnabled(user.enabled());
+        userEntity.setAccountNonExpired(user.accountNonExpired());
+        userEntity.setAccountNonLocked(user.accountNonLocked());
+        userEntity.setCredentialsNonExpired(user.credentialsNonExpired());
+        return userEntity;
+    }
+
+    private AuthUserEntity toAuthUserEntityWithId(UserAuthJson user) {
+        AuthUserEntity userEntity = toAuthUserEntity(user);
+        userEntity.setId(user.id());
+        return userEntity;
     }
 
 

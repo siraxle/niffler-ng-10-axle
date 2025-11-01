@@ -6,13 +6,13 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface AuthUserDao {
-    AuthUserEntity createUser(AuthUserEntity user);
+    AuthUserEntity create(AuthUserEntity user);
 
-    Optional<AuthUserEntity> findUserById(UUID id);
+    Optional<AuthUserEntity> findById(UUID id);
 
-    Optional<AuthUserEntity> findUserByUsername(String username);
+    Optional<AuthUserEntity> findByUsername(String username);
 
-    AuthUserEntity updateUser(AuthUserEntity user);
+    AuthUserEntity update(AuthUserEntity user);
 
-    void deleteUser(AuthUserEntity user);
+    void delete(AuthUserEntity user);
 }

@@ -60,13 +60,13 @@ public class JdbcTest {
             user.setAccountNonExpired(true);
             user.setAccountNonLocked(true);
             user.setCredentialsNonExpired(true);
-            return new AuthUserDaoJdbc(con).createUser(user);
+            return new AuthUserDaoJdbc(con).create(user);
         }, CFG.authJdbcUrl());
 
         assertNotNull(createdUser.getId());
 
         Optional<AuthUserEntity> foundUser = transaction((Connection con) ->
-                        new AuthUserDaoJdbc(con).findUserById(createdUser.getId()),
+                        new AuthUserDaoJdbc(con).findById(createdUser.getId()),
                 CFG.authJdbcUrl()
         );
 
@@ -85,7 +85,7 @@ public class JdbcTest {
             user.setAccountNonExpired(true);
             user.setAccountNonLocked(true);
             user.setCredentialsNonExpired(true);
-            return new AuthUserDaoJdbc(con).createUser(user).getId();
+            return new AuthUserDaoJdbc(con).create(user).getId();
         }, CFG.authJdbcUrl(), Connection.TRANSACTION_READ_COMMITTED);
 
         transaction((Connection con) -> {
@@ -102,7 +102,7 @@ public class JdbcTest {
         }, CFG.authJdbcUrl(), Connection.TRANSACTION_READ_COMMITTED);
 
         Optional<AuthUserEntity> userWithAuthorities = transaction((Connection con) ->
-                        new AuthUserDaoJdbc(con).findUserById(userId),
+                        new AuthUserDaoJdbc(con).findById(userId),
                 CFG.authJdbcUrl(),
                 Connection.TRANSACTION_READ_COMMITTED
         );
@@ -127,7 +127,7 @@ public class JdbcTest {
                                     authUser.setAccountNonExpired(true);
                                     authUser.setAccountNonLocked(true);
                                     authUser.setCredentialsNonExpired(true);
-                                    return new AuthUserDaoJdbc(con).createUser(authUser);
+                                    return new AuthUserDaoJdbc(con).create(authUser);
                                 },
                                 CFG.authJdbcUrl()
                         ),

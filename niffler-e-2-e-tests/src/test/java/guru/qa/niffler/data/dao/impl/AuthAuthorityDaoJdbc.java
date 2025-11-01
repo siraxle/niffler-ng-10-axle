@@ -17,21 +17,26 @@ public class AuthAuthorityDaoJdbc implements AuthAuthorityDao {
     }
 
     @Override
-    public AuthAuthorityEntity createAuthority(AuthAuthorityEntity authority) {
+    public AuthAuthorityEntity[] createAuthority(AuthAuthorityEntity... authorities) {
         try (PreparedStatement ps = connection.prepareStatement(
                 "INSERT INTO authority (user_id, authority) VALUES (?, ?)",
                 Statement.RETURN_GENERATED_KEYS
         )) {
-            ps.setObject(1, authority.getUserId());
-            ps.setString(2, authority.getAuthority().name());
-            ps.executeUpdate();
+            for (AuthAuthorityEntity authority : authorities) {
+                ps.setObject(1, authority.getUserId());
+                ps.setString(2, authority.getAuthority().name());
+                ps.addBatch();
+            }
+            ps.executeBatch();
 
             try (ResultSet rs = ps.getGeneratedKeys()) {
-                if (rs.next()) {
-                    authority.setId(rs.getObject("id", UUID.class));
+                int i = 0;
+                while (rs.next()) {
+                    authorities[i].setId(rs.getObject(1, UUID.class));
+                    i++;
                 }
             }
-            return authority;
+            return authorities;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

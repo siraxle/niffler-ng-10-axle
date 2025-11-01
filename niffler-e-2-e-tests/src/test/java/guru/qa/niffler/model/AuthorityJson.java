@@ -10,7 +10,7 @@ public record AuthorityJson(
         UUID id,
         @JsonProperty("user_id")
         UUID userId,
-        @JsonProperty("category")
+        @JsonProperty("authority")
         Authority authority) {
 
     public static AuthorityJson fromEntity(AuthAuthorityEntity entity) {

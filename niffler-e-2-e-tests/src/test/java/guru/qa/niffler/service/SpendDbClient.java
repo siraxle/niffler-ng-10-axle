@@ -18,7 +18,7 @@ public class SpendDbClient {
         return transaction(connection -> {
             SpendEntity spendEntity = SpendEntity.fromJson(spend);
             if (spendEntity.getCategory().getId() == null) {
-                CategoryEntity categoryEntity = new CategoryDaoJdbc(connection).createCategory(spendEntity.getCategory());
+                CategoryEntity categoryEntity = new CategoryDaoJdbc(connection).create(spendEntity.getCategory());
                 spendEntity.setCategory(categoryEntity);
             }
             return SpendJson.fromEntity(new SpendDaoJdbc(connection).create(spendEntity));
@@ -28,7 +28,7 @@ public class SpendDbClient {
     public CategoryJson createCategory(CategoryJson category) {
         return transaction(connection -> {
             CategoryEntity categoryEntity = CategoryEntity.fromJson(category);
-            CategoryEntity createdCategory = new CategoryDaoJdbc(connection).createCategory(categoryEntity);
+            CategoryEntity createdCategory = new CategoryDaoJdbc(connection).create(categoryEntity);
             return CategoryJson.fromEntity(createdCategory);
         }, CFG.spendJdbcUrl());
     }
@@ -36,7 +36,7 @@ public class SpendDbClient {
     public CategoryJson updateCategory(CategoryJson category) {
         return transaction(connection -> {
             CategoryEntity categoryEntity = CategoryEntity.fromJson(category);
-            CategoryEntity updatedCategory = new CategoryDaoJdbc(connection).updateCategory(categoryEntity);
+            CategoryEntity updatedCategory = new CategoryDaoJdbc(connection).update(categoryEntity);
             return CategoryJson.fromEntity(updatedCategory);
         }, CFG.spendJdbcUrl());
     }

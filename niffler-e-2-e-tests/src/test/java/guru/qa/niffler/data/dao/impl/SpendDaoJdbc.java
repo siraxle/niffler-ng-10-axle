@@ -96,7 +96,7 @@ public class SpendDaoJdbc implements SpendDao {
     }
 
     @Override
-    public void deleteSpend(SpendEntity spend) {
+    public void delete(SpendEntity spend) {
         try (PreparedStatement ps = connection.prepareStatement(
                 "DELETE FROM spend WHERE id = ?"
         )) {

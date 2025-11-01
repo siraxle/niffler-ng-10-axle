@@ -82,6 +82,10 @@ public class Databases {
         }
     }
 
+    public static <T> T xaTransaction(XaFunction<T>... actions) {
+        return xaTransaction(Connection.TRANSACTION_READ_COMMITTED, actions);
+    }
+
     public static <T> T xaTransaction(int isolationLevel, XaFunction<T>... actions) {
         UserTransaction ut = new UserTransactionImp();
         try {
@@ -94,8 +98,7 @@ public class Databases {
             }
             ut.commit();
             return result;
-        } catch (
-                Exception e) {
+        } catch (Exception e) {
             try {
                 ut.rollback();
             } catch (SystemException exception) {
@@ -105,28 +108,9 @@ public class Databases {
         }
     }
 
-//    public static void transaction(Consumer<Connection> consumer, String jdbcUrl, int isolationLevel) {
-//        Connection connection = null;
-//        try {
-//            connection = connection(jdbcUrl);
-//            connection.setTransactionIsolation(isolationLevel);
-//            connection.setAutoCommit(false);
-//            consumer.accept(connection);
-//            connection.commit();
-//            connection.setAutoCommit(true);
-//        } catch (SQLException e) {
-//            if (connection != null) {
-//                try {
-//                    connection.rollback();
-//                    connection.setAutoCommit(true);
-//                } catch (SQLException ex) {
-//                    throw new RuntimeException(ex);
-//                }
-//
-//            }
-//            throw new RuntimeException(e);
-//        }
-//    }
+    public static void xaTransaction(XaConsumer... actions) {
+        xaTransaction(Connection.TRANSACTION_READ_COMMITTED, actions);
+    }
 
     public static void xaTransaction(int isolationLevel, XaConsumer... actions) {
         UserTransaction ut = new UserTransactionImp();
@@ -205,5 +189,4 @@ public class Databases {
             }
         }
     }
-
 }
