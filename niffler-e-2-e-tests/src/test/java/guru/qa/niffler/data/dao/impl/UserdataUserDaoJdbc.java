@@ -66,6 +66,7 @@ public class UserdataUserDaoJdbc implements UserDao {
         }
     }
 
+
     @Override
     public Optional<UserEntity> findByUsername(String username) {
         try (PreparedStatement ps = connection.prepareStatement(

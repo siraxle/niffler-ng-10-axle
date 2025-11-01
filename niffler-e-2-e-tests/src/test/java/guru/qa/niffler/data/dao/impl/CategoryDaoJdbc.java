@@ -97,6 +97,7 @@ public class CategoryDaoJdbc implements CategoryDao {
         return categories;
     }
 
+
     @Override
     public void delete(CategoryEntity category) {
         try (PreparedStatement ps = connection.prepareStatement(
