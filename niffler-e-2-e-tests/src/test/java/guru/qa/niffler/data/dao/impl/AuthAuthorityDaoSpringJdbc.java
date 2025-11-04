@@ -1,7 +1,7 @@
 package guru.qa.niffler.data.dao.impl;
 
 import guru.qa.niffler.data.dao.AuthAuthorityDao;
-import guru.qa.niffler.data.entity.auth.AuthAuthorityEntity;
+import guru.qa.niffler.data.entity.auth.AuthorityEntity;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -20,7 +20,7 @@ public class AuthAuthorityDaoSpringJdbc implements AuthAuthorityDao {
     }
 
     @Override
-    public AuthAuthorityEntity[] createAuthority(AuthAuthorityEntity... authority) {
+    public AuthorityEntity[] create(AuthorityEntity... authority) {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
         jdbcTemplate.batchUpdate("insert into authority(user_id, authority) values(?, ?)",
                 new BatchPreparedStatementSetter() {
@@ -40,12 +40,12 @@ public class AuthAuthorityDaoSpringJdbc implements AuthAuthorityDao {
     }
 
     @Override
-    public List<AuthAuthorityEntity> findAuthoritiesByUserId(UUID userId) {
+    public List<AuthorityEntity> findAuthoritiesByUserId(UUID userId) {
         return List.of();
     }
 
     @Override
-    public void deleteAuthority(AuthAuthorityEntity authority) {
+    public void deleteAuthority(AuthorityEntity authority) {
 
     }
 }

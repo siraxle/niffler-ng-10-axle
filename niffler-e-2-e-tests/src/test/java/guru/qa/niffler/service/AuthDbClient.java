@@ -4,7 +4,7 @@ import guru.qa.niffler.config.Config;
 import guru.qa.niffler.data.dao.impl.AuthAuthorityDaoJdbc;
 import guru.qa.niffler.data.dao.impl.AuthUserDaoJdbc;
 import guru.qa.niffler.data.dao.impl.UserdataUserDaoJdbc;
-import guru.qa.niffler.data.entity.auth.AuthAuthorityEntity;
+import guru.qa.niffler.data.entity.auth.AuthorityEntity;
 import guru.qa.niffler.data.entity.auth.AuthUserEntity;
 import guru.qa.niffler.data.entity.user.UserEntity;
 import guru.qa.niffler.model.Authority;
@@ -26,15 +26,15 @@ public class AuthDbClient {
         return transaction(connection -> {
             AuthUserEntity createdUser = new AuthUserDaoJdbc(connection).create(toAuthUserEntity(user));
 
-            AuthAuthorityEntity readAuthority = new AuthAuthorityEntity();
+            AuthorityEntity readAuthority = new AuthorityEntity();
             readAuthority.setUserId(createdUser.getId());
             readAuthority.setAuthority(Authority.READ);
 
-            AuthAuthorityEntity writeAuthority = new AuthAuthorityEntity();
+            AuthorityEntity writeAuthority = new AuthorityEntity();
             writeAuthority.setUserId(createdUser.getId());
             writeAuthority.setAuthority(Authority.WRITE);
 
-            new AuthAuthorityDaoJdbc(connection).createAuthority(readAuthority, writeAuthority);
+            new AuthAuthorityDaoJdbc(connection).create(readAuthority, writeAuthority);
 
             return UserAuthJson.fromEntity(createdUser);
         }, CFG.authJdbcUrl());
@@ -61,7 +61,7 @@ public class AuthDbClient {
             Optional<AuthUserEntity> user = new AuthUserDaoJdbc(connection).findByUsername(username);
 
             if (user.isPresent()) {
-                List<AuthAuthorityEntity> authorities =
+                List<AuthorityEntity> authorities =
                         new AuthAuthorityDaoJdbc(connection).findAuthoritiesByUserId(user.get().getId());
 
                 return authorities.stream()
@@ -75,7 +75,7 @@ public class AuthDbClient {
 
     public List<AuthorityJson> getUserAuthoritiesById(UUID userId) {
         return transaction(connection -> {
-            List<AuthAuthorityEntity> authorities =
+            List<AuthorityEntity> authorities =
                     new AuthAuthorityDaoJdbc(connection).findAuthoritiesByUserId(userId);
 
             return authorities.stream()
@@ -106,10 +106,10 @@ public class AuthDbClient {
 
             if (user.isPresent()) {
                 // Сначала удаляем authorities
-                List<AuthAuthorityEntity> authorities =
+                List<AuthorityEntity> authorities =
                         new AuthAuthorityDaoJdbc(connection).findAuthoritiesByUserId(user.get().getId());
 
-                for (AuthAuthorityEntity authority : authorities) {
+                for (AuthorityEntity authority : authorities) {
                     new AuthAuthorityDaoJdbc(connection).deleteAuthority(authority);
                 }
 

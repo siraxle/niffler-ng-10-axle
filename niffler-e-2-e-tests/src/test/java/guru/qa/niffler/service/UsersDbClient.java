@@ -1,9 +1,9 @@
 package guru.qa.niffler.service;
 
 import guru.qa.niffler.config.Config;
-import guru.qa.niffler.data.dao.UserAuthorityDaoSpringJdbc;
+import guru.qa.niffler.data.Databases;
 import guru.qa.niffler.data.dao.impl.*;
-import guru.qa.niffler.data.entity.auth.AuthAuthorityEntity;
+import guru.qa.niffler.data.entity.auth.AuthorityEntity;
 import guru.qa.niffler.data.entity.auth.AuthUserEntity;
 import guru.qa.niffler.data.entity.user.UserEntity;
 import guru.qa.niffler.model.Authority;
@@ -15,8 +15,7 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
 
-import static guru.qa.niffler.data.Databases.dataSource;
-import static guru.qa.niffler.data.Databases.transaction;
+import static guru.qa.niffler.data.Databases.*;
 import static guru.qa.niffler.data.entity.user.UserEntity.toUserEntity;
 
 public class UsersDbClient {
@@ -36,17 +35,17 @@ public class UsersDbClient {
         AuthUserEntity createdAuthUser = new AuthUserDaoSpringJdbc(dataSource(CFG.authJdbcUrl()))
                 .create(authUser);
 
-        AuthAuthorityEntity[] authorityEntities = Arrays.stream(Authority.values()).map(
+        AuthorityEntity[] authorityEntities = Arrays.stream(Authority.values()).map(
                 e -> {
-                    AuthAuthorityEntity authAuthority = new AuthAuthorityEntity();
+                    AuthorityEntity authAuthority = new AuthorityEntity();
                     authAuthority.setUserId(createdAuthUser.getId());
                     authAuthority.setAuthority(e);
                     return authAuthority;
                 }
-        ).toArray(AuthAuthorityEntity[]::new);
+        ).toArray(AuthorityEntity[]::new);
 
         new AuthAuthorityDaoSpringJdbc(dataSource(CFG.authJdbcUrl()))
-                .createAuthority(authorityEntities);
+                .create(authorityEntities);
         return UserJson.fromEntity(
                 new UdUserDaoSpringJdbc(dataSource(CFG.userdataJdbcUrl()))
                         .create(
@@ -56,10 +55,15 @@ public class UsersDbClient {
     }
 
     public UserJson createUser(UserJson user) {
-        return transaction(connection -> {
-            UserEntity createdUser = new UserdataUserDaoJdbc(connection).create(toUserEntity(user));
-            return UserJson.fromEntity(createdUser);
-        }, CFG.userdataJdbcUrl());
+        return xaTransaction(
+                new Databases.XaFunction<>(
+                        connection -> {
+                            UserEntity createdUser = new UserdataUserDaoJdbc(connection).create(toUserEntity(user));
+                            return UserJson.fromEntity(createdUser);
+                        },
+                        CFG.userdataJdbcUrl()
+                )
+        );
     }
 
     public Optional<UserJson> findUserByUsername(String username) {

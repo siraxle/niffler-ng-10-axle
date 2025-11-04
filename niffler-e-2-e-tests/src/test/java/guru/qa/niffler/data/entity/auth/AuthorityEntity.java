@@ -10,15 +10,15 @@ import java.util.UUID;
 
 @Getter
 @Setter
-public class AuthAuthorityEntity implements Serializable {
+public class AuthorityEntity implements Serializable {
     private UUID id;
     private UUID userId;
     private Authority authority;
 
-    public AuthAuthorityEntity() {}
+    public AuthorityEntity() {}
 
-    public static AuthAuthorityEntity fromJson(AuthorityJson authorityJson) {
-        AuthAuthorityEntity entity = new AuthAuthorityEntity();
+    public static AuthorityEntity fromJson(AuthorityJson authorityJson) {
+        AuthorityEntity entity = new AuthorityEntity();
         entity.setId(authorityJson.id());
         entity.setUserId(authorityJson.userId());
         entity.setAuthority(authorityJson.authority());
