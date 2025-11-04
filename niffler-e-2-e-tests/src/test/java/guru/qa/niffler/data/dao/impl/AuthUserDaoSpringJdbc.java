@@ -9,6 +9,7 @@ import org.springframework.jdbc.support.KeyHolder;
 
 import javax.sql.DataSource;
 import java.sql.PreparedStatement;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -70,5 +71,10 @@ public class AuthUserDaoSpringJdbc implements AuthUserDao {
     @Override
     public void delete(AuthUserEntity user) {
 
+    }
+
+    @Override
+    public List<AuthUserEntity> findAll() {
+        return List.of();
     }
 }

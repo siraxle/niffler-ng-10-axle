@@ -9,6 +9,10 @@ import org.springframework.jdbc.support.KeyHolder;
 
 import javax.sql.DataSource;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -54,6 +58,15 @@ public class UdUserDaoSpringJdbc implements UserDao {
                         UdUserEntityRowMapper.instance,
                         id
                 )
+        );
+    }
+
+    @Override
+    public List<UserEntity> findAll() {
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+        return jdbcTemplate.query(
+                "SELECT * FROM \"user\" ORDER BY username",
+                UdUserEntityRowMapper.instance
         );
     }
 
