@@ -132,7 +132,7 @@ public class Databases {
         }
     }
 
-    private static DataSource dataSource(final String jdbcUrl) {
+    public static DataSource dataSource(final String jdbcUrl) {
         return dataSources.computeIfAbsent(
                 jdbcUrl,
                 k -> {
@@ -190,3 +190,4 @@ public class Databases {
         }
     }
 }
+

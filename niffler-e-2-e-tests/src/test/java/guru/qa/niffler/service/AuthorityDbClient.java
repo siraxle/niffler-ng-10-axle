@@ -15,6 +15,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static guru.qa.niffler.data.Databases.transaction;
+import static guru.qa.niffler.model.AuthorityJson.toAuthorityJsonArray;
 
 public class AuthorityDbClient {
     private static final Config CFG = Config.getInstance();
@@ -101,11 +102,5 @@ public class AuthorityDbClient {
                 .orElseThrow(() -> new RuntimeException("User not found: " + username));
     }
 
-    private AuthorityJson[] toAuthorityJsonArray(AuthAuthorityEntity[] entities) {
-        AuthorityJson[] result = new AuthorityJson[entities.length];
-        for (int i = 0; i < entities.length; i++) {
-            result[i] = AuthorityJson.fromEntity(entities[i]);
-        }
-        return result;
-    }
+
 }

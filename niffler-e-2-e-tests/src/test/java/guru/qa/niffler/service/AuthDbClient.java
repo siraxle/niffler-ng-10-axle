@@ -17,35 +17,10 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static guru.qa.niffler.data.Databases.transaction;
+import static guru.qa.niffler.data.entity.auth.AuthUserEntity.toAuthUserEntity;
 
 public class AuthDbClient {
     private static final Config CFG = Config.getInstance();
-
-//    public UserAuthJson createUser(UserAuthJson user, String... authorities) {
-//        return transaction(connection -> {
-//            // Конвертируем JSON в Entity
-//            AuthUserEntity userEntity = new AuthUserEntity();
-//            userEntity.setUsername(user.username());
-//            userEntity.setPassword(user.password());
-//            userEntity.setEnabled(user.enabled());
-//            userEntity.setAccountNonExpired(user.accountNonExpired());
-//            userEntity.setAccountNonLocked(user.accountNonLocked());
-//            userEntity.setCredentialsNonExpired(user.credentialsNonExpired());
-//            // Создаем пользователя
-//            AuthUserEntity createdUser = new AuthUserDaoJdbc(connection).create(userEntity);
-//            // Создаем authorities если указаны
-//            if (authorities != null && authorities.length > 0) {
-//                for (String authority : authorities) {
-//                    AuthAuthorityEntity authAuthority = new AuthAuthorityEntity();
-//                    authAuthority.setUserId(createdUser.getId());
-//                    authAuthority.setAuthority(Authority.valueOf(authority));
-//                    new AuthAuthorityDaoJdbc(connection).createAuthority(authAuthority);
-//                }
-//            }
-//            // Возвращаем JSON модель
-//            return UserAuthJson.fromEntity(createdUser);
-//        }, CFG.authJdbcUrl());
-//    }
 
     public UserAuthJson createUser(UserAuthJson user) {
         return transaction(connection -> {
@@ -155,23 +130,6 @@ public class AuthDbClient {
 
     public boolean userExists(String username) {
         return findUserByUsername(username).isPresent();
-    }
-
-    private AuthUserEntity toAuthUserEntity(UserAuthJson user) {
-        AuthUserEntity userEntity = new AuthUserEntity();
-        userEntity.setUsername(user.username());
-        userEntity.setPassword(user.password());
-        userEntity.setEnabled(user.enabled());
-        userEntity.setAccountNonExpired(user.accountNonExpired());
-        userEntity.setAccountNonLocked(user.accountNonLocked());
-        userEntity.setCredentialsNonExpired(user.credentialsNonExpired());
-        return userEntity;
-    }
-
-    private AuthUserEntity toAuthUserEntityWithId(UserAuthJson user) {
-        AuthUserEntity userEntity = toAuthUserEntity(user);
-        userEntity.setId(user.id());
-        return userEntity;
     }
 
 

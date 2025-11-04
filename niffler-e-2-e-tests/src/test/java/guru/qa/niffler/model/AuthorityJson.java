@@ -20,4 +20,13 @@ public record AuthorityJson(
                 entity.getAuthority()
         );
     }
+
+    public static AuthorityJson[] toAuthorityJsonArray(AuthAuthorityEntity[] entities) {
+        AuthorityJson[] result = new AuthorityJson[entities.length];
+        for (int i = 0; i < entities.length; i++) {
+            result[i] = AuthorityJson.fromEntity(entities[i]);
+        }
+        return result;
+    }
+
 }

@@ -6,11 +6,9 @@ import guru.qa.niffler.data.dao.impl.AuthAuthorityDaoJdbc;
 import guru.qa.niffler.data.dao.impl.AuthUserDaoJdbc;
 import guru.qa.niffler.data.entity.auth.AuthAuthorityEntity;
 import guru.qa.niffler.data.entity.auth.AuthUserEntity;
-import guru.qa.niffler.model.Authority;
-import guru.qa.niffler.model.CategoryJson;
-import guru.qa.niffler.model.CurrencyValues;
-import guru.qa.niffler.model.SpendJson;
+import guru.qa.niffler.model.*;
 import guru.qa.niffler.service.SpendDbClient;
+import guru.qa.niffler.service.UsersDbClient;
 import guru.qa.niffler.utils.RandomDataUtils;
 import org.junit.jupiter.api.Test;
 
@@ -27,6 +25,23 @@ public class JdbcTest {
 
     private static final Config CFG = Config.getInstance();
 
+    @Test
+    void springJdbcTest() {
+        UsersDbClient usersDbClient = new UsersDbClient();
+        UserJson userJson = usersDbClient.createUserSpringJdbc(
+                new UserJson(
+                        null,
+                        "valentin-7",
+                        CurrencyValues.RUB,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null
+                )
+        );
+        System.out.println(userJson);
+    }
 
     @Test
     void daoTest() {
