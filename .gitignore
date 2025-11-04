@@ -25,6 +25,7 @@ bin/
 *.iws
 *.iml
 *.ipr
+*.log
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
@@ -42,3 +43,4 @@ out/
 ### gRPC generated files ###
 /niffler-grpc-common/src/generated/**
 /niffler-e-2-e-tests/.screen-output/**
+/niffler-e-2-e-tests/tmlog8.log
