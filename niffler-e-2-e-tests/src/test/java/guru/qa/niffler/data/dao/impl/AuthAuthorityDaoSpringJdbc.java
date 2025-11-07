@@ -2,6 +2,7 @@ package guru.qa.niffler.data.dao.impl;
 
 import guru.qa.niffler.data.dao.AuthAuthorityDao;
 import guru.qa.niffler.data.entity.auth.AuthorityEntity;
+import guru.qa.niffler.data.mapper.AuthorityEntityRowMapper;
 import guru.qa.niffler.model.Authority;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -38,7 +39,7 @@ public class AuthAuthorityDaoSpringJdbc implements AuthAuthorityDao {
                         return authority.length;
                     }
                 });
-        return null;
+        return authority;
     }
 
     @Override
@@ -46,7 +47,7 @@ public class AuthAuthorityDaoSpringJdbc implements AuthAuthorityDao {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
         String sql = "SELECT * FROM authority WHERE user_id = ? ORDER BY authority";
 
-        return jdbcTemplate.query(sql, (rs, rowNum) -> mapResultSetToAuthorityEntity(rs), userId);
+        return jdbcTemplate.query(sql, AuthorityEntityRowMapper.instance, userId);
     }
 
     @Override
@@ -60,7 +61,7 @@ public class AuthAuthorityDaoSpringJdbc implements AuthAuthorityDao {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
         String sql = "SELECT * FROM authority ORDER BY user_id, authority";
 
-        return jdbcTemplate.query(sql, (rs, rowNum) -> mapResultSetToAuthorityEntity(rs));
+        return jdbcTemplate.query(sql, AuthorityEntityRowMapper.instance);
     }
 
     private AuthorityEntity mapResultSetToAuthorityEntity(ResultSet rs) throws SQLException {

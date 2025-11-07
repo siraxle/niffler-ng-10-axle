@@ -1,17 +1,14 @@
 package guru.qa.niffler.data.dao.impl;
 
 import guru.qa.niffler.data.dao.SpendDao;
-import guru.qa.niffler.data.entity.spend.CategoryEntity;
 import guru.qa.niffler.data.entity.spend.SpendEntity;
-import guru.qa.niffler.model.CurrencyValues;
+import guru.qa.niffler.data.mapper.SpendEntityRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
 import javax.sql.DataSource;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 import java.util.Optional;
@@ -50,20 +47,18 @@ public class SpendDaoSpringJdbc implements SpendDao {
 
     @Override
     public Optional<SpendEntity> findById(UUID id) {
-        String sql = """
-            SELECT s.*, c.name as name, c.archived as archived 
-            FROM spend s 
-            JOIN category c ON s.category_id = c.id 
-            WHERE s.id = ?
-            """;
-
-        return jdbcTemplate.query(sql, rs -> {
-            if (rs.next()) {
-                return Optional.of(mapResultSetToSpendEntity(rs));
-            } else {
-                return Optional.empty();
-            }
-        }, id);
+        return Optional.ofNullable(
+                jdbcTemplate.queryForObject(
+                        """
+                        SELECT s.*, c.name as category_name, c.archived as category_archived 
+                        FROM spend s 
+                        JOIN category c ON s.category_id = c.id 
+                        WHERE s.id = ?
+                        """,
+                        SpendEntityRowMapper.instance,
+                        id
+                )
+        );
     }
 
     @Override
@@ -76,32 +71,12 @@ public class SpendDaoSpringJdbc implements SpendDao {
             ORDER BY s.spend_date DESC
             """;
 
-        return jdbcTemplate.query(sql, (rs, rowNum) -> mapResultSetToSpendEntity(rs), username);
+        return jdbcTemplate.query(sql, SpendEntityRowMapper.instance, username);
     }
 
     @Override
     public void delete(SpendEntity spend) {
         jdbcTemplate.update("DELETE FROM spend WHERE id = ?", spend.getId());
-    }
-
-    private SpendEntity mapResultSetToSpendEntity(ResultSet rs) throws SQLException {
-        SpendEntity spend = new SpendEntity();
-        spend.setId(rs.getObject("id", UUID.class));
-        spend.setUsername(rs.getString("username"));
-        spend.setSpendDate(rs.getDate("spend_date"));
-        spend.setCurrency(CurrencyValues.valueOf(rs.getString("currency")));
-        spend.setAmount(rs.getDouble("amount"));
-        spend.setDescription(rs.getString("description"));
-
-        // Создаем CategoryEntity
-        CategoryEntity category = new CategoryEntity();
-        category.setId(rs.getObject("category_id", UUID.class));
-        category.setName(rs.getString("name"));
-        category.setUsername(rs.getString("username")); // тот же username что и у spend
-        category.setArchived(rs.getBoolean("archived"));
-
-        spend.setCategory(category);
-        return spend;
     }
 
     @Override
@@ -113,7 +88,7 @@ public class SpendDaoSpringJdbc implements SpendDao {
         ORDER BY s.spend_date DESC
         """;
 
-        return jdbcTemplate.query(sql, (rs, rowNum) -> mapResultSetToSpendEntity(rs));
+        return jdbcTemplate.query(sql, SpendEntityRowMapper.instance);
     }
 
 

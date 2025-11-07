@@ -2,14 +2,13 @@ package guru.qa.niffler.data.dao.impl;
 
 import guru.qa.niffler.data.dao.CategoryDao;
 import guru.qa.niffler.data.entity.spend.CategoryEntity;
+import guru.qa.niffler.data.mapper.CategoryEntityRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
 import javax.sql.DataSource;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 import java.util.Optional;
@@ -45,35 +44,31 @@ public class CategoryDaoSpringJdbc implements CategoryDao {
 
     @Override
     public Optional<CategoryEntity> findById(UUID id) {
-        String sql = "SELECT * FROM category WHERE id = ?";
-
-        return jdbcTemplate.query(sql, rs -> {
-            if (rs.next()) {
-                return Optional.of(mapResultSetToCategoryEntity(rs));
-            } else {
-                return Optional.empty();
-            }
-        }, id);
+        return Optional.ofNullable(
+                jdbcTemplate.queryForObject(
+                        "SELECT * FROM category WHERE id = ?",
+                        CategoryEntityRowMapper.instance,
+                        id
+                )
+        );
     }
 
     @Override
     public Optional<CategoryEntity> findByUsernameAndCategoryName(String username, String categoryName) {
-        String sql = "SELECT * FROM category WHERE username = ? AND name = ?";
-
-        return jdbcTemplate.query(sql, rs -> {
-            if (rs.next()) {
-                return Optional.of(mapResultSetToCategoryEntity(rs));
-            } else {
-                return Optional.empty();
-            }
-        }, username, categoryName);
+        return Optional.ofNullable(
+                jdbcTemplate.queryForObject(
+                        "SELECT * FROM category WHERE username = ? AND name = ?",
+                        CategoryEntityRowMapper.instance,
+                        username, categoryName
+                )
+        );
     }
 
     @Override
     public List<CategoryEntity> findAllByUserName(String username) {
         String sql = "SELECT * FROM category WHERE username = ? ORDER BY name";
 
-        return jdbcTemplate.query(sql, (rs, rowNum) -> mapResultSetToCategoryEntity(rs), username);
+        return jdbcTemplate.query(sql, CategoryEntityRowMapper.instance, username);
     }
 
     @Override
@@ -97,15 +92,7 @@ public class CategoryDaoSpringJdbc implements CategoryDao {
     public List<CategoryEntity> findAll() {
         String sql = "SELECT * FROM category ORDER BY username, name";
 
-        return jdbcTemplate.query(sql, (rs, rowNum) -> mapResultSetToCategoryEntity(rs));
+        return jdbcTemplate.query(sql, CategoryEntityRowMapper.instance);
     }
 
-    private CategoryEntity mapResultSetToCategoryEntity(ResultSet rs) throws SQLException {
-        CategoryEntity category = new CategoryEntity();
-        category.setId(rs.getObject("id", UUID.class));
-        category.setName(rs.getString("name"));
-        category.setUsername(rs.getString("username"));
-        category.setArchived(rs.getBoolean("archived"));
-        return category;
-    }
 }
