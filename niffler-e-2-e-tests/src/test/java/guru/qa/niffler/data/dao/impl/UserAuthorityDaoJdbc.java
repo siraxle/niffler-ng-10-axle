@@ -1,12 +1,11 @@
 package guru.qa.niffler.data.dao.impl;
 
 import guru.qa.niffler.data.dao.UserAuthorityDao;
-import guru.qa.niffler.data.entity.auth.AuthAuthorityEntity;
+import guru.qa.niffler.data.entity.auth.AuthorityEntity;
 import guru.qa.niffler.data.entity.auth.AuthUserEntity;
 import guru.qa.niffler.data.entity.user.UserEntity;
 import guru.qa.niffler.model.Authority;
 import guru.qa.niffler.model.CurrencyValues;
-import guru.qa.niffler.model.UserAuthJson;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -125,12 +124,12 @@ public class UserAuthorityDaoJdbc implements UserAuthorityDao {
 
 
     @Override
-    public void createAuthority(AuthAuthorityEntity... authorities) {
+    public void createAuthority(AuthorityEntity... authorities) {
         try (PreparedStatement ps = connection.prepareStatement(
                 "INSERT INTO authority (user_id, authority) VALUES (?, ?)",
                 Statement.RETURN_GENERATED_KEYS
         )) {
-            for (AuthAuthorityEntity authority : authorities) {
+            for (AuthorityEntity authority : authorities) {
                 ps.setObject(1, authority.getUserId());
                 ps.setString(2, authority.getAuthority().name());
                 ps.addBatch();
@@ -150,8 +149,8 @@ public class UserAuthorityDaoJdbc implements UserAuthorityDao {
     }
 
     @Override
-    public List<AuthAuthorityEntity> findAuthoritiesByUserId(UUID userId) {
-        List<AuthAuthorityEntity> authorities = new ArrayList<>();
+    public List<AuthorityEntity> findAuthoritiesByUserId(UUID userId) {
+        List<AuthorityEntity> authorities = new ArrayList<>();
         try (PreparedStatement ps = connection.prepareStatement(
                 "SELECT * FROM authority WHERE user_id = ?"
         )) {
@@ -159,7 +158,7 @@ public class UserAuthorityDaoJdbc implements UserAuthorityDao {
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    AuthAuthorityEntity authority = mapResultSetToAuthAuthorityEntity(rs);
+                    AuthorityEntity authority = mapResultSetToAuthAuthorityEntity(rs);
                     authorities.add(authority);
                 }
             }
@@ -170,7 +169,7 @@ public class UserAuthorityDaoJdbc implements UserAuthorityDao {
     }
 
     @Override
-    public void deleteAuthority(AuthAuthorityEntity authority) {
+    public void deleteAuthority(AuthorityEntity authority) {
         try (PreparedStatement ps = connection.prepareStatement(
                 "DELETE FROM authority WHERE id = ?"
         )) {
@@ -181,8 +180,8 @@ public class UserAuthorityDaoJdbc implements UserAuthorityDao {
         }
     }
 
-    private AuthAuthorityEntity mapResultSetToAuthAuthorityEntity(ResultSet rs) throws SQLException {
-        AuthAuthorityEntity authority = new AuthAuthorityEntity();
+    private AuthorityEntity mapResultSetToAuthAuthorityEntity(ResultSet rs) throws SQLException {
+        AuthorityEntity authority = new AuthorityEntity();
         authority.setId(rs.getObject("id", UUID.class));
         authority.setUserId(rs.getObject("user_id", UUID.class));
         String authorityStr = rs.getString("authority");

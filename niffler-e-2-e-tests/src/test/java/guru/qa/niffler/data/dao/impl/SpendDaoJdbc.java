@@ -30,7 +30,7 @@ public class SpendDaoJdbc implements SpendDao {
         )) {
             ps.setString(1, spend.getUsername());
             ps.setObject(2, spend.getSpendDate());
-            ps.setString(3, spend.getCategory().getName());
+            ps.setString(3, spend.getCurrency().name());
             ps.setDouble(4, spend.getAmount());
             ps.setString(5, spend.getDescription());
             ps.setObject(6, spend.getCategory().getId());
@@ -105,6 +105,27 @@ public class SpendDaoJdbc implements SpendDao {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public List<SpendEntity> findAll() {
+        List<SpendEntity> spends = new ArrayList<>();
+        String sql = """
+        SELECT s.*, c.name as category_name, c.archived as category_archived 
+        FROM spend s 
+        JOIN category c ON s.category_id = c.id 
+        ORDER BY s.spend_date DESC
+        """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                spends.add(mapResultSetToSpendEntity(rs));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return spends;
     }
 
     private SpendEntity mapResultSetToSpendEntity(ResultSet rs) throws SQLException {

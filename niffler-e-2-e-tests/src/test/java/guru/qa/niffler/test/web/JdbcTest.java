@@ -4,7 +4,7 @@ import guru.qa.niffler.config.Config;
 import guru.qa.niffler.data.Databases.XaFunction;
 import guru.qa.niffler.data.dao.impl.AuthAuthorityDaoJdbc;
 import guru.qa.niffler.data.dao.impl.AuthUserDaoJdbc;
-import guru.qa.niffler.data.entity.auth.AuthAuthorityEntity;
+import guru.qa.niffler.data.entity.auth.AuthorityEntity;
 import guru.qa.niffler.data.entity.auth.AuthUserEntity;
 import guru.qa.niffler.model.*;
 import guru.qa.niffler.service.SpendDbClient;
@@ -104,16 +104,16 @@ public class JdbcTest {
         }, CFG.authJdbcUrl(), Connection.TRANSACTION_READ_COMMITTED);
 
         transaction((Connection con) -> {
-            AuthAuthorityEntity authAuthorityReadEntity = new AuthAuthorityEntity();
+            AuthorityEntity authAuthorityReadEntity = new AuthorityEntity();
             authAuthorityReadEntity.setUserId(userId);
             authAuthorityReadEntity.setAuthority(Authority.READ);
 
-            AuthAuthorityEntity authAuthorityWriteEntity = new AuthAuthorityEntity();
+            AuthorityEntity authAuthorityWriteEntity = new AuthorityEntity();
             authAuthorityWriteEntity.setUserId(userId);
             authAuthorityWriteEntity.setAuthority(Authority.WRITE);
 
-            new AuthAuthorityDaoJdbc(con).createAuthority(authAuthorityReadEntity);
-            new AuthAuthorityDaoJdbc(con).createAuthority(authAuthorityWriteEntity);
+            new AuthAuthorityDaoJdbc(con).create(authAuthorityReadEntity);
+            new AuthAuthorityDaoJdbc(con).create(authAuthorityWriteEntity);
         }, CFG.authJdbcUrl(), Connection.TRANSACTION_READ_COMMITTED);
 
         Optional<AuthUserEntity> userWithAuthorities = transaction((Connection con) ->

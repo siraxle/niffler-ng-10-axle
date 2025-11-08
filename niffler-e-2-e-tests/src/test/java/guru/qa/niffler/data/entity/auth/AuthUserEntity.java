@@ -18,7 +18,7 @@ public class AuthUserEntity {
     private Boolean accountNonExpired;
     private Boolean accountNonLocked;
     private Boolean credentialsNonExpired;
-    private List<AuthAuthorityEntity> authorities = new ArrayList<>();
+    private List<AuthorityEntity> authorities = new ArrayList<>();
 
     public AuthUserEntity() {
     }
