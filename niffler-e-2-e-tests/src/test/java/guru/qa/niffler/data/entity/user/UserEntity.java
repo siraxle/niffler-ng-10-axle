@@ -27,6 +27,7 @@ public class UserEntity implements Serializable {
         UserEntity entity = new UserEntity();
         entity.setId(userJson.id());
         entity.setUsername(userJson.username());
+//        entity.setUsername(null);
         entity.setCurrency(userJson.currency());
         entity.setFirstname(userJson.firstname());
         entity.setSurname(userJson.surname());
