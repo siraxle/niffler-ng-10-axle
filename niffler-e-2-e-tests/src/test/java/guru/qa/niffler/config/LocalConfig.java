@@ -10,7 +10,7 @@ package guru.qa.niffler.config;
 
     @Override
     public String spendUrl() {
-        return "http://localhost:8093/";
+        return "jdbc:postgresql://localhost:5432/niffler-spend";
     }
 
      @Override

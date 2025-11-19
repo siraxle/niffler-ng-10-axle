@@ -32,7 +32,7 @@ public class SpendDaoSpringJdbc implements SpendDao {
             );
             ps.setString(1, spend.getUsername());
             ps.setString(2, spend.getCurrency().name());
-            ps.setDate(3, spend.getSpendDate());
+            ps.setDate(3, new java.sql.Date(spend.getSpendDate().getTime()));
             ps.setDouble(4, spend.getAmount());
             ps.setString(5, spend.getDescription());
             ps.setObject(6, spend.getCategory().getId());

@@ -10,6 +10,8 @@ import guru.qa.niffler.data.dao.impl.UdUserDaoSpringJdbc;
 import guru.qa.niffler.data.entity.auth.AuthUserEntity;
 import guru.qa.niffler.data.entity.auth.AuthorityEntity;
 import guru.qa.niffler.data.entity.user.UserEntity;
+import guru.qa.niffler.data.repository.AuthUserRepository;
+import guru.qa.niffler.data.repository.impl.AuthUserRepositoryJdbc;
 import guru.qa.niffler.data.tpl.DataSources;
 import guru.qa.niffler.data.tpl.JdbcTransactionTemplate;
 import guru.qa.niffler.data.tpl.XaTransactionTemplate;
@@ -24,12 +26,12 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
 
-import static guru.qa.niffler.data.entity.user.UserEntity.toUserEntity;
 
 public class UsersDbClient {
     private static final Config CFG = Config.getInstance();
     private static final PasswordEncoder pe = PasswordEncoderFactories.createDelegatingPasswordEncoder();
-    private final AuthUserDao authUserDao = new AuthUserDaoSpringJdbc();
+//    private final AuthUserDao authUserDao = new AuthUserDaoSpringJdbc();
+    private final AuthUserRepository authUserRepository = new AuthUserRepositoryJdbc();
     private final AuthAuthorityDao authAuthorityDao = new AuthAuthorityDaoSpringJdbc();
     private final UserDao userDao = new UdUserDaoSpringJdbc();
 
@@ -52,7 +54,7 @@ public class UsersDbClient {
             CFG.userdataJdbcUrl()
     );
 
-    public UserJson createUserSpringJdbc(UserJson user){
+    public UserJson createUser(UserJson user) {
         return xaTxTemplate.execute(() -> {
                     AuthUserEntity authUser = new AuthUserEntity();
                     authUser.setUsername(user.username());
@@ -61,37 +63,31 @@ public class UsersDbClient {
                     authUser.setAccountNonExpired(true);
                     authUser.setAccountNonLocked(true);
                     authUser.setCredentialsNonExpired(true);
+                    authUser.setAuthorities(
+                            Arrays.stream(Authority.values()).map(
+                                    e -> {
+                                        AuthorityEntity authorityEntity = new AuthorityEntity();
+                                        authorityEntity.setUser(authUser);
+                                        authorityEntity.setAuthority(e);
+                                        return authorityEntity;
+                                    }
+                            ).toList()
 
-                    AuthUserEntity createdAuthUser = authUserDao
-                            .create(authUser);
-
-                    AuthorityEntity[] authorityEntities = Arrays.stream(Authority.values()).map(
-                            e -> {
-                                AuthorityEntity authAuthority = new AuthorityEntity();
-                                authAuthority.setUserId(createdAuthUser.getId());
-                                authAuthority.setAuthority(e);
-                                return authAuthority;
-                            }
-                    ).toArray(AuthorityEntity[]::new);
-
-                    authAuthorityDao
-                            .create(authorityEntities);
+                    );
+                   authUserRepository.create(authUser);
                     return UserJson.fromEntity(
-                            userDao
-                                    .create(
-                                            UserEntity.fromJson(user)
-                                    )
+                            userDao.create(UserEntity.fromJson(user))
                     );
                 }
         );
     }
 
-    public UserJson createUser(UserJson user) {
-        return xaTxTemplate.execute(() -> {
-            UserEntity createdUser = userDao.create(toUserEntity(user));
-            return UserJson.fromEntity(createdUser);
-        });
-    }
+//    public UserJson createUser(UserJson user) {
+//        return xaTxTemplate.execute(() -> {
+//            UserEntity createdUser = userDao.create(toUserEntity(user));
+//            return UserJson.fromEntity(createdUser);
+//        });
+//    }
 
     public Optional<UserJson> findUserByUsername(String username) {
         return xaTxTemplate.execute(() -> {

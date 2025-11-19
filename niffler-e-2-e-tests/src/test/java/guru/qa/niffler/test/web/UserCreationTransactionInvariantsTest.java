@@ -99,14 +99,12 @@ class UserCreationTransactionInvariantsTest {
         UsersDbClient usersDbClient = new UsersDbClient();
         String username = currentTestId + "_spring_single";
 
-        // Этот подход используется в UserExtension - создание только в userdata БД
         UserJson user = createUserJson(username);
         UserJson createdUser = usersDbClient.createUser(user);
 
         assertNotNull(createdUser.id(), "User should be created in userdata DB");
         System.out.println("✓ Created in userdata DB: " + createdUser.id());
 
-        // КРИТИЧЕСКИ ВАЖНО для UserExtension: немедленная доступность
         Optional<UserJson> foundUser = usersDbClient.findUserByUsername(username);
         assertTrue(foundUser.isPresent(), "User should be immediately findable - REQUIRED for UserExtension");
         assertEquals(username, foundUser.get().username(), "Usernames should match");
@@ -214,6 +212,9 @@ class UserCreationTransactionInvariantsTest {
                 null, username, CurrencyValues.USD, firstname, surname, fullname, null, null
         );
     }
+
+
+
 
     @AfterEach
     void cleanup() {

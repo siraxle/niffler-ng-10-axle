@@ -27,7 +27,7 @@ public class AuthAuthorityDaoSpringJdbc implements AuthAuthorityDao {
 
                     @Override
                     public void setValues(PreparedStatement ps, int i) throws SQLException {
-                        ps.setObject(1, authority[i].getUserId());
+                        ps.setObject(1, authority[i].getUser().getId());
                         ps.setString(2, authority[i].getAuthority().name());
                     }
 
@@ -61,17 +61,4 @@ public class AuthAuthorityDaoSpringJdbc implements AuthAuthorityDao {
         return jdbcTemplate.query(sql, AuthorityEntityRowMapper.instance);
     }
 
-    private AuthorityEntity mapResultSetToAuthorityEntity(ResultSet rs) throws SQLException {
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(DataSources.dataSource(CFG.authJdbcUrl()));
-        AuthorityEntity authority = new AuthorityEntity();
-        authority.setId(rs.getObject("id", UUID.class));
-        authority.setUserId(rs.getObject("user_id", UUID.class));
-
-        String authorityStr = rs.getString("authority");
-        if (authorityStr != null) {
-            authority.setAuthority(Authority.valueOf(authorityStr));
-        }
-
-        return authority;
-    }
 }

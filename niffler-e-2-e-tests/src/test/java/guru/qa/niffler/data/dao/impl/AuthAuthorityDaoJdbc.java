@@ -2,6 +2,7 @@ package guru.qa.niffler.data.dao.impl;
 
 import guru.qa.niffler.config.Config;
 import guru.qa.niffler.data.dao.AuthAuthorityDao;
+import guru.qa.niffler.data.entity.auth.AuthUserEntity;
 import guru.qa.niffler.data.entity.auth.AuthorityEntity;
 import guru.qa.niffler.model.Authority;
 
@@ -19,11 +20,9 @@ private static final Config CFG = Config.getInstance();
     @Override
     public AuthorityEntity[] create(AuthorityEntity... authorities) {
         try (PreparedStatement ps = holder(CFG.authJdbcUrl()).connection().prepareStatement(
-                "INSERT INTO authority (user_id, authority) VALUES (?, ?)",
-                Statement.RETURN_GENERATED_KEYS
-        )) {
+                "INSERT INTO authority (user_id, authority) VALUES (?, ?)")) {
             for (AuthorityEntity authority : authorities) {
-                ps.setObject(1, authority.getUserId());
+                ps.setObject(1, authority.getUser().getId());
                 ps.setString(2, authority.getAuthority().name());
                 ps.addBatch();
             }
@@ -93,7 +92,9 @@ private static final Config CFG = Config.getInstance();
     private AuthorityEntity mapResultSetToAuthAuthorityEntity(ResultSet rs) throws SQLException {
         AuthorityEntity authority = new AuthorityEntity();
         authority.setId(rs.getObject("id", UUID.class));
-        authority.setUserId(rs.getObject("user_id", UUID.class));
+        AuthUserEntity user = new AuthUserEntity();
+        user.setId(rs.getObject("user_id", UUID.class));
+        authority.setUser(user);
         String authorityStr = rs.getString("authority");
         if (authority != null) {
             authority.setAuthority(Authority.valueOf(authorityStr));

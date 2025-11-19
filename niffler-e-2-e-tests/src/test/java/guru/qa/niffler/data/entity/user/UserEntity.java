@@ -2,52 +2,132 @@ package guru.qa.niffler.data.entity.user;
 
 import guru.qa.niffler.model.CurrencyValues;
 import guru.qa.niffler.model.UserJson;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.proxy.HibernateProxy;
 
 import java.io.Serializable;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Stream;
+
+import static jakarta.persistence.FetchType.EAGER;
 
 @Getter
 @Setter
+@Entity
+@Table(name = "\"user\"")
 public class UserEntity implements Serializable {
-    private UUID id;
-    private String username;
-    private CurrencyValues currency;
-    private String firstname;
-    private String surname;
-    private String fullname;
-    private byte[] photo;
-    private byte[] photoSmall;
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  @Column(name = "id", nullable = false, columnDefinition = "UUID default gen_random_uuid()")
+  private UUID id;
 
-    public UserEntity() {
+  @Column(nullable = false, unique = true)
+  private String username;
+
+  @Column(nullable = false)
+  @Enumerated(EnumType.STRING)
+  private CurrencyValues currency;
+
+  @Column()
+  private String firstname;
+
+  @Column()
+  private String surname;
+
+  @Column(name = "full_name")
+  private String fullname;
+
+  @Column(name = "photo", columnDefinition = "bytea")
+  private byte[] photo;
+
+  @Column(name = "photo_small", columnDefinition = "bytea")
+  private byte[] photoSmall;
+
+  @OneToMany(mappedBy = "requester", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<FriendshipEntity> friendshipRequests = new ArrayList<>();
+
+  @OneToMany(mappedBy = "addressee", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<FriendshipEntity> friendshipAddressees = new ArrayList<>();
+
+  @OneToMany(fetch = EAGER, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "user")
+  private List<PushTokenEntity> pushTokens = new ArrayList<>();
+
+  public void addFriends(FriendshipStatus status, UserEntity... friends) {
+    List<FriendshipEntity> friendsEntities = Stream.of(friends)
+        .map(f -> {
+          FriendshipEntity fe = new FriendshipEntity();
+          fe.setRequester(this);
+          fe.setAddressee(f);
+          fe.setStatus(status);
+          fe.setCreatedDate(new Date());
+          return fe;
+        }).toList();
+    this.friendshipRequests.addAll(friendsEntities);
+  }
+
+  public void addInvitations(UserEntity... invitations) {
+    List<FriendshipEntity> invitationsEntities = Stream.of(invitations)
+        .map(i -> {
+          FriendshipEntity fe = new FriendshipEntity();
+          fe.setRequester(i);
+          fe.setAddressee(this);
+          fe.setStatus(FriendshipStatus.PENDING);
+          fe.setCreatedDate(new Date());
+          return fe;
+        }).toList();
+    this.friendshipAddressees.addAll(invitationsEntities);
+  }
+
+  public void removeFriends(UserEntity... friends) {
+    List<UUID> idsToBeRemoved = Arrays.stream(friends).map(UserEntity::getId).toList();
+    for (Iterator<FriendshipEntity> i = getFriendshipRequests().iterator(); i.hasNext(); ) {
+      FriendshipEntity friendsEntity = i.next();
+      if (idsToBeRemoved.contains(friendsEntity.getAddressee().getId())) {
+        friendsEntity.setAddressee(null);
+        i.remove();
+      }
     }
+  }
 
-    public static UserEntity fromJson(UserJson userJson) {
-        UserEntity entity = new UserEntity();
-        entity.setId(userJson.id());
-        entity.setUsername(userJson.username());
-//        entity.setUsername(null);
-        entity.setCurrency(userJson.currency());
-        entity.setFirstname(userJson.firstname());
-        entity.setSurname(userJson.surname());
-        entity.setFullname(userJson.fullname());
-        entity.setPhoto(userJson.photo());
-        entity.setPhotoSmall(userJson.photoSmall());
-        return entity;
+  public void removeInvites(UserEntity... invitations) {
+    List<UUID> idsToBeRemoved = Arrays.stream(invitations).map(UserEntity::getId).toList();
+    for (Iterator<FriendshipEntity> i = getFriendshipAddressees().iterator(); i.hasNext(); ) {
+      FriendshipEntity friendsEntity = i.next();
+      if (idsToBeRemoved.contains(friendsEntity.getRequester().getId())) {
+        friendsEntity.setRequester(null);
+        i.remove();
+      }
     }
+  }
 
-    public static UserEntity toUserEntity(UserJson user) {
-        UserEntity entity = new UserEntity();
-        entity.setId(user.id());
-        entity.setUsername(user.username());
-        entity.setCurrency(user.currency());
-        entity.setFirstname(user.firstname());
-        entity.setSurname(user.surname());
-        entity.setFullname(user.fullname());
-        entity.setPhoto(user.photo());
-        entity.setPhotoSmall(user.photoSmall());
-        return entity;
-    }
+  public static UserEntity fromJson(UserJson userJson) {
+    UserEntity entity = new UserEntity();
+    entity.setId(userJson.id());
+    entity.setUsername(userJson.username());
+    entity.setCurrency(userJson.currency());
+    entity.setFirstname(userJson.firstname());
+    entity.setSurname(userJson.surname());
+    entity.setFullname(userJson.fullname());
+    entity.setPhoto(userJson.photo());
+    entity.setPhotoSmall(userJson.photoSmall());
+    return entity;
+  }
 
+  @Override
+  public final boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null) return false;
+    Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
+    Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
+    if (thisEffectiveClass != oEffectiveClass) return false;
+    UserEntity that = (UserEntity) o;
+    return getId() != null && Objects.equals(getId(), that.getId());
+  }
+
+  @Override
+  public final int hashCode() {
+    return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode() : getClass().hashCode();
+  }
 }
