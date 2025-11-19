@@ -2,6 +2,8 @@ package guru.qa.niffler.utils;
 
 import com.github.javafaker.Faker;
 
+import java.util.UUID;
+
 public class RandomDataUtils {
     private static final Faker faker = new Faker();
 
@@ -23,6 +25,10 @@ public class RandomDataUtils {
 
     public static String randomeSentence(int wordsCount) {
         return faker.lorem().sentence(wordsCount);
+    }
+
+    public static String randomUUID() {
+        return UUID.randomUUID().toString();
     }
 
 }

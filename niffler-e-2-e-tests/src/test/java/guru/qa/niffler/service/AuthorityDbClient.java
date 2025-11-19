@@ -1,41 +1,58 @@
 package guru.qa.niffler.service;
 
 import guru.qa.niffler.config.Config;
-import guru.qa.niffler.data.dao.impl.AuthAuthorityDaoJdbc;
-import guru.qa.niffler.data.dao.impl.AuthUserDaoJdbc;
-import guru.qa.niffler.data.entity.auth.AuthorityEntity;
+import guru.qa.niffler.data.dao.AuthAuthorityDao;
+import guru.qa.niffler.data.dao.AuthUserDao;
+import guru.qa.niffler.data.dao.impl.AuthAuthorityDaoSpringJdbc;
+import guru.qa.niffler.data.dao.impl.AuthUserDaoSpringJdbc;
 import guru.qa.niffler.data.entity.auth.AuthUserEntity;
+import guru.qa.niffler.data.entity.auth.AuthorityEntity;
+import guru.qa.niffler.data.tpl.DataSources;
+import guru.qa.niffler.data.tpl.JdbcTransactionTemplate;
 import guru.qa.niffler.model.Authority;
 import guru.qa.niffler.model.AuthorityJson;
+import org.springframework.jdbc.support.JdbcTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
-import java.sql.Connection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static guru.qa.niffler.data.Databases.transaction;
 import static guru.qa.niffler.model.AuthorityJson.toAuthorityJsonArray;
 
 public class AuthorityDbClient {
     private static final Config CFG = Config.getInstance();
 
+    private final AuthUserDao authUserDao = new AuthUserDaoSpringJdbc();
+    private final AuthAuthorityDao authAuthorityDao = new AuthAuthorityDaoSpringJdbc();
+
+    private final TransactionTemplate transactionTemplate = new TransactionTemplate(
+            new JdbcTransactionManager(
+                    DataSources.dataSource(CFG.authJdbcUrl())
+            )
+    );
+
+    private final JdbcTransactionTemplate jdbcTxTemplate = new JdbcTransactionTemplate(
+            CFG.authJdbcUrl()
+    );
+
     public AuthorityJson createAuthority(String username, String authority) {
-        return transaction(connection -> {
-            UUID userId = getUserIdByUsername(connection, username);
+        return jdbcTxTemplate.execute(() -> {
+            UUID userId = getUserIdByUsername(username);
 
             AuthorityEntity authAuthority = new AuthorityEntity();
             authAuthority.setUserId(userId);
             authAuthority.setAuthority(Authority.valueOf(authority));
 
-            AuthorityEntity[] createdAuthorities = new AuthAuthorityDaoJdbc(connection).create(authAuthority);
+            AuthorityEntity[] createdAuthorities = authAuthorityDao.create(authAuthority);
             return AuthorityJson.fromEntity(createdAuthorities[0]);
-        }, CFG.authJdbcUrl());
+        });
     }
 
     public AuthorityJson[] createAuthorities(String username, String... authorities) {
-        return transaction(connection -> {
-            UUID userId = getUserIdByUsername(connection, username);
+        return jdbcTxTemplate.execute(() -> {
+            UUID userId = getUserIdByUsername(username);
 
             AuthorityEntity[] authEntities = new AuthorityEntity[authorities.length];
             for (int i = 0; i < authorities.length; i++) {
@@ -45,61 +62,63 @@ public class AuthorityDbClient {
                 authEntities[i] = authAuthority;
             }
 
-            AuthorityEntity[] createdAuthorities = new AuthAuthorityDaoJdbc(connection).create(authEntities);
+            AuthorityEntity[] createdAuthorities = authAuthorityDao.create(authEntities);
             return toAuthorityJsonArray(createdAuthorities);
-        }, CFG.authJdbcUrl());
+        });
     }
 
     public List<AuthorityJson> getAuthoritiesByUsername(String username) {
-        return transaction(connection -> {
-            UUID userId = getUserIdByUsername(connection, username);
-            List<AuthorityEntity> authorities = new AuthAuthorityDaoJdbc(connection).findAuthoritiesByUserId(userId);
+        return jdbcTxTemplate.execute(() -> {
+            UUID userId = getUserIdByUsername(username);
+            List<AuthorityEntity> authorities = authAuthorityDao.findAuthoritiesByUserId(userId);
             return authorities.stream()
                     .map(AuthorityJson::fromEntity)
                     .collect(Collectors.toList());
-        }, CFG.authJdbcUrl());
+        });
     }
 
     public List<AuthorityJson> getAuthoritiesByUserId(UUID userId) {
-        return transaction(connection -> {
-            List<AuthorityEntity> authorities = new AuthAuthorityDaoJdbc(connection).findAuthoritiesByUserId(userId);
+        return jdbcTxTemplate.execute(() -> {
+            List<AuthorityEntity> authorities = authAuthorityDao.findAuthoritiesByUserId(userId);
             return authorities.stream()
                     .map(AuthorityJson::fromEntity)
                     .collect(Collectors.toList());
-        }, CFG.authJdbcUrl());
+        });
     }
 
     public void deleteAuthority(String username, String authority) {
-        transaction(connection -> {
-            UUID userId = getUserIdByUsername(connection, username);
-            List<AuthorityEntity> userAuthorities = new AuthAuthorityDaoJdbc(connection).findAuthoritiesByUserId(userId);
+        jdbcTxTemplate.execute(() -> {
+            UUID userId = getUserIdByUsername(username);
+            List<AuthorityEntity> userAuthorities = authAuthorityDao.findAuthoritiesByUserId(userId);
 
             userAuthorities.stream()
                     .filter(auth -> auth.getAuthority().name().equals(authority))
                     .findFirst()
-                    .ifPresent(auth -> new AuthAuthorityDaoJdbc(connection).deleteAuthority(auth));
+                    .ifPresent(authAuthorityDao::deleteAuthority);
 
             return null;
-        }, CFG.authJdbcUrl());
+        });
     }
 
     public void deleteAllAuthorities(String username) {
-        transaction(connection -> {
-            UUID userId = getUserIdByUsername(connection, username);
-            List<AuthorityEntity> authorities = new AuthAuthorityDaoJdbc(connection).findAuthoritiesByUserId(userId);
+        jdbcTxTemplate.execute(() -> {
+            UUID userId = getUserIdByUsername(username);
+            List<AuthorityEntity> authorities = authAuthorityDao.findAuthoritiesByUserId(userId);
 
             for (AuthorityEntity authority : authorities) {
-                new AuthAuthorityDaoJdbc(connection).deleteAuthority(authority);
+                authAuthorityDao.deleteAuthority(authority);
             }
 
             return null;
-        }, CFG.authJdbcUrl());
+        });
     }
 
-    private UUID getUserIdByUsername(Connection connection, String username) {
-        Optional<AuthUserEntity> user = new AuthUserDaoJdbc(connection).findByUsername(username);
-        return user.map(AuthUserEntity::getId)
-                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+    private UUID getUserIdByUsername(String username) {
+        return jdbcTxTemplate.execute(() -> {
+            Optional<AuthUserEntity> user = authUserDao.findByUsername(username);
+            return user.map(AuthUserEntity::getId)
+                    .orElseThrow(() -> new RuntimeException("User not found: " + username));
+        });
     }
 
 
