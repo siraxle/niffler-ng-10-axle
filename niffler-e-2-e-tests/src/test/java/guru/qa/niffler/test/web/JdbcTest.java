@@ -35,7 +35,7 @@ public class JdbcTest {
         UserJson userJson = usersDbClient.createUser(
                 new UserJson(
                         null,
-                        "valent-01",
+                        "valent-02",
                         CurrencyValues.RUB,
                         null,
                         null,
@@ -69,6 +69,7 @@ public class JdbcTest {
         );
         System.out.println(spendJson);
     }
+
 
     @Test
     void testDirectConnection() {

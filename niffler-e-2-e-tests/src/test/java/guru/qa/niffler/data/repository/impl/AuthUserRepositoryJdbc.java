@@ -1,10 +1,8 @@
 package guru.qa.niffler.data.repository.impl;
 
 import guru.qa.niffler.config.Config;
-import guru.qa.niffler.data.dao.AuthUserDao;
 import guru.qa.niffler.data.entity.auth.AuthUserEntity;
 import guru.qa.niffler.data.entity.auth.AuthorityEntity;
-import guru.qa.niffler.data.mapper.AuthUserEntityRowMapper;
 import guru.qa.niffler.data.repository.AuthUserRepository;
 import guru.qa.niffler.model.Authority;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
@@ -59,8 +57,10 @@ public class AuthUserRepositoryJdbc implements AuthUserRepository {
                 authorityPs.setObject(1, generatedKey);
                 authorityPs.setString(2, authority.getAuthority().name());
                 authorityPs.addBatch();
+                authority.setUser(user);
             }
             authorityPs.executeBatch();
+
             return user;
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -149,11 +149,19 @@ public class AuthUserRepositoryJdbc implements AuthUserRepository {
 
     @Override
     public void delete(AuthUserEntity user) {
-        try (PreparedStatement ps = holder(CFG.authJdbcUrl()).connection().prepareStatement(
-                "DELETE FROM \"user\" WHERE id = ?"
-        )) {
-            ps.setObject(1, user.getId());
-            ps.executeUpdate();
+        try (PreparedStatement deleteAuthoritiesPs = holder(CFG.authJdbcUrl()).connection().prepareStatement(
+                "DELETE FROM authority WHERE user_id = ?"
+        );
+             PreparedStatement deleteUserPs = holder(CFG.authJdbcUrl()).connection().prepareStatement(
+                     "DELETE FROM \"user\" WHERE id = ?"
+             )) {
+
+            deleteAuthoritiesPs.setObject(1, user.getId());
+            deleteAuthoritiesPs.executeUpdate();
+
+            deleteUserPs.setObject(1, user.getId());
+            deleteUserPs.executeUpdate();
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

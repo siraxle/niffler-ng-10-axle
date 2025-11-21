@@ -3,6 +3,7 @@ package guru.qa.niffler.data.dao.impl;
 import guru.qa.niffler.config.Config;
 import guru.qa.niffler.data.dao.AuthUserDao;
 import guru.qa.niffler.data.entity.auth.AuthUserEntity;
+import guru.qa.niffler.data.extractor.AuthUserWithAuthoritiesExtractor;
 import guru.qa.niffler.data.mapper.AuthUserEntityRowMapper;
 import guru.qa.niffler.data.tpl.DataSources;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -18,6 +19,11 @@ import java.util.UUID;
 public class AuthUserDaoSpringJdbc implements AuthUserDao {
 
     private static final Config CFG = Config.getInstance();
+    private final JdbcTemplate jdbcTemplate;
+
+    public AuthUserDaoSpringJdbc() {
+        this.jdbcTemplate = new JdbcTemplate(DataSources.dataSource(CFG.authJdbcUrl()));
+    }
 
     @Override
     public AuthUserEntity create(AuthUserEntity user) {
@@ -103,4 +109,51 @@ public class AuthUserDaoSpringJdbc implements AuthUserDao {
                 AuthUserEntityRowMapper.instance
         );
     }
+
+    /**
+     * Находит пользователя по ID со всеми его authorities (JOIN запрос)
+     */
+    public Optional<AuthUserEntity> findByIdWithAuthorities(UUID id) {
+        String sql = """
+            SELECT a.id as authority_id,
+                   authority,
+                   u.id,
+                   u.username,
+                   u.password,
+                   u.enabled,
+                   u.account_non_expired,
+                   u.account_non_locked,
+                   u.credentials_non_expired
+            FROM "user" u\s
+            JOIN authority a ON u.id = a.user_id\s
+            WHERE u.id = ?
+           \s""";
+
+        AuthUserEntity user = jdbcTemplate.query(sql, new AuthUserWithAuthoritiesExtractor(), id);
+        return Optional.ofNullable(user);
+    }
+
+    /**
+     * Находит пользователя по username со всеми его authorities (JOIN запрос)
+     */
+    public Optional<AuthUserEntity> findByUsernameWithAuthorities(String username) {
+        String sql = """
+            SELECT a.id as authority_id,
+                   authority,
+                   u.id,
+                   u.username,
+                   u.password,
+                   u.enabled,
+                   u.account_non_expired,
+                   u.account_non_locked,
+                   u.credentials_non_expired
+            FROM "user" u\s
+            JOIN authority a ON u.id = a.user_id\s
+            WHERE u.username = ?
+           \s""";
+
+        AuthUserEntity user = jdbcTemplate.query(sql, new AuthUserWithAuthoritiesExtractor(), username);
+        return Optional.ofNullable(user);
+    }
+
 }
