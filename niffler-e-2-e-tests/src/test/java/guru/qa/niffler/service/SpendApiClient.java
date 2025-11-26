@@ -19,7 +19,7 @@ public class SpendApiClient {
     private static final Config CFG = Config.getInstance();
 
     private final Retrofit retrofit = new Retrofit.Builder()
-            .baseUrl(CFG.spendUrl())
+            .baseUrl(CFG.spendJdbcUrl())
             .addConverterFactory(JacksonConverterFactory.create())
             .build();
 

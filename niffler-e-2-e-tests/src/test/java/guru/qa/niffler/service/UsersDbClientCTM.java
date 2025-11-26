@@ -23,8 +23,6 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
 
-import static guru.qa.niffler.data.entity.user.UserEntity.fromJson;
-import static guru.qa.niffler.data.entity.user.UserEntity.toUserEntity;
 
 public class UsersDbClientCTM {
     private static final Config CFG = Config.getInstance();
@@ -77,7 +75,7 @@ public class UsersDbClientCTM {
             AuthorityEntity[] authorityEntities = Arrays.stream(Authority.values())
                     .map(e -> {
                         AuthorityEntity authAuthority = new AuthorityEntity();
-                        authAuthority.setUserId(createdAuthUser.getId());
+                        authAuthority.setUser(createdAuthUser); // Устанавливаем связь с пользователем
                         authAuthority.setAuthority(e);
                         return authAuthority;
                     })
@@ -86,7 +84,7 @@ public class UsersDbClientCTM {
             authAuthorityDao.create(authorityEntities);
 
             // Создание в userdata БД
-            UserEntity createdUser = userDao.create(fromJson(user));
+            UserEntity createdUser = userDao.create(UserEntity.fromJson(user));
 
             return UserJson.fromEntity(createdUser);
         });
@@ -143,5 +141,17 @@ public class UsersDbClientCTM {
 
     public boolean userExists(String username) {
         return findUserByUsername(username).isPresent();
+    }
+
+    private UserEntity toUserEntity(UserJson userJson) {
+        UserEntity entity = new UserEntity();
+        entity.setUsername(userJson.username());
+        entity.setCurrency(userJson.currency());
+        entity.setFirstname(userJson.firstname());
+        entity.setSurname(userJson.surname());
+        entity.setFullname(userJson.fullname());
+        entity.setPhoto(userJson.photo());
+        entity.setPhotoSmall(userJson.photoSmall());
+        return entity;
     }
 }

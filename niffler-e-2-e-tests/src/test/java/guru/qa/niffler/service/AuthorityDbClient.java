@@ -42,7 +42,9 @@ public class AuthorityDbClient {
             UUID userId = getUserIdByUsername(username);
 
             AuthorityEntity authAuthority = new AuthorityEntity();
-            authAuthority.setUserId(userId);
+            AuthUserEntity user = new AuthUserEntity();
+            user.setId(userId);
+            authAuthority.setUser(user);
             authAuthority.setAuthority(Authority.valueOf(authority));
 
             AuthorityEntity[] createdAuthorities = authAuthorityDao.create(authAuthority);
@@ -57,7 +59,7 @@ public class AuthorityDbClient {
             AuthorityEntity[] authEntities = new AuthorityEntity[authorities.length];
             for (int i = 0; i < authorities.length; i++) {
                 AuthorityEntity authAuthority = new AuthorityEntity();
-                authAuthority.setUserId(userId);
+                authAuthority.getUser().getId();
                 authAuthority.setAuthority(Authority.valueOf(authorities[i]));
                 authEntities[i] = authAuthority;
             }

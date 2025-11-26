@@ -7,8 +7,8 @@ import guru.qa.niffler.data.dao.UserDao;
 import guru.qa.niffler.data.dao.impl.AuthAuthorityDaoSpringJdbc;
 import guru.qa.niffler.data.dao.impl.AuthUserDaoSpringJdbc;
 import guru.qa.niffler.data.dao.impl.UdUserDaoSpringJdbc;
-import guru.qa.niffler.data.entity.auth.AuthorityEntity;
 import guru.qa.niffler.data.entity.auth.AuthUserEntity;
+import guru.qa.niffler.data.entity.auth.AuthorityEntity;
 import guru.qa.niffler.data.entity.user.UserEntity;
 import guru.qa.niffler.data.tpl.DataSources;
 import guru.qa.niffler.data.tpl.JdbcTransactionTemplate;
@@ -22,8 +22,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import static guru.qa.niffler.data.entity.auth.AuthUserEntity.toAuthUserEntity;
 
 public class AuthDbClient {
     private static final Config CFG = Config.getInstance();
@@ -46,12 +44,13 @@ public class AuthDbClient {
         return jdbcTxTemplate.execute(() -> {
             AuthUserEntity createdUser = authUserDao.create(toAuthUserEntity(user));
 
+            // Создаем authorities и устанавливаем связь с пользователем
             AuthorityEntity readAuthority = new AuthorityEntity();
-            readAuthority.setUserId(createdUser.getId());
+            readAuthority.setUser(createdUser);
             readAuthority.setAuthority(Authority.READ);
 
             AuthorityEntity writeAuthority = new AuthorityEntity();
-            writeAuthority.setUserId(createdUser.getId());
+            writeAuthority.setUser(createdUser);
             writeAuthority.setAuthority(Authority.WRITE);
 
             authAuthorityDao.create(readAuthority, writeAuthority);
@@ -135,4 +134,16 @@ public class AuthDbClient {
     public boolean userExists(String username) {
         return findUserByUsername(username).isPresent();
     }
+
+    private AuthUserEntity toAuthUserEntity(UserAuthJson userJson) {
+        AuthUserEntity entity = new AuthUserEntity();
+        entity.setUsername(userJson.username());
+        entity.setPassword(userJson.password());
+        entity.setEnabled(userJson.enabled());
+        entity.setAccountNonExpired(userJson.accountNonExpired());
+        entity.setAccountNonLocked(userJson.accountNonLocked());
+        entity.setCredentialsNonExpired(userJson.credentialsNonExpired());
+        return entity;
+    }
+
 }
