@@ -14,6 +14,10 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class AuthUserWithAuthoritiesExtractor implements ResultSetExtractor<AuthUserEntity> {
+    public static final AuthUserWithAuthoritiesExtractor instance = new AuthUserWithAuthoritiesExtractor();
+
+    private AuthUserWithAuthoritiesExtractor() {
+    }
 
     @Override
     public AuthUserEntity extractData(ResultSet rs) throws SQLException, DataAccessException {

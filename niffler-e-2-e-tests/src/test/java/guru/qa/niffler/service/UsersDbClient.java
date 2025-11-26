@@ -2,10 +2,8 @@ package guru.qa.niffler.service;
 
 import guru.qa.niffler.config.Config;
 import guru.qa.niffler.data.dao.AuthAuthorityDao;
-import guru.qa.niffler.data.dao.AuthUserDao;
 import guru.qa.niffler.data.dao.UserDao;
 import guru.qa.niffler.data.dao.impl.AuthAuthorityDaoSpringJdbc;
-import guru.qa.niffler.data.dao.impl.AuthUserDaoSpringJdbc;
 import guru.qa.niffler.data.dao.impl.UdUserDaoSpringJdbc;
 import guru.qa.niffler.data.entity.auth.AuthUserEntity;
 import guru.qa.niffler.data.entity.auth.AuthorityEntity;
@@ -30,7 +28,7 @@ import java.util.UUID;
 public class UsersDbClient {
     private static final Config CFG = Config.getInstance();
     private static final PasswordEncoder pe = PasswordEncoderFactories.createDelegatingPasswordEncoder();
-//    private final AuthUserDao authUserDao = new AuthUserDaoSpringJdbc();
+    //    private final AuthUserDao authUserDao = new AuthUserDaoSpringJdbc();
     private final AuthUserRepository authUserRepository = new AuthUserRepositoryJdbc();
     private final AuthAuthorityDao authAuthorityDao = new AuthAuthorityDaoSpringJdbc();
     private final UserDao userDao = new UdUserDaoSpringJdbc();
@@ -74,7 +72,7 @@ public class UsersDbClient {
                             ).toList()
 
                     );
-                   authUserRepository.create(authUser);
+                    authUserRepository.create(authUser);
                     return UserJson.fromEntity(
                             userDao.create(UserEntity.fromJson(user))
                     );

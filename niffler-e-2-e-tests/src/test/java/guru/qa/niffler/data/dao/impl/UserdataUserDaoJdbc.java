@@ -3,6 +3,8 @@ package guru.qa.niffler.data.dao.impl;
 import guru.qa.niffler.config.Config;
 import guru.qa.niffler.data.dao.UserDao;
 import guru.qa.niffler.data.entity.user.UserEntity;
+import guru.qa.niffler.data.mapper.CategoryEntityRowMapper;
+import guru.qa.niffler.data.mapper.UdUserEntityRowMapper;
 import guru.qa.niffler.model.CurrencyValues;
 
 import java.sql.*;
@@ -57,7 +59,7 @@ public class UserdataUserDaoJdbc implements UserDao {
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return Optional.of(mapResultSetToUserEntity(rs));
+                    return Optional.of(UdUserEntityRowMapper.instance.mapRow(rs, rs.getRow()));
                 } else {
                     return Optional.empty();
                 }
@@ -75,7 +77,7 @@ public class UserdataUserDaoJdbc implements UserDao {
         );
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                users.add(mapResultSetToUserEntity(rs));
+                users.add(UdUserEntityRowMapper.instance.mapRow(rs, rs.getRow()));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -92,7 +94,7 @@ public class UserdataUserDaoJdbc implements UserDao {
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return Optional.of(mapResultSetToUserEntity(rs));
+                    return Optional.of(UdUserEntityRowMapper.instance.mapRow(rs, rs.getRow()));
                 } else {
                     return Optional.empty();
                 }
@@ -114,22 +116,4 @@ public class UserdataUserDaoJdbc implements UserDao {
         }
     }
 
-
-    private UserEntity mapResultSetToUserEntity(ResultSet rs) throws SQLException {
-        UserEntity user = new UserEntity();
-        user.setId(rs.getObject("id", UUID.class));
-        user.setUsername(rs.getString("username"));
-
-        String currencyStr = rs.getString("currency");
-        if (currencyStr != null) {
-            user.setCurrency(CurrencyValues.valueOf(currencyStr));
-        }
-
-        user.setFirstname(rs.getString("firstname"));
-        user.setSurname(rs.getString("surname"));
-        user.setFullname(rs.getString("full_name"));
-        user.setPhoto(rs.getBytes("photo"));
-        user.setPhotoSmall(rs.getBytes("photo_small"));
-        return user;
-    }
 }

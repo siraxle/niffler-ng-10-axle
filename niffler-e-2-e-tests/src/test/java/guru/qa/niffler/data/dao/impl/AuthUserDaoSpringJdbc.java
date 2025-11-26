@@ -124,12 +124,11 @@ public class AuthUserDaoSpringJdbc implements AuthUserDao {
                    u.account_non_expired,
                    u.account_non_locked,
                    u.credentials_non_expired
-            FROM "user" u\s
-            JOIN authority a ON u.id = a.user_id\s
-            WHERE u.id = ?
-           \s""";
+            FROM "user"
+            JOIN authority a ON u.id = a.user_id
+            WHERE u.id = ?""";
 
-        AuthUserEntity user = jdbcTemplate.query(sql, new AuthUserWithAuthoritiesExtractor(), id);
+        AuthUserEntity user = jdbcTemplate.query(sql, AuthUserWithAuthoritiesExtractor.instance, id);
         return Optional.ofNullable(user);
     }
 
@@ -152,7 +151,7 @@ public class AuthUserDaoSpringJdbc implements AuthUserDao {
             WHERE u.username = ?
            \s""";
 
-        AuthUserEntity user = jdbcTemplate.query(sql, new AuthUserWithAuthoritiesExtractor(), username);
+        AuthUserEntity user = jdbcTemplate.query(sql, AuthUserWithAuthoritiesExtractor.instance, username);
         return Optional.ofNullable(user);
     }
 

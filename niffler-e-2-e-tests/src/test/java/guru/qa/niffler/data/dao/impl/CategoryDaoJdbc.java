@@ -3,8 +3,12 @@ package guru.qa.niffler.data.dao.impl;
 import guru.qa.niffler.config.Config;
 import guru.qa.niffler.data.dao.CategoryDao;
 import guru.qa.niffler.data.entity.spend.CategoryEntity;
+import guru.qa.niffler.data.mapper.CategoryEntityRowMapper;
 
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -50,7 +54,7 @@ public class CategoryDaoJdbc implements CategoryDao {
             ps.setObject(1, id);
 
             try (ResultSet rs = ps.executeQuery()) {
-                return rs.next() ? Optional.of(mapResultSetToCategoryEntity(rs)) : Optional.empty();
+                return rs.next() ? Optional.of(CategoryEntityRowMapper.instance.mapRow(rs, rs.getRow())) : Optional.empty();
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -67,7 +71,7 @@ public class CategoryDaoJdbc implements CategoryDao {
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return Optional.of(mapResultSetToCategoryEntity(rs));
+                    return Optional.of(CategoryEntityRowMapper.instance.mapRow(rs, rs.getRow()));
                 } else {
                     return Optional.empty();
                 }
@@ -87,7 +91,7 @@ public class CategoryDaoJdbc implements CategoryDao {
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    categories.add(mapResultSetToCategoryEntity(rs));
+                    categories.add(CategoryEntityRowMapper.instance.mapRow(rs, rs.getRow()));
                 }
             }
         } catch (SQLException e) {
@@ -137,7 +141,7 @@ public class CategoryDaoJdbc implements CategoryDao {
         try (PreparedStatement ps = holder(CFG.spendJdbcUrl()).connection().prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                categories.add(mapResultSetToCategoryEntity(rs));
+                categories.add(CategoryEntityRowMapper.instance.mapRow(rs, rs.getRow()));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -145,12 +149,4 @@ public class CategoryDaoJdbc implements CategoryDao {
         return categories;
     }
 
-    private CategoryEntity mapResultSetToCategoryEntity(ResultSet rs) throws SQLException {
-        CategoryEntity category = new CategoryEntity();
-        category.setId(rs.getObject("id", UUID.class));
-        category.setUsername(rs.getString("username"));
-        category.setName(rs.getString("name"));
-        category.setArchived(rs.getBoolean("archived"));
-        return category;
-    }
 }

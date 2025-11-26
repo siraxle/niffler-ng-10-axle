@@ -3,6 +3,7 @@ package guru.qa.niffler.data.dao.impl;
 import guru.qa.niffler.config.Config;
 import guru.qa.niffler.data.dao.AuthUserDao;
 import guru.qa.niffler.data.entity.auth.AuthUserEntity;
+import guru.qa.niffler.data.mapper.AuthUserEntityRowMapper;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -59,7 +60,7 @@ public class AuthUserDaoJdbc implements AuthUserDao {
             ps.executeQuery();
             try (ResultSet rs = ps.getResultSet()) {
                 if (rs.next()) {
-                    return Optional.of(mapResultSetToAuthUser(rs));
+                    return Optional.of(AuthUserEntityRowMapper.instance.mapRow(rs, rs.getRow()));
                 } else {
                     return Optional.empty();
                 }
@@ -79,7 +80,7 @@ public class AuthUserDaoJdbc implements AuthUserDao {
 
             try (ResultSet rs = ps.getResultSet()) {
                 if (rs.next()) {
-                    return Optional.of(mapResultSetToAuthUser(rs));
+                    return Optional.of(AuthUserEntityRowMapper.instance.mapRow(rs, rs.getRow()));
                 } else {
                     return Optional.empty();
                 }
@@ -132,7 +133,7 @@ public class AuthUserDaoJdbc implements AuthUserDao {
         try (PreparedStatement ps = holder(CFG.authJdbcUrl()).connection().prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                users.add(mapResultSetToAuthUser(rs));
+                users.add(AuthUserEntityRowMapper.instance.mapRow(rs, rs.getRow()));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -140,16 +141,4 @@ public class AuthUserDaoJdbc implements AuthUserDao {
         return users;
     }
 
-
-    private AuthUserEntity mapResultSetToAuthUser(ResultSet rs) throws SQLException {
-        AuthUserEntity user = new AuthUserEntity();
-        user.setId(rs.getObject("id", UUID.class));
-        user.setUsername(rs.getString("username"));
-        user.setPassword(rs.getString("password")); // уже закодирован
-        user.setEnabled(rs.getBoolean("enabled"));
-        user.setAccountNonExpired(rs.getBoolean("account_non_expired"));
-        user.setAccountNonLocked(rs.getBoolean("account_non_locked"));
-        user.setCredentialsNonExpired(rs.getBoolean("credentials_non_expired"));
-        return user;
-    }
 }

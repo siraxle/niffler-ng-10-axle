@@ -1,7 +1,10 @@
 package guru.qa.niffler.test.db;
 
+import guru.qa.niffler.data.entity.user.FriendshipEntity;
 import guru.qa.niffler.data.entity.user.UserEntity;
+import guru.qa.niffler.data.repository.FriendshipRepository;
 import guru.qa.niffler.data.repository.UserDataRepository;
+import guru.qa.niffler.data.repository.impl.FriendshipRepositoryJdbc;
 import guru.qa.niffler.data.repository.impl.UserDataRepositoryJdbc;
 import guru.qa.niffler.model.CurrencyValues;
 import guru.qa.niffler.utils.RandomDataUtils;
@@ -18,11 +21,13 @@ class UserDataRepositoryTest {
     private final UserDataRepository userDataRepository = new UserDataRepositoryJdbc();
     private String testUsername;
     private String testUsername2;
+    private FriendshipRepository friendshipRepository;
 
     @BeforeEach
     void setUp() {
         testUsername = RandomDataUtils.randomUsername();
         testUsername2 = RandomDataUtils.randomUsername();
+        friendshipRepository = new FriendshipRepositoryJdbc();
     }
 
     @Test
@@ -108,18 +113,20 @@ class UserDataRepositoryTest {
         UserEntity createdUser1 = userDataRepository.create(user1);
         UserEntity createdUser2 = userDataRepository.create(user2);
 
+        // Создаем ПРИНЯТУЮ дружбу
         userDataRepository.addFriend(createdUser1, createdUser2);
 
-        // Проверяем pending invitations
-        List<UserEntity> pendingInvitations = userDataRepository.findPendingInvitations(createdUser2);
-        assertFalse(pendingInvitations.isEmpty());
-        assertEquals(createdUser1.getUsername(), pendingInvitations.get(0).getUsername());
+        // Проверяем друзей (ACCEPTED), а не pending invitations
+        List<UserEntity> friends = userDataRepository.findFriends(createdUser1);
+        assertFalse(friends.isEmpty());
+        assertEquals(createdUser2.getUsername(), friends.get(0).getUsername());
 
+        // Удаляем дружбу
         userDataRepository.removeFriend(createdUser1, createdUser2);
 
-        // Проверяем что приглашение удалено
-        List<UserEntity> pendingAfterRemoval = userDataRepository.findPendingInvitations(createdUser2);
-        assertTrue(pendingAfterRemoval.isEmpty());
+        // Проверяем что друзья удалены
+        List<UserEntity> friendsAfterRemoval = userDataRepository.findFriends(createdUser1);
+        assertTrue(friendsAfterRemoval.isEmpty());
     }
 
     @Test
@@ -155,11 +162,36 @@ class UserDataRepositoryTest {
         UserEntity createdUser1 = userDataRepository.create(user1);
         UserEntity createdUser2 = userDataRepository.create(user2);
 
-        userDataRepository.addFriend(createdUser1, createdUser2);
+        userDataRepository.addIncomeInvitation(createdUser1, createdUser2);
 
         List<UserEntity> pending = userDataRepository.findPendingInvitations(createdUser2);
         assertFalse(pending.isEmpty());
         assertEquals(createdUser1.getUsername(), pending.get(0).getUsername());
+    }
+
+    @Test
+    void fullFriendshipCycle() {
+        UserEntity user1 = createTestUser(testUsername);
+        UserEntity user2 = createTestUser(testUsername2);
+
+        UserEntity createdUser1 = userDataRepository.create(user1);
+        UserEntity createdUser2 = userDataRepository.create(user2);
+
+        // 1. Создаем приглашение (PENDING)
+        userDataRepository.addIncomeInvitation(createdUser1, createdUser2);
+
+        // 2. Проверяем pending invitations
+        List<UserEntity> pending = userDataRepository.findPendingInvitations(createdUser2);
+        assertFalse(pending.isEmpty());
+        assertEquals(createdUser1.getUsername(), pending.get(0).getUsername());
+
+        // 3. Принимаем приглашение
+        userDataRepository.acceptFriend(createdUser2, createdUser1);
+
+        // 4. Проверяем что стали друзьями
+        List<UserEntity> friends = userDataRepository.findFriends(createdUser1);
+        assertFalse(friends.isEmpty());
+        assertEquals(createdUser2.getUsername(), friends.get(0).getUsername());
     }
 
     @Test

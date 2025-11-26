@@ -1,17 +1,18 @@
 package guru.qa.niffler.data.repository.impl;
 
 import guru.qa.niffler.config.Config;
-import guru.qa.niffler.data.entity.user.FriendshipEntity;
 import guru.qa.niffler.data.entity.user.FriendShipId;
-import guru.qa.niffler.data.entity.user.FriendshipStatus;
-import guru.qa.niffler.data.entity.user.UserEntity;
+import guru.qa.niffler.data.entity.user.FriendshipEntity;
+import guru.qa.niffler.data.mapper.FriendshipEntityRowMapper;
 import guru.qa.niffler.data.repository.FriendshipRepository;
 
-import java.sql.*;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import static guru.qa.niffler.data.tpl.Connections.holder;
 
@@ -51,7 +52,7 @@ public class FriendshipRepositoryJdbc implements FriendshipRepository {
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return Optional.of(mapResultSetToFriendship(rs));
+                    return Optional.of(FriendshipEntityRowMapper.instance.mapRow(rs, rs.getRow()));
                 } else {
                     return Optional.empty();
                 }
@@ -75,7 +76,7 @@ public class FriendshipRepositoryJdbc implements FriendshipRepository {
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    friendships.add(mapResultSetToFriendship(rs));
+                    friendships.add(FriendshipEntityRowMapper.instance.mapRow(rs, rs.getRow()));
                 }
             }
         } catch (SQLException e) {
@@ -98,7 +99,7 @@ public class FriendshipRepositoryJdbc implements FriendshipRepository {
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    friendships.add(mapResultSetToFriendship(rs));
+                    friendships.add(FriendshipEntityRowMapper.instance.mapRow(rs, rs.getRow()));
                 }
             }
         } catch (SQLException e) {
@@ -140,22 +141,4 @@ public class FriendshipRepositoryJdbc implements FriendshipRepository {
         }
     }
 
-    private FriendshipEntity mapResultSetToFriendship(ResultSet rs) throws SQLException {
-        FriendshipEntity friendship = new FriendshipEntity();
-
-        UserEntity requester = new UserEntity();
-        requester.setId(rs.getObject("requester_id", UUID.class));
-        requester.setUsername(rs.getString("requester_username"));
-        friendship.setRequester(requester);
-
-        UserEntity addressee = new UserEntity();
-        addressee.setId(rs.getObject("addressee_id", UUID.class));
-        addressee.setUsername(rs.getString("addressee_username"));
-        friendship.setAddressee(addressee);
-
-        friendship.setCreatedDate(rs.getDate("created_date"));
-        friendship.setStatus(FriendshipStatus.valueOf(rs.getString("status")));
-
-        return friendship;
-    }
 }

@@ -1,10 +1,9 @@
 package guru.qa.niffler.data.repository.impl;
 
 import guru.qa.niffler.config.Config;
-import guru.qa.niffler.data.entity.spend.CategoryEntity;
 import guru.qa.niffler.data.entity.spend.SpendEntity;
+import guru.qa.niffler.data.mapper.SpendEntityRowMapper;
 import guru.qa.niffler.data.repository.SpendRepository;
-import guru.qa.niffler.model.CurrencyValues;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -62,7 +61,7 @@ public class SpendRepositoryJdbc implements SpendRepository {
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return Optional.of(mapResultSetToSpend(rs));
+                    return Optional.of(SpendEntityRowMapper.instance.mapRow(rs, rs.getRow()));
                 } else {
                     return Optional.empty();
                 }
@@ -84,7 +83,7 @@ public class SpendRepositoryJdbc implements SpendRepository {
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    spends.add(mapResultSetToSpend(rs));
+                    spends.add(SpendEntityRowMapper.instance.mapRow(rs, rs.getRow()));
                 }
             }
         } catch (SQLException e) {
@@ -106,7 +105,7 @@ public class SpendRepositoryJdbc implements SpendRepository {
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    spends.add(mapResultSetToSpend(rs));
+                    spends.add(SpendEntityRowMapper.instance.mapRow(rs, rs.getRow()));
                 }
             }
         } catch (SQLException e) {
@@ -160,7 +159,7 @@ public class SpendRepositoryJdbc implements SpendRepository {
         try (PreparedStatement ps = holder(CFG.spendJdbcUrl()).connection().prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                spends.add(mapResultSetToSpend(rs));
+                spends.add(SpendEntityRowMapper.instance.mapRow(rs, rs.getRow()));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -168,22 +167,4 @@ public class SpendRepositoryJdbc implements SpendRepository {
         return spends;
     }
 
-    private SpendEntity mapResultSetToSpend(ResultSet rs) throws SQLException {
-        SpendEntity spend = new SpendEntity();
-        spend.setId(rs.getObject("id", UUID.class));
-        spend.setUsername(rs.getString("username"));
-        spend.setCurrency(CurrencyValues.valueOf(rs.getString("currency")));
-        spend.setSpendDate(rs.getDate("spend_date"));
-        spend.setAmount(rs.getDouble("amount"));
-        spend.setDescription(rs.getString("description"));
-
-        CategoryEntity category = new CategoryEntity();
-        category.setId(rs.getObject("category_id", UUID.class));
-        category.setName(rs.getString("category_name"));
-        category.setUsername(rs.getString("category_username"));
-        category.setArchived(rs.getBoolean("category_archived"));
-        spend.setCategory(category);
-
-        return spend;
-    }
 }

@@ -3,6 +3,7 @@ package guru.qa.niffler.data.repository.impl;
 import guru.qa.niffler.config.Config;
 import guru.qa.niffler.data.entity.auth.AuthUserEntity;
 import guru.qa.niffler.data.entity.auth.AuthorityEntity;
+import guru.qa.niffler.data.mapper.AuthUserEntityRowMapper;
 import guru.qa.niffler.data.repository.AuthUserRepository;
 import guru.qa.niffler.model.Authority;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
@@ -82,7 +83,7 @@ public class AuthUserRepositoryJdbc implements AuthUserRepository {
 
                 while (rs.next()) {
                     if (user == null) {
-                        user = mapResultSetToAuthUser(rs);
+                        user = AuthUserEntityRowMapper.instance.mapRow(rs, rs.getRow());
                     }
 
                     AuthorityEntity authority = new AuthorityEntity();
@@ -107,14 +108,34 @@ public class AuthUserRepositoryJdbc implements AuthUserRepository {
     @Override
     public Optional<AuthUserEntity> findByUsername(String username) {
         try (PreparedStatement ps = holder(CFG.authJdbcUrl()).connection().prepareStatement(
-                "SELECT * FROM \"user\" WHERE username = ?"
+                "SELECT u.*, a.id as authority_id, a.authority " +
+                        "FROM \"user\" u LEFT JOIN authority a ON u.id = a.user_id " +
+                        "WHERE u.username = ?"
         )) {
             ps.setString(1, username);
-            ps.executeQuery();
 
-            try (ResultSet rs = ps.getResultSet()) {
-                if (rs.next()) {
-                    return Optional.of(mapResultSetToAuthUser(rs));
+            try (ResultSet rs = ps.executeQuery()) {
+                AuthUserEntity user = null;
+                List<AuthorityEntity> authorities = new ArrayList<>();
+
+                while (rs.next()) {
+                    if (user == null) {
+                        user = AuthUserEntityRowMapper.instance.mapRow(rs, rs.getRow());
+                    }
+
+                    String authorityStr = rs.getString("authority");
+                    if (authorityStr != null) {
+                        AuthorityEntity authority = new AuthorityEntity();
+                        authority.setId(rs.getObject("authority_id", UUID.class));
+                        authority.setAuthority(Authority.valueOf(authorityStr));
+                        authority.setUser(user);
+                        authorities.add(authority);
+                    }
+                }
+
+                if (user != null) {
+                    user.setAuthorities(authorities);
+                    return Optional.of(user);
                 } else {
                     return Optional.empty();
                 }
@@ -170,29 +191,51 @@ public class AuthUserRepositoryJdbc implements AuthUserRepository {
     @Override
     public List<AuthUserEntity> findAll() {
         List<AuthUserEntity> users = new ArrayList<>();
-        String sql = "SELECT * FROM \"user\" ORDER BY username";
 
-        try (PreparedStatement ps = holder(CFG.authJdbcUrl()).connection().prepareStatement(sql);
+        try (PreparedStatement ps = holder(CFG.authJdbcUrl()).connection().prepareStatement(
+                "SELECT u.*, a.id as authority_id, a.authority " +
+                        "FROM \"user\" u LEFT JOIN authority a ON u.id = a.user_id " +
+                        "ORDER BY u.username"
+        );
              ResultSet rs = ps.executeQuery()) {
+
+            AuthUserEntity currentUser = null;
+            UUID currentUserId = null;
+
             while (rs.next()) {
-                users.add(mapResultSetToAuthUser(rs));
+                UUID userId = rs.getObject("id", UUID.class);
+
+                // Если это новый пользователь
+                if (currentUser == null || !userId.equals(currentUserId)) {
+                    if (currentUser != null) {
+                        users.add(currentUser);
+                    }
+
+                    currentUser = AuthUserEntityRowMapper.instance.mapRow(rs, rs.getRow());
+                    currentUser.setAuthorities(new ArrayList<>());
+                    currentUserId = userId;
+                }
+
+                // Добавляем authority если она есть
+                String authorityStr = rs.getString("authority");
+                if (authorityStr != null) {
+                    AuthorityEntity authority = new AuthorityEntity();
+                    authority.setId(rs.getObject("authority_id", UUID.class));
+                    authority.setAuthority(Authority.valueOf(authorityStr.toUpperCase()));
+                    authority.setUser(currentUser);
+                    currentUser.getAuthorities().add(authority);
+                }
             }
+
+            // Добавляем последнего пользователя
+            if (currentUser != null) {
+                users.add(currentUser);
+            }
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
         return users;
     }
 
-
-    private AuthUserEntity mapResultSetToAuthUser(ResultSet rs) throws SQLException {
-        AuthUserEntity user = new AuthUserEntity();
-        user.setId(rs.getObject("id", UUID.class));
-        user.setUsername(rs.getString("username"));
-        user.setPassword(rs.getString("password")); // уже закодирован
-        user.setEnabled(rs.getBoolean("enabled"));
-        user.setAccountNonExpired(rs.getBoolean("account_non_expired"));
-        user.setAccountNonLocked(rs.getBoolean("account_non_locked"));
-        user.setCredentialsNonExpired(rs.getBoolean("credentials_non_expired"));
-        return user;
-    }
 }

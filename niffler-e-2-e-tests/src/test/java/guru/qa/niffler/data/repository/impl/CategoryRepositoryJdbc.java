@@ -2,6 +2,8 @@ package guru.qa.niffler.data.repository.impl;
 
 import guru.qa.niffler.config.Config;
 import guru.qa.niffler.data.entity.spend.CategoryEntity;
+import guru.qa.niffler.data.mapper.AuthorityEntityRowMapper;
+import guru.qa.niffler.data.mapper.CategoryEntityRowMapper;
 import guru.qa.niffler.data.repository.CategoryRepository;
 
 import java.sql.*;
@@ -52,7 +54,7 @@ public class CategoryRepositoryJdbc implements CategoryRepository {
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return Optional.of(mapResultSetToCategory(rs));
+                    return Optional.of(CategoryEntityRowMapper.instance.mapRow(rs, rs.getRow()));
                 } else {
                     return Optional.empty();
                 }
@@ -72,7 +74,7 @@ public class CategoryRepositoryJdbc implements CategoryRepository {
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return Optional.of(mapResultSetToCategory(rs));
+                    return Optional.of(CategoryEntityRowMapper.instance.mapRow(rs, rs.getRow()));
                 } else {
                     return Optional.empty();
                 }
@@ -92,7 +94,7 @@ public class CategoryRepositoryJdbc implements CategoryRepository {
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    categories.add(mapResultSetToCategory(rs));
+                    categories.add(CategoryEntityRowMapper.instance.mapRow(rs, rs.getRow()));
                 }
             }
         } catch (SQLException e) {
@@ -141,7 +143,7 @@ public class CategoryRepositoryJdbc implements CategoryRepository {
         try (PreparedStatement ps = holder(CFG.spendJdbcUrl()).connection().prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                categories.add(mapResultSetToCategory(rs));
+                categories.add(CategoryEntityRowMapper.instance.mapRow(rs, rs.getRow()));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -149,12 +151,4 @@ public class CategoryRepositoryJdbc implements CategoryRepository {
         return categories;
     }
 
-    private CategoryEntity mapResultSetToCategory(ResultSet rs) throws SQLException {
-        CategoryEntity category = new CategoryEntity();
-        category.setId(rs.getObject("id", UUID.class));
-        category.setName(rs.getString("name"));
-        category.setUsername(rs.getString("username"));
-        category.setArchived(rs.getBoolean("archived"));
-        return category;
-    }
 }

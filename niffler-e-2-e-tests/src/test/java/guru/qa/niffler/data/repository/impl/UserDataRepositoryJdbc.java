@@ -3,6 +3,8 @@ package guru.qa.niffler.data.repository.impl;
 import guru.qa.niffler.config.Config;
 import guru.qa.niffler.data.entity.user.FriendshipStatus;
 import guru.qa.niffler.data.entity.user.UserEntity;
+import guru.qa.niffler.data.mapper.CategoryEntityRowMapper;
+import guru.qa.niffler.data.mapper.UdUserEntityRowMapper;
 import guru.qa.niffler.data.repository.UserDataRepository;
 
 import java.sql.*;
@@ -57,7 +59,7 @@ public class UserDataRepositoryJdbc implements UserDataRepository {
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return Optional.of(mapResultSetToUser(rs));
+                    return Optional.of(UdUserEntityRowMapper.instance.mapRow(rs, rs.getRow()));
                 } else {
                     return Optional.empty();
                 }
@@ -76,7 +78,7 @@ public class UserDataRepositoryJdbc implements UserDataRepository {
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return Optional.of(mapResultSetToUser(rs));
+                    return Optional.of(UdUserEntityRowMapper.instance.mapRow(rs, rs.getRow()));
                 } else {
                     return Optional.empty();
                 }
@@ -130,7 +132,7 @@ public class UserDataRepositoryJdbc implements UserDataRepository {
         try (PreparedStatement ps = holder(CFG.userdataJdbcUrl()).connection().prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                users.add(mapResultSetToUser(rs));
+                users.add(UdUserEntityRowMapper.instance.mapRow(rs, rs.getRow()));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -208,7 +210,7 @@ public class UserDataRepositoryJdbc implements UserDataRepository {
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    friends.add(mapResultSetToUser(rs));
+                    friends.add(UdUserEntityRowMapper.instance.mapRow(rs, rs.getRow()));
                 }
             }
         } catch (SQLException e) {
@@ -230,7 +232,7 @@ public class UserDataRepositoryJdbc implements UserDataRepository {
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    pendingInvitations.add(mapResultSetToUser(rs));
+                    pendingInvitations.add(UdUserEntityRowMapper.instance.mapRow(rs, rs.getRow()));
                 }
             }
         } catch (SQLException e) {
@@ -253,16 +255,4 @@ public class UserDataRepositoryJdbc implements UserDataRepository {
         }
     }
 
-    private UserEntity mapResultSetToUser(ResultSet rs) throws SQLException {
-        UserEntity user = new UserEntity();
-        user.setId(rs.getObject("id", UUID.class));
-        user.setUsername(rs.getString("username"));
-        user.setCurrency(guru.qa.niffler.model.CurrencyValues.valueOf(rs.getString("currency")));
-        user.setFirstname(rs.getString("firstname"));
-        user.setSurname(rs.getString("surname"));
-        user.setFullname(rs.getString("full_name"));
-        user.setPhoto(rs.getBytes("photo"));
-        user.setPhotoSmall(rs.getBytes("photo_small"));
-        return user;
-    }
 }

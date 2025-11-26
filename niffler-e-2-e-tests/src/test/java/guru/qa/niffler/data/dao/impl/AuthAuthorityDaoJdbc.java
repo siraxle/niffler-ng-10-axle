@@ -4,6 +4,8 @@ import guru.qa.niffler.config.Config;
 import guru.qa.niffler.data.dao.AuthAuthorityDao;
 import guru.qa.niffler.data.entity.auth.AuthUserEntity;
 import guru.qa.niffler.data.entity.auth.AuthorityEntity;
+import guru.qa.niffler.data.mapper.AuthorityEntityRowMapper;
+import guru.qa.niffler.data.mapper.UdUserEntityRowMapper;
 import guru.qa.niffler.model.Authority;
 
 import java.sql.*;
@@ -51,7 +53,7 @@ private static final Config CFG = Config.getInstance();
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    AuthorityEntity authority = mapResultSetToAuthAuthorityEntity(rs);
+                    AuthorityEntity authority = AuthorityEntityRowMapper.instance.mapRow(rs, rs.getRow());
                     authorities.add(authority);
                 }
             }
@@ -81,26 +83,12 @@ private static final Config CFG = Config.getInstance();
         try (PreparedStatement ps = holder(CFG.authJdbcUrl()).connection().prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                authorities.add(mapResultSetToAuthAuthorityEntity(rs));
+                authorities.add(AuthorityEntityRowMapper.instance.mapRow(rs, rs.getRow()));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
         return authorities;
     }
-
-    private AuthorityEntity mapResultSetToAuthAuthorityEntity(ResultSet rs) throws SQLException {
-        AuthorityEntity authority = new AuthorityEntity();
-        authority.setId(rs.getObject("id", UUID.class));
-        AuthUserEntity user = new AuthUserEntity();
-        user.setId(rs.getObject("user_id", UUID.class));
-        authority.setUser(user);
-        String authorityStr = rs.getString("authority");
-        if (authority != null) {
-            authority.setAuthority(Authority.valueOf(authorityStr));
-        }
-        return authority;
-    }
-
 
 }

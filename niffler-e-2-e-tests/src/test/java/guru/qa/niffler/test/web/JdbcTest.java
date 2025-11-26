@@ -35,7 +35,7 @@ public class JdbcTest {
         UserJson userJson = usersDbClient.createUser(
                 new UserJson(
                         null,
-                        "valent-02",
+                        "valent-03",
                         CurrencyValues.RUB,
                         null,
                         null,
@@ -57,7 +57,7 @@ public class JdbcTest {
                         new Date(),
                         new CategoryJson(
                                 null,
-                                "test-cat-name-9",
+                                "test-cat-name-10",
                                 "cat",
                                 false
                         ),

@@ -42,7 +42,9 @@ public class AuthorityDbClient {
             UUID userId = getUserIdByUsername(username);
 
             AuthorityEntity authAuthority = new AuthorityEntity();
-            authAuthority.getUser().getId();
+            AuthUserEntity user = new AuthUserEntity();
+            user.setId(userId);
+            authAuthority.setUser(user);
             authAuthority.setAuthority(Authority.valueOf(authority));
 
             AuthorityEntity[] createdAuthorities = authAuthorityDao.create(authAuthority);

@@ -44,12 +44,13 @@ public class AuthDbClient {
         return jdbcTxTemplate.execute(() -> {
             AuthUserEntity createdUser = authUserDao.create(toAuthUserEntity(user));
 
+            // Создаем authorities и устанавливаем связь с пользователем
             AuthorityEntity readAuthority = new AuthorityEntity();
-            readAuthority.getUser().getId();
+            readAuthority.setUser(createdUser);
             readAuthority.setAuthority(Authority.READ);
 
             AuthorityEntity writeAuthority = new AuthorityEntity();
-            writeAuthority.getUser().getId();
+            writeAuthority.setUser(createdUser);
             writeAuthority.setAuthority(Authority.WRITE);
 
             authAuthorityDao.create(readAuthority, writeAuthority);
