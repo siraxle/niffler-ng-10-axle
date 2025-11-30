@@ -1,9 +1,8 @@
 package guru.qa.niffler.test.db;
 
-import guru.qa.niffler.data.entity.user.FriendshipEntity;
 import guru.qa.niffler.data.entity.user.UserEntity;
 import guru.qa.niffler.data.repository.FriendshipRepository;
-import guru.qa.niffler.data.repository.UserDataRepository;
+import guru.qa.niffler.data.repository.UserDataUserRepository;
 import guru.qa.niffler.data.repository.impl.FriendshipRepositoryJdbc;
 import guru.qa.niffler.data.repository.impl.UserDataRepositoryJdbc;
 import guru.qa.niffler.model.CurrencyValues;
@@ -18,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class UserDataRepositoryTest {
 
-    private final UserDataRepository userDataRepository = new UserDataRepositoryJdbc();
+    private final UserDataUserRepository userDataRepository = new UserDataRepositoryJdbc();
     private String testUsername;
     private String testUsername2;
     private FriendshipRepository friendshipRepository;

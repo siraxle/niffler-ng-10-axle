@@ -3,7 +3,7 @@ package guru.qa.niffler.service;
 import guru.qa.niffler.config.Config;
 import guru.qa.niffler.data.dao.AuthAuthorityDao;
 import guru.qa.niffler.data.dao.AuthUserDao;
-import guru.qa.niffler.data.dao.UserDao;
+import guru.qa.niffler.data.dao.UdUserDao;
 import guru.qa.niffler.data.dao.impl.AuthAuthorityDaoSpringJdbc;
 import guru.qa.niffler.data.dao.impl.AuthUserDaoSpringJdbc;
 import guru.qa.niffler.data.dao.impl.UdUserDaoSpringJdbc;
@@ -30,7 +30,7 @@ public class UsersDbClientCTM {
 
     private final AuthUserDao authUserDao = new AuthUserDaoSpringJdbc();
     private final AuthAuthorityDao authAuthorityDao = new AuthAuthorityDaoSpringJdbc();
-    private final UserDao userDao = new UdUserDaoSpringJdbc();
+    private final UdUserDao userDao = new UdUserDaoSpringJdbc();
 
     // TransactionManager для отдельных БД
     private final PlatformTransactionManager authTransactionManager =

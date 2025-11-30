@@ -5,7 +5,7 @@ import guru.qa.niffler.data.entity.user.FriendshipEntity;
 import guru.qa.niffler.data.entity.user.FriendshipStatus;
 import guru.qa.niffler.data.entity.user.UserEntity;
 import guru.qa.niffler.data.repository.FriendshipRepository;
-import guru.qa.niffler.data.repository.UserDataRepository;
+import guru.qa.niffler.data.repository.UserDataUserRepository;
 import guru.qa.niffler.data.repository.impl.FriendshipRepositoryJdbc;
 import guru.qa.niffler.data.repository.impl.UserDataRepositoryJdbc;
 import guru.qa.niffler.model.CurrencyValues;
@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class FriendshipRepositoryTest {
 
     private FriendshipRepository friendshipRepository;
-    private UserDataRepository userDataRepository;
+    private UserDataUserRepository userDataRepository;
     private UserEntity user1;
     private UserEntity user2;
 

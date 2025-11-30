@@ -4,6 +4,8 @@ import com.atomikos.jdbc.AtomikosDataSourceBean;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.sql.DataSource;
 import java.util.Map;
 import java.util.Properties;
@@ -31,6 +33,13 @@ public class DataSources {
                     dsBean.setXaProperties(props);
                     dsBean.setPoolSize(3);
                     dsBean.setMaxPoolSize(10);
+                    try {
+                        InitialContext context = new InitialContext();
+                        context.bind("java:com/env/jdbc/" + uniqId, dsBean);
+                    } catch (NamingException e) {
+                        throw new RuntimeException(e);
+                    }
+
                     return dsBean;
                 }
         );

@@ -103,11 +103,11 @@ class AuthUserRepositoryTest {
         user.setCredentialsNonExpired(true);
 
         AuthorityEntity authority1 = new AuthorityEntity();
-        authority1.setAuthority(Authority.READ);
+        authority1.setAuthority(Authority.read);
         user.addAuthorities(authority1);
 
         AuthorityEntity authority2 = new AuthorityEntity();
-        authority2.setAuthority(Authority.WRITE);
+        authority2.setAuthority(Authority.write);
         user.addAuthorities(authority2);
 
         authority1.setUser(user);
