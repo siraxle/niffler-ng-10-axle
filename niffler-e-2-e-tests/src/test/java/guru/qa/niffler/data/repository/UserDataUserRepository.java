@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface UserDataRepository {
+public interface UserDataUserRepository {
     UserEntity create(UserEntity user);
 
     Optional<UserEntity> findById(UUID id);
@@ -22,9 +22,9 @@ public interface UserDataRepository {
     // методы для работы с друзьями
     void addIncomeInvitation(UserEntity requester, UserEntity addressee);
 
-    void addOutcomeInvitation(UserEntity requester, UserEntity addressee);
-
     void addFriend(UserEntity requester, UserEntity addressee);
+
+    void addOutcomeInvitation(UserEntity requester, UserEntity addressee);
 
     void removeFriend(UserEntity user, UserEntity friend);
 

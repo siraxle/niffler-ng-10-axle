@@ -3,21 +3,20 @@ package guru.qa.niffler.test.web;
 import guru.qa.niffler.config.Config;
 import guru.qa.niffler.data.dao.AuthAuthorityDao;
 import guru.qa.niffler.data.dao.AuthUserDao;
-import guru.qa.niffler.data.dao.UserDao;
+import guru.qa.niffler.data.dao.UdUserDao;
 import guru.qa.niffler.data.dao.impl.*;
 import guru.qa.niffler.model.*;
 import guru.qa.niffler.service.SpendDbClient;
 import guru.qa.niffler.service.UsersDbClient;
-import guru.qa.niffler.service.UsersDbClientCTM;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.Date;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class JdbcTest {
 
@@ -26,25 +25,41 @@ public class JdbcTest {
 
     private final AuthUserDao authUserDao = new AuthUserDaoSpringJdbc();
     private final AuthAuthorityDao authAuthorityDao = new AuthAuthorityDaoSpringJdbc();
-    private final UserDao userDao = new UdUserDaoSpringJdbc();
+    private final UdUserDao userDao = new UdUserDaoSpringJdbc();
 
 
-    @Test
-    void springJdbcTest() {
-        UsersDbClient usersDbClient = new UsersDbClient();
+//    @Test
+//    void springJdbcTest() {
+//        UsersDbClient usersDbClient = new UsersDbClient();
+//        UserJson userJson = usersDbClient.createUser(
+//                new UserJson(
+//                        null,
+//                        "valent-00",
+//                        CurrencyValues.RUB,
+//                        null,
+//                        null,
+//                        null,
+//                        null,
+//                        null
+//                )
+//        );
+//        System.out.println(userJson);
+//    }
+
+
+    static UsersDbClient usersDbClient = new UsersDbClient();
+    @ValueSource(strings = {
+            "valent-07"
+    })
+    @ParameterizedTest
+    void springJdbcTest(String username) {
+
         UserJson userJson = usersDbClient.createUser(
-                new UserJson(
-                        null,
-                        "valent-03",
-                        CurrencyValues.RUB,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null
-                )
+                username,
+                "12345"
         );
-        System.out.println(userJson);
+        usersDbClient.addIncomeInvitation(userJson, 1);
+        usersDbClient.addOutcomeInvitation(userJson, 1);
     }
 
 

@@ -3,7 +3,7 @@ package guru.qa.niffler.service;
 import guru.qa.niffler.config.Config;
 import guru.qa.niffler.data.dao.AuthAuthorityDao;
 import guru.qa.niffler.data.dao.AuthUserDao;
-import guru.qa.niffler.data.dao.UserDao;
+import guru.qa.niffler.data.dao.UdUserDao;
 import guru.qa.niffler.data.dao.impl.AuthAuthorityDaoSpringJdbc;
 import guru.qa.niffler.data.dao.impl.AuthUserDaoSpringJdbc;
 import guru.qa.niffler.data.dao.impl.UdUserDaoSpringJdbc;
@@ -28,7 +28,7 @@ public class AuthDbClient {
 
     private final AuthUserDao authUserDao = new AuthUserDaoSpringJdbc();
     private final AuthAuthorityDao authAuthorityDao = new AuthAuthorityDaoSpringJdbc();
-    private final UserDao userDao = new UdUserDaoSpringJdbc();
+    private final UdUserDao userDao = new UdUserDaoSpringJdbc();
 
     private final TransactionTemplate transactionTemplate = new TransactionTemplate(
             new JdbcTransactionManager(
@@ -47,11 +47,11 @@ public class AuthDbClient {
             // Создаем authorities и устанавливаем связь с пользователем
             AuthorityEntity readAuthority = new AuthorityEntity();
             readAuthority.setUser(createdUser);
-            readAuthority.setAuthority(Authority.READ);
+            readAuthority.setAuthority(Authority.read);
 
             AuthorityEntity writeAuthority = new AuthorityEntity();
             writeAuthority.setUser(createdUser);
-            writeAuthority.setAuthority(Authority.WRITE);
+            writeAuthority.setAuthority(Authority.write);
 
             authAuthorityDao.create(readAuthority, writeAuthority);
 

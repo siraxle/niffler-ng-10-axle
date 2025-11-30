@@ -1,11 +1,9 @@
 package guru.qa.niffler.data.dao.impl;
 
 import guru.qa.niffler.config.Config;
-import guru.qa.niffler.data.dao.UserDao;
+import guru.qa.niffler.data.dao.UdUserDao;
 import guru.qa.niffler.data.entity.user.UserEntity;
-import guru.qa.niffler.data.mapper.CategoryEntityRowMapper;
 import guru.qa.niffler.data.mapper.UdUserEntityRowMapper;
-import guru.qa.niffler.model.CurrencyValues;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -15,7 +13,7 @@ import java.util.UUID;
 
 import static guru.qa.niffler.data.tpl.Connections.holder;
 
-public class UserdataUserDaoJdbc implements UserDao {
+public class UdUserDaoJdbc implements UdUserDao {
 
     private static final Config CFG = Config.getInstance();
 

@@ -1,5 +1,5 @@
 package guru.qa.niffler.model;
 
 public enum Authority {
-  READ, WRITE
+  read, write
 }

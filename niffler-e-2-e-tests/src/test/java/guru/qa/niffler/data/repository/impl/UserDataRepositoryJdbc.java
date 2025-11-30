@@ -3,9 +3,8 @@ package guru.qa.niffler.data.repository.impl;
 import guru.qa.niffler.config.Config;
 import guru.qa.niffler.data.entity.user.FriendshipStatus;
 import guru.qa.niffler.data.entity.user.UserEntity;
-import guru.qa.niffler.data.mapper.CategoryEntityRowMapper;
 import guru.qa.niffler.data.mapper.UdUserEntityRowMapper;
-import guru.qa.niffler.data.repository.UserDataRepository;
+import guru.qa.niffler.data.repository.UserDataUserRepository;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -15,7 +14,7 @@ import java.util.UUID;
 
 import static guru.qa.niffler.data.tpl.Connections.holder;
 
-public class UserDataRepositoryJdbc implements UserDataRepository {
+public class UserDataRepositoryJdbc implements UserDataUserRepository {
 
     private static final Config CFG = Config.getInstance();
 
