@@ -1,6 +1,7 @@
 package guru.qa.niffler.data.repository.impl;
 
 import guru.qa.niffler.config.Config;
+import guru.qa.niffler.data.entity.spend.CategoryEntity;
 import guru.qa.niffler.data.entity.spend.SpendEntity;
 import guru.qa.niffler.data.mapper.SpendEntityRowMapper;
 import guru.qa.niffler.data.repository.SpendRepository;
@@ -93,6 +94,28 @@ public class SpendRepositoryJdbc implements SpendRepository {
     }
 
     @Override
+    public List<SpendEntity> findByUsernameAndSpendDescription(String username, String description) {
+        List<SpendEntity> spends = new ArrayList<>();
+        String sql = "SELECT s.*, c.id as category_id, c.name as category_name, c.username as category_username, c.archived as category_archived " +
+                "FROM spend s JOIN category c ON s.category_id = c.id " +
+                "WHERE s.username = ? AND s.description ILIKE ? ORDER BY s.spend_date DESC";
+
+        try (PreparedStatement ps = holder(CFG.spendJdbcUrl()).connection().prepareStatement(sql)) {
+            ps.setString(1, username);
+            ps.setString(2, "%" + description + "%");
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    spends.add(SpendEntityRowMapper.instance.mapRow(rs, rs.getRow()));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return spends;
+    }
+
+    @Override
     public List<SpendEntity> findByCategory(String categoryName, String username) {
         List<SpendEntity> spends = new ArrayList<>();
         String sql = "SELECT s.*, c.id as category_id, c.name as category_name, c.username as category_username, c.archived as category_archived " +
@@ -138,11 +161,98 @@ public class SpendRepositoryJdbc implements SpendRepository {
     }
 
     @Override
-    public void delete(SpendEntity spend) {
+    public CategoryEntity createCategory(CategoryEntity category) {
+        try (PreparedStatement ps = holder(CFG.spendJdbcUrl()).connection().prepareStatement(
+                "INSERT INTO category (name, username, archived) VALUES (?, ?, ?)",
+                Statement.RETURN_GENERATED_KEYS
+        )) {
+            ps.setString(1, category.getName());
+            ps.setString(2, category.getUsername());
+            ps.setBoolean(3, category.isArchived());
+            ps.executeUpdate();
+
+            final UUID generatedKey;
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) {
+                    generatedKey = rs.getObject("id", UUID.class);
+                } else {
+                    throw new SQLException("Can't find id in ResultSet");
+                }
+            }
+            category.setId(generatedKey);
+            return category;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public Optional<CategoryEntity> findCategoryById(UUID id) {
+        try (PreparedStatement ps = holder(CFG.spendJdbcUrl()).connection().prepareStatement(
+                "SELECT * FROM category WHERE id = ?"
+        )) {
+            ps.setObject(1, id);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    CategoryEntity category = new CategoryEntity();
+                    category.setId(rs.getObject("id", UUID.class));
+                    category.setName(rs.getString("name"));
+                    category.setUsername(rs.getString("username"));
+                    category.setArchived(rs.getBoolean("archived"));
+                    return Optional.of(category);
+                } else {
+                    return Optional.empty();
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public Optional<CategoryEntity> findCategoryByUsernameAndSpendName(String username, String name) {
+        try (PreparedStatement ps = holder(CFG.spendJdbcUrl()).connection().prepareStatement(
+                "SELECT * FROM category WHERE username = ? AND name = ?"
+        )) {
+            ps.setString(1, username);
+            ps.setString(2, name);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    CategoryEntity category = new CategoryEntity();
+                    category.setId(rs.getObject("id", UUID.class));
+                    category.setName(rs.getString("name"));
+                    category.setUsername(rs.getString("username"));
+                    category.setArchived(rs.getBoolean("archived"));
+                    return Optional.of(category);
+                } else {
+                    return Optional.empty();
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void remove(SpendEntity spend) {
         try (PreparedStatement ps = holder(CFG.spendJdbcUrl()).connection().prepareStatement(
                 "DELETE FROM spend WHERE id = ?"
         )) {
             ps.setObject(1, spend.getId());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void removeCategory(CategoryEntity category) {
+        try (PreparedStatement ps = holder(CFG.spendJdbcUrl()).connection().prepareStatement(
+                "DELETE FROM category WHERE id = ?"
+        )) {
+            ps.setObject(1, category.getId());
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);

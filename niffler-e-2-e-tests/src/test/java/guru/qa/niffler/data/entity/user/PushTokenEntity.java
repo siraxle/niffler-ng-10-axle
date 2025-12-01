@@ -26,6 +26,7 @@ public class PushTokenEntity {
   @Column(nullable = false, unique = true)
   private String token;
 
+  @Column(name = "user_agent")
   private String userAgent;
 
   @Column(nullable = false)

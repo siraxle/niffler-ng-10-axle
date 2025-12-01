@@ -1,6 +1,7 @@
 package guru.qa.niffler.data.repository.impl;
 
 import guru.qa.niffler.config.Config;
+import guru.qa.niffler.data.entity.user.FriendshipEntity;
 import guru.qa.niffler.data.entity.user.FriendshipStatus;
 import guru.qa.niffler.data.entity.user.UserEntity;
 import guru.qa.niffler.data.repository.UserDataUserRepository;
@@ -23,6 +24,7 @@ public class UserdataUserRepositoryHibernate implements UserDataUserRepository {
     public UserEntity create(UserEntity user) {
         entityManager.joinTransaction();
         entityManager.persist(user);
+        entityManager.flush();
         return user;
     }
 
@@ -46,23 +48,32 @@ public class UserdataUserRepositoryHibernate implements UserDataUserRepository {
 
     @Override
     public UserEntity update(UserEntity user) {
-        return null;
+        entityManager.joinTransaction();
+        UserEntity merged = entityManager.merge(user);
+        entityManager.flush();
+        return merged;
     }
 
     @Override
-    public void delete(UserEntity user) {
-
+    public void remove(UserEntity user) {
+        entityManager.joinTransaction();
+        UserEntity managedUser = entityManager.find(UserEntity.class, user.getId());
+        if (managedUser != null) {
+            entityManager.remove(managedUser);
+            entityManager.flush();
+        }
     }
 
     @Override
     public List<UserEntity> findAll() {
-        return List.of();
+        return entityManager.createQuery("SELECT u FROM UserEntity u ORDER BY u.username", UserEntity.class)
+                .getResultList();
     }
 
     @Override
     public void addIncomeInvitation(UserEntity requester, UserEntity addressee) {
         entityManager.joinTransaction();
-        addressee.addFriends(FriendshipStatus.PENDING, requester);
+        requester.addFriends(FriendshipStatus.PENDING, addressee);
     }
 
     @Override
@@ -80,21 +91,79 @@ public class UserdataUserRepositoryHibernate implements UserDataUserRepository {
 
     @Override
     public void removeFriend(UserEntity user, UserEntity friend) {
+        entityManager.joinTransaction();
+        UserEntity managedUser = entityManager.find(UserEntity.class, user.getId());
+        UserEntity managedFriend = entityManager.find(UserEntity.class, friend.getId());
 
+        if (managedUser != null && managedFriend != null) {
+            managedUser.removeFriends(managedFriend);
+            managedFriend.removeFriends(managedUser);
+            entityManager.merge(managedUser);
+            entityManager.merge(managedFriend);
+        }
     }
 
     @Override
     public List<UserEntity> findFriends(UserEntity user) {
-        return List.of();
+        // Упрощенный запрос без CASE
+        String jpql = """
+            SELECT f.addressee FROM FriendshipEntity f 
+            WHERE f.requester.id = :userId AND f.status = :status
+            UNION
+            SELECT f.requester FROM FriendshipEntity f 
+            WHERE f.addressee.id = :userId AND f.status = :status
+            """;
+
+        return entityManager.createQuery(jpql, UserEntity.class)
+                .setParameter("userId", user.getId())
+                .setParameter("status", FriendshipStatus.ACCEPTED)
+                .getResultList();
     }
 
     @Override
     public List<UserEntity> findPendingInvitations(UserEntity user) {
-        return List.of();
+        String jpql = """
+                SELECT f.requester FROM FriendshipEntity f 
+                WHERE f.addressee.id = :userId AND f.status = :status
+                """;
+
+        return entityManager.createQuery(jpql, UserEntity.class)
+                .setParameter("userId", user.getId())
+                .setParameter("status", FriendshipStatus.PENDING)
+                .getResultList();
     }
 
     @Override
     public void acceptFriend(UserEntity user, UserEntity friend) {
+        entityManager.joinTransaction();
 
+        // Находим pending invitation
+        String jpql = """
+                SELECT f FROM FriendshipEntity f 
+                WHERE f.requester.id = :friendId AND f.addressee.id = :userId AND f.status = :status
+                """;
+
+        try {
+            FriendshipEntity pendingFriendship = entityManager.createQuery(jpql, FriendshipEntity.class)
+                    .setParameter("friendId", friend.getId())
+                    .setParameter("userId", user.getId())
+                    .setParameter("status", FriendshipStatus.PENDING)
+                    .getSingleResult();
+
+            // Обновляем статус приглашения на ACCEPTED
+            pendingFriendship.setStatus(FriendshipStatus.ACCEPTED);
+
+            // Создаем обратную запись о дружбе
+            UserEntity managedUser = entityManager.find(UserEntity.class, user.getId());
+            UserEntity managedFriend = entityManager.find(UserEntity.class, friend.getId());
+
+            managedUser.addFriends(FriendshipStatus.ACCEPTED, managedFriend);
+
+            entityManager.merge(pendingFriendship);
+            entityManager.merge(managedUser);
+
+        } catch (NoResultException e) {
+            throw new RuntimeException("Pending friendship invitation not found from user: " + friend.getUsername() + " to user: " + user.getUsername());
+        }
     }
 }

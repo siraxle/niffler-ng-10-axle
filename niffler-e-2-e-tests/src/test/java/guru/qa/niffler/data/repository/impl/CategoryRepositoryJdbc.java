@@ -124,7 +124,7 @@ public class CategoryRepositoryJdbc implements CategoryRepository {
     }
 
     @Override
-    public void delete(CategoryEntity category) {
+    public void remove(CategoryEntity category) {
         try (PreparedStatement ps = holder(CFG.spendJdbcUrl()).connection().prepareStatement(
                 "DELETE FROM category WHERE id = ?"
         )) {

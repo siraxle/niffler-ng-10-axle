@@ -12,6 +12,7 @@ import guru.qa.niffler.data.entity.auth.AuthorityEntity;
 import guru.qa.niffler.data.entity.user.UserEntity;
 import guru.qa.niffler.data.tpl.DataSources;
 import guru.qa.niffler.data.tpl.JdbcTransactionTemplate;
+import guru.qa.niffler.data.tpl.XaTransactionTemplate;
 import guru.qa.niffler.model.Authority;
 import guru.qa.niffler.model.AuthorityJson;
 import guru.qa.niffler.model.UserAuthJson;
@@ -40,8 +41,12 @@ public class AuthDbClient {
             CFG.authJdbcUrl()
     );
 
+    private final XaTransactionTemplate xaTxTemplate = new XaTransactionTemplate(
+            CFG.authJdbcUrl()
+    );
+
     public UserAuthJson createUser(UserAuthJson user) {
-        return jdbcTxTemplate.execute(() -> {
+        return xaTxTemplate.execute(() -> {
             AuthUserEntity createdUser = authUserDao.create(toAuthUserEntity(user));
 
             // Создаем authorities и устанавливаем связь с пользователем
@@ -60,21 +65,21 @@ public class AuthDbClient {
     }
 
     public Optional<UserAuthJson> findUserByUsername(String username) {
-        return jdbcTxTemplate.execute(() -> {
+        return xaTxTemplate.execute(() -> {
             Optional<AuthUserEntity> user = authUserDao.findByUsername(username);
             return user.map(UserAuthJson::fromEntity);
         });
     }
 
     public Optional<UserAuthJson> findUserById(UUID id) {
-        return jdbcTxTemplate.execute(() -> {
+        return xaTxTemplate.execute(() -> {
             Optional<AuthUserEntity> user = authUserDao.findById(id);
             return user.map(UserAuthJson::fromEntity);
         });
     }
 
     public List<AuthorityJson> getUserAuthorities(String username) {
-        return jdbcTxTemplate.execute(() -> {
+        return xaTxTemplate.execute(() -> {
             Optional<AuthUserEntity> user = authUserDao.findByUsername(username);
 
             if (user.isPresent()) {
@@ -89,7 +94,7 @@ public class AuthDbClient {
     }
 
     public List<AuthorityJson> getUserAuthoritiesById(UUID userId) {
-        return jdbcTxTemplate.execute(() -> {
+        return xaTxTemplate.execute(() -> {
             List<AuthorityEntity> authorities = authAuthorityDao.findAuthoritiesByUserId(userId);
             return authorities.stream()
                     .map(AuthorityJson::fromEntity)
@@ -98,7 +103,7 @@ public class AuthDbClient {
     }
 
     public UserAuthJson updateUser(UserAuthJson user) {
-        return jdbcTxTemplate.execute(() -> {
+        return xaTxTemplate.execute(() -> {
             AuthUserEntity userEntity = toAuthUserEntity(user);
             userEntity.setId(user.id());
 
@@ -109,7 +114,7 @@ public class AuthDbClient {
 
     public void deleteUser(String username) {
         // Удаляем из auth БД
-        jdbcTxTemplate.execute(() -> {
+        xaTxTemplate.execute(() -> {
             Optional<AuthUserEntity> user = authUserDao.findByUsername(username);
 
             if (user.isPresent()) {
@@ -124,7 +129,7 @@ public class AuthDbClient {
 
         // Удаляем из userdata БД
         JdbcTransactionTemplate userdataTxTemplate = new JdbcTransactionTemplate(CFG.userdataJdbcUrl());
-        userdataTxTemplate.execute(() -> {
+        xaTxTemplate.execute(() -> {
             Optional<UserEntity> user = userDao.findByUsername(username);
             user.ifPresent(userDao::delete);
             return null;

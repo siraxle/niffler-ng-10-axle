@@ -9,6 +9,7 @@ import guru.qa.niffler.data.entity.auth.AuthUserEntity;
 import guru.qa.niffler.data.entity.auth.AuthorityEntity;
 import guru.qa.niffler.data.tpl.DataSources;
 import guru.qa.niffler.data.tpl.JdbcTransactionTemplate;
+import guru.qa.niffler.data.tpl.XaTransactionTemplate;
 import guru.qa.niffler.model.Authority;
 import guru.qa.niffler.model.AuthorityJson;
 import org.springframework.jdbc.support.JdbcTransactionManager;
@@ -37,8 +38,12 @@ public class AuthorityDbClient {
             CFG.authJdbcUrl()
     );
 
+    private final XaTransactionTemplate xaTxTemplate = new XaTransactionTemplate(
+            CFG.authJdbcUrl()
+    );
+
     public AuthorityJson createAuthority(String username, String authority) {
-        return jdbcTxTemplate.execute(() -> {
+        return xaTxTemplate.execute(() -> {
             UUID userId = getUserIdByUsername(username);
 
             AuthorityEntity authAuthority = new AuthorityEntity();
@@ -53,7 +58,7 @@ public class AuthorityDbClient {
     }
 
     public AuthorityJson[] createAuthorities(String username, String... authorities) {
-        return jdbcTxTemplate.execute(() -> {
+        return xaTxTemplate.execute(() -> {
             UUID userId = getUserIdByUsername(username);
 
             AuthorityEntity[] authEntities = new AuthorityEntity[authorities.length];
@@ -70,7 +75,7 @@ public class AuthorityDbClient {
     }
 
     public List<AuthorityJson> getAuthoritiesByUsername(String username) {
-        return jdbcTxTemplate.execute(() -> {
+        return xaTxTemplate.execute(() -> {
             UUID userId = getUserIdByUsername(username);
             List<AuthorityEntity> authorities = authAuthorityDao.findAuthoritiesByUserId(userId);
             return authorities.stream()
@@ -80,7 +85,7 @@ public class AuthorityDbClient {
     }
 
     public List<AuthorityJson> getAuthoritiesByUserId(UUID userId) {
-        return jdbcTxTemplate.execute(() -> {
+        return xaTxTemplate.execute(() -> {
             List<AuthorityEntity> authorities = authAuthorityDao.findAuthoritiesByUserId(userId);
             return authorities.stream()
                     .map(AuthorityJson::fromEntity)
@@ -89,7 +94,7 @@ public class AuthorityDbClient {
     }
 
     public void deleteAuthority(String username, String authority) {
-        jdbcTxTemplate.execute(() -> {
+        xaTxTemplate.execute(() -> {
             UUID userId = getUserIdByUsername(username);
             List<AuthorityEntity> userAuthorities = authAuthorityDao.findAuthoritiesByUserId(userId);
 
@@ -103,7 +108,7 @@ public class AuthorityDbClient {
     }
 
     public void deleteAllAuthorities(String username) {
-        jdbcTxTemplate.execute(() -> {
+        xaTxTemplate.execute(() -> {
             UUID userId = getUserIdByUsername(username);
             List<AuthorityEntity> authorities = authAuthorityDao.findAuthoritiesByUserId(userId);
 
@@ -116,7 +121,7 @@ public class AuthorityDbClient {
     }
 
     private UUID getUserIdByUsername(String username) {
-        return jdbcTxTemplate.execute(() -> {
+        return xaTxTemplate.execute(() -> {
             Optional<AuthUserEntity> user = authUserDao.findByUsername(username);
             return user.map(AuthUserEntity::getId)
                     .orElseThrow(() -> new RuntimeException("User not found: " + username));

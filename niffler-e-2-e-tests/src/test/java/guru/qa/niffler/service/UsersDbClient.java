@@ -53,18 +53,6 @@ public class UsersDbClient {
             CFG.userdataJdbcUrl()
     );
 
-//    public UserJson createUser(UserJson user) {
-//        return xaTxTemplate.execute(() -> {
-//                    AuthUserEntity authUser = authUserEntity(user);
-//                    authUserRepository.create(authUser);
-//                    return UserJson.fromEntity(
-//                            udUserRepository.create(UserEntity.fromJson(user))
-//                            // тут должен быть null или параметр friendsState 36:28 урок 6.2
-//                    );
-//                }
-//        );
-//    }
-
     public UserJson createUser(String username, String password) {
         return xaTxTemplate.execute(() -> {
                     AuthUserEntity authUser = authUserEntity(username, password);
@@ -123,7 +111,7 @@ public class UsersDbClient {
     public void deleteUser(String username) {
         xaTxTemplate.execute(() -> {
             Optional<UserEntity> user = udUserRepository.findByUsername(username);
-            user.ifPresent(udUserRepository::delete);
+            user.ifPresent(udUserRepository::remove);
             return null;
         });
     }
@@ -172,7 +160,7 @@ public class UsersDbClient {
         }
     }
 
-    void addFriend(UserEntity requester, UserEntity addressee) {
-    }
+//    void addFriend(UserEntity requester, UserEntity addressee) {
+//    }
 
 }

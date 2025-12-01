@@ -14,7 +14,7 @@ import java.util.UUID;
 
 import static guru.qa.niffler.data.tpl.Connections.holder;
 
-public class UserDataRepositoryJdbc implements UserDataUserRepository {
+public class UserdataRepositoryJdbc implements UserDataUserRepository {
 
     private static final Config CFG = Config.getInstance();
 
@@ -112,7 +112,7 @@ public class UserDataRepositoryJdbc implements UserDataUserRepository {
     }
 
     @Override
-    public void delete(UserEntity user) {
+    public void remove(UserEntity user) {
         try (PreparedStatement ps = holder(CFG.userdataJdbcUrl()).connection().prepareStatement(
                 "DELETE FROM \"user\" WHERE id = ?"
         )) {
@@ -141,16 +141,11 @@ public class UserDataRepositoryJdbc implements UserDataUserRepository {
 
     @Override
     public void addIncomeInvitation(UserEntity requester, UserEntity addressee) {
-        // Входящее приглашение для addressee от requester
-        // requester -> addressee (PENDING)
         createFriendship(requester, addressee, FriendshipStatus.PENDING);
     }
 
     @Override
     public void addOutcomeInvitation(UserEntity requester, UserEntity addressee) {
-        // Исходящее приглашение от requester к addressee
-        // requester -> addressee (PENDING)
-        // По сути то же самое что addIncomeInvitation, но с точки зрения другого пользователя
         createFriendship(requester, addressee, FriendshipStatus.PENDING);
     }
 
@@ -180,7 +175,6 @@ public class UserDataRepositoryJdbc implements UserDataUserRepository {
 
     @Override
     public void removeFriend(UserEntity user, UserEntity friend) {
-        // существующая реализация - остается без изменений
         try (PreparedStatement ps = holder(CFG.userdataJdbcUrl()).connection().prepareStatement(
                 "DELETE FROM friendship WHERE (requester_id = ? AND addressee_id = ?) OR (requester_id = ? AND addressee_id = ?)"
         )) {

@@ -15,7 +15,7 @@ public interface UserDataUserRepository {
 
     UserEntity update(UserEntity user);
 
-    void delete(UserEntity user);
+    void remove(UserEntity user);
 
     List<UserEntity> findAll();
 

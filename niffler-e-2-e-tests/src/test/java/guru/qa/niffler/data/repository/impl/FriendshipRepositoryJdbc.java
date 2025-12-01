@@ -129,7 +129,7 @@ public class FriendshipRepositoryJdbc implements FriendshipRepository {
     }
 
     @Override
-    public void delete(FriendshipEntity friendship) {
+    public void remove(FriendshipEntity friendship) {
         try (PreparedStatement ps = holder(CFG.userdataJdbcUrl()).connection().prepareStatement(
                 "DELETE FROM friendship WHERE requester_id = ? AND addressee_id = ?"
         )) {

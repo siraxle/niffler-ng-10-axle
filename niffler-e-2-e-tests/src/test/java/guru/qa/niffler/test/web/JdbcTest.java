@@ -49,7 +49,7 @@ public class JdbcTest {
 
     static UsersDbClient usersDbClient = new UsersDbClient();
     @ValueSource(strings = {
-            "valent-07"
+            "valent-08"
     })
     @ParameterizedTest
     void springJdbcTest(String username) {
@@ -72,7 +72,7 @@ public class JdbcTest {
                         new Date(),
                         new CategoryJson(
                                 null,
-                                "test-cat-name-10",
+                                "test-cat-name-00",
                                 "cat",
                                 false
                         ),
