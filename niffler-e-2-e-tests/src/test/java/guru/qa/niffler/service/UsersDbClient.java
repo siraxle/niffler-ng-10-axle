@@ -27,7 +27,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 
-public class UsersDbClient {
+public class UsersDbClient implements UsersClient {
     private static final Config CFG = Config.getInstance();
     private static final PasswordEncoder pe = PasswordEncoderFactories.createDelegatingPasswordEncoder();
     private final AuthUserRepository authUserRepository = new AuthUserRepositoryHibernate();
@@ -63,6 +63,23 @@ public class UsersDbClient {
                     );
                 }
         );
+    }
+
+    @Override
+    public void createFriends(UserJson targetUser, int count) {
+        xaTxTemplate.execute(() -> {
+            UserEntity targetEntity = udUserRepository.findById(targetUser.id())
+                    .orElseThrow(() -> new IllegalArgumentException("Target user not found with id: " + targetUser.id()));
+            for (int i = 0; i < count; i++) {
+                UserEntity friendEntity = createRandomUser("friend_" + (i + 1) + "_" + targetUser.username());
+                UserEntity savedFriend = udUserRepository.create(friendEntity);
+                udUserRepository.addFriend(targetEntity, savedFriend);
+                udUserRepository.addFriend(savedFriend, targetEntity);
+                udUserRepository.acceptFriend(savedFriend, targetEntity);
+                udUserRepository.acceptFriend(targetEntity, savedFriend);
+            }
+            return null;
+        });
     }
 
     private static UserEntity userEntity(String username) {
@@ -120,6 +137,7 @@ public class UsersDbClient {
         return findUserByUsername(username).isPresent();
     }
 
+    @Override
     public void addIncomeInvitation(UserJson targetUser, int count) {
         if (count > 0) {
             UserEntity targetEntity = udUserRepository.findById(
@@ -135,11 +153,11 @@ public class UsersDbClient {
                             return null;
                         }
                 );
-
             }
         }
     }
 
+    @Override
     public void addOutcomeInvitation(UserJson targetUser, int count) {
         if (count > 0) {
             UserEntity targetEntity = udUserRepository.findById(
@@ -160,7 +178,14 @@ public class UsersDbClient {
         }
     }
 
-//    void addFriend(UserEntity requester, UserEntity addressee) {
-//    }
+    private UserEntity createRandomUser(String prefix) {
+        UserEntity user = new UserEntity();
+        user.setUsername(prefix + "_" + UUID.randomUUID().toString().substring(0, 8));
+        user.setCurrency(CurrencyValues.USD);
+        user.setFirstname("Test");
+        user.setSurname("User");
+        user.setFullname("Test User");
+        return user;
+    }
 
 }

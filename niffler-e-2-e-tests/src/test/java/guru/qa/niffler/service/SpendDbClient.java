@@ -15,7 +15,9 @@ import guru.qa.niffler.model.SpendJson;
 import org.springframework.jdbc.support.JdbcTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-public class SpendDbClient {
+import java.util.Optional;
+
+public class SpendDbClient implements SpendClient {
 
     private static final Config CFG = Config.getInstance();
     private final CategoryRepository categoryRepository = new CategoryRepositoryJdbc();
@@ -35,6 +37,8 @@ public class SpendDbClient {
             CFG.spendJdbcUrl()
     );
 
+
+    @Override
     public SpendJson createSpend(SpendJson spend) {
         return xaTxTemplate.execute(() -> {
             SpendEntity spendEntity = SpendEntity.fromJson(spend);
@@ -48,6 +52,7 @@ public class SpendDbClient {
         });
     }
 
+    @Override
     public CategoryJson createCategory(CategoryJson category) {
         return xaTxTemplate.execute(() -> {
             CategoryEntity categoryEntity = CategoryEntity.fromJson(category);
@@ -56,11 +61,21 @@ public class SpendDbClient {
         });
     }
 
+    @Override
     public CategoryJson updateCategory(CategoryJson category) {
         return xaTxTemplate.execute(() -> {
             CategoryEntity categoryEntity = CategoryEntity.fromJson(category);
             CategoryEntity updatedCategory = categoryRepository.update(categoryEntity);
             return CategoryJson.fromEntity(updatedCategory);
+        });
+    }
+
+
+    @Override
+    public Optional<CategoryJson> findCategoryByNameAndUsername(String categoryName, String username) {
+        return xaTxTemplate.execute(() -> {
+            Optional<CategoryEntity> category = categoryRepository.findByUsernameAndName(username, categoryName);
+            return category.map(CategoryJson::fromEntity);
         });
     }
 }
