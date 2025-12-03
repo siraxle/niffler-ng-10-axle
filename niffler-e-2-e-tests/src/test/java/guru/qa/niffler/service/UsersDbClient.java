@@ -53,6 +53,7 @@ public class UsersDbClient implements UsersClient {
             CFG.userdataJdbcUrl()
     );
 
+    @Override
     public UserJson createUser(String username, String password) {
         return xaTxTemplate.execute(() -> {
                     AuthUserEntity authUser = authUserEntity(username, password);
@@ -82,35 +83,7 @@ public class UsersDbClient implements UsersClient {
         });
     }
 
-    private static UserEntity userEntity(String username) {
-        UserEntity entity = new UserEntity();
-        entity.setUsername(username);
-        entity.setCurrency(CurrencyValues.RUB);
-        return entity;
-    }
-
-    private static AuthUserEntity authUserEntity(String username, String password) {
-        AuthUserEntity authUser = new AuthUserEntity();
-        authUser.setUsername(username);
-        authUser.setPassword(pe.encode(password));
-        authUser.setEnabled(true);
-        authUser.setAccountNonExpired(true);
-        authUser.setAccountNonLocked(true);
-        authUser.setCredentialsNonExpired(true);
-        authUser.setAuthorities(
-                Arrays.stream(Authority.values()).map(
-                        e -> {
-                            AuthorityEntity authorityEntity = new AuthorityEntity();
-                            authorityEntity.setUser(authUser);
-                            authorityEntity.setAuthority(e);
-                            return authorityEntity;
-                        }
-                ).toList()
-
-        );
-        return authUser;
-    }
-
+    @Override
     public Optional<UserJson> findUserByUsername(String username) {
         return xaTxTemplate.execute(() -> {
             Optional<UserEntity> user = udUserRepository.findByUsername(username);
@@ -118,6 +91,7 @@ public class UsersDbClient implements UsersClient {
         });
     }
 
+    @Override
     public Optional<UserJson> findUserById(UUID id) {
         return xaTxTemplate.execute(() -> {
             Optional<UserEntity> user = udUserRepository.findById(id);
@@ -125,6 +99,7 @@ public class UsersDbClient implements UsersClient {
         });
     }
 
+    @Override
     public void deleteUser(String username) {
         xaTxTemplate.execute(() -> {
             Optional<UserEntity> user = udUserRepository.findByUsername(username);
@@ -133,6 +108,7 @@ public class UsersDbClient implements UsersClient {
         });
     }
 
+    @Override
     public boolean userExists(String username) {
         return findUserByUsername(username).isPresent();
     }
@@ -176,6 +152,35 @@ public class UsersDbClient implements UsersClient {
 
             }
         }
+    }
+
+    private static UserEntity userEntity(String username) {
+        UserEntity entity = new UserEntity();
+        entity.setUsername(username);
+        entity.setCurrency(CurrencyValues.RUB);
+        return entity;
+    }
+
+    private static AuthUserEntity authUserEntity(String username, String password) {
+        AuthUserEntity authUser = new AuthUserEntity();
+        authUser.setUsername(username);
+        authUser.setPassword(pe.encode(password));
+        authUser.setEnabled(true);
+        authUser.setAccountNonExpired(true);
+        authUser.setAccountNonLocked(true);
+        authUser.setCredentialsNonExpired(true);
+        authUser.setAuthorities(
+                Arrays.stream(Authority.values()).map(
+                        e -> {
+                            AuthorityEntity authorityEntity = new AuthorityEntity();
+                            authorityEntity.setUser(authUser);
+                            authorityEntity.setAuthority(e);
+                            return authorityEntity;
+                        }
+                ).toList()
+
+        );
+        return authUser;
     }
 
     private UserEntity createRandomUser(String prefix) {
