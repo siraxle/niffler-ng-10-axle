@@ -147,7 +147,7 @@ public class SpendRepositorySpringJdbc implements SpendRepository {
     }
 
     @Override
-    public Optional<CategoryEntity> findCategoryByUsernameAndSpendName(String username, String name) {
+    public Optional<CategoryEntity> findCategoryByUsernameAndCategoryName(String username, String name) {
         String sql = "SELECT * FROM category WHERE username = ? AND name = ?";
         try {
             CategoryEntity category = jdbcTemplate.queryForObject(sql, (rs, rowNum) -> {

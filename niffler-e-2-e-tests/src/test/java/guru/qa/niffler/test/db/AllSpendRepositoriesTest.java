@@ -87,7 +87,7 @@ public class AllSpendRepositoriesTest {
             assertEquals(savedCategory.getName(), foundCategory.get().getName(), "Имена должны совпадать");
 
             Optional<CategoryEntity> foundByUsernameAndName = repository
-                    .findCategoryByUsernameAndSpendName(testUsername, savedCategory.getName());
+                    .findCategoryByUsernameAndCategoryName(testUsername, savedCategory.getName());
             assertTrue(foundByUsernameAndName.isPresent(), "Категория должна находиться по username и имени");
             assertEquals(savedCategory.getId(), foundByUsernameAndName.get().getId(), "ID должны совпадать");
 

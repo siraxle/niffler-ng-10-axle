@@ -83,7 +83,7 @@ public class SpendRepositoryHibernate implements SpendRepository {
     }
 
     @Override
-    public Optional<CategoryEntity> findCategoryByUsernameAndSpendName(String username, String name) {
+    public Optional<CategoryEntity> findCategoryByUsernameAndCategoryName(String username, String name) {
         try {
             return Optional.of(entityManager.createQuery(
                             "SELECT c FROM CategoryEntity c WHERE c.username = :username AND c.name = :name",

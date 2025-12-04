@@ -76,8 +76,8 @@ public class UsersDbClient implements UsersClient {
                 UserEntity savedFriend = udUserRepository.create(friendEntity);
                 udUserRepository.addFriend(targetEntity, savedFriend);
                 udUserRepository.addFriend(savedFriend, targetEntity);
-                udUserRepository.acceptFriend(savedFriend, targetEntity);
-                udUserRepository.acceptFriend(targetEntity, savedFriend);
+//                udUserRepository.acceptFriend(savedFriend, targetEntity);
+//                udUserRepository.acceptFriend(targetEntity, savedFriend);
             }
             return null;
         });

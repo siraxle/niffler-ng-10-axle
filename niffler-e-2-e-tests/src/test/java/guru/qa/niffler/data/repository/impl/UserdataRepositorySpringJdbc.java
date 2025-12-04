@@ -146,15 +146,6 @@ public class UserdataRepositorySpringJdbc implements UserDataUserRepository {
         return jdbcTemplate.query(sql, UdUserEntityRowMapper.instance,
                 user.getId(), FriendshipStatus.PENDING.name());
     }
-
-    @Override
-    public void acceptFriend(UserEntity user, UserEntity friend) {
-        jdbcTemplate.update(
-                "UPDATE friendship SET status = ? WHERE requester_id = ? AND addressee_id = ?",
-                FriendshipStatus.ACCEPTED.name(), friend.getId(), user.getId()
-        );
-    }
-
     private void createFriendship(UserEntity user, UserEntity friend, FriendshipStatus status) {
         jdbcTemplate.update(
                 "INSERT INTO friendship (requester_id, addressee_id, created_date, status) VALUES (?, ?, ?, ?)",
@@ -163,5 +154,32 @@ public class UserdataRepositorySpringJdbc implements UserDataUserRepository {
                 new Timestamp(System.currentTimeMillis()),
                 status.name()
         );
+    }
+
+    @Override
+    public void acceptFriend(UserEntity acceptingUser, UserEntity invitingUser) {
+        jdbcTemplate.update(
+                "UPDATE friendship SET status = ? WHERE requester_id = ? AND addressee_id = ?",
+                FriendshipStatus.ACCEPTED.name(),
+                invitingUser.getId(),
+                acceptingUser.getId()
+        );
+
+        Integer count = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM friendship WHERE requester_id = ? AND addressee_id = ?",
+                Integer.class,
+                acceptingUser.getId(),
+                invitingUser.getId()
+        );
+
+        if (count == 0) {
+            jdbcTemplate.update(
+                    "INSERT INTO friendship (requester_id, addressee_id, created_date, status) VALUES (?, ?, ?, ?)",
+                    acceptingUser.getId(),
+                    invitingUser.getId(),
+                    new java.sql.Date(System.currentTimeMillis()),
+                    FriendshipStatus.ACCEPTED.name()
+            );
+        }
     }
 }

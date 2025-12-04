@@ -8,6 +8,7 @@ import guru.qa.niffler.data.repository.UserDataUserRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -134,36 +135,33 @@ public class UserdataUserRepositoryHibernate implements UserDataUserRepository {
     }
 
     @Override
-    public void acceptFriend(UserEntity user, UserEntity friend) {
+    public void acceptFriend(UserEntity acceptingUser, UserEntity invitingUser) {
         entityManager.joinTransaction();
 
-        // Находим pending invitation
-        String jpql = """
-                SELECT f FROM FriendshipEntity f 
-                WHERE f.requester.id = :friendId AND f.addressee.id = :userId AND f.status = :status
-                """;
+        String jpql = "SELECT f FROM FriendshipEntity f WHERE f.requester = :requester AND f.addressee = :addressee";
+        FriendshipEntity invitation = entityManager.createQuery(jpql, FriendshipEntity.class)
+                .setParameter("requester", invitingUser)
+                .setParameter("addressee", acceptingUser)
+                .getSingleResult();
 
-        try {
-            FriendshipEntity pendingFriendship = entityManager.createQuery(jpql, FriendshipEntity.class)
-                    .setParameter("friendId", friend.getId())
-                    .setParameter("userId", user.getId())
-                    .setParameter("status", FriendshipStatus.PENDING)
-                    .getSingleResult();
+        invitation.setStatus(FriendshipStatus.ACCEPTED);
+        entityManager.merge(invitation);
 
-            // Обновляем статус приглашения на ACCEPTED
-            pendingFriendship.setStatus(FriendshipStatus.ACCEPTED);
+        jpql = "SELECT COUNT(f) FROM FriendshipEntity f WHERE f.requester = :requester AND f.addressee = :addressee";
+        Long count = entityManager.createQuery(jpql, Long.class)
+                .setParameter("requester", acceptingUser)
+                .setParameter("addressee", invitingUser)
+                .getSingleResult();
 
-            // Создаем обратную запись о дружбе
-            UserEntity managedUser = entityManager.find(UserEntity.class, user.getId());
-            UserEntity managedFriend = entityManager.find(UserEntity.class, friend.getId());
-
-            managedUser.addFriends(FriendshipStatus.ACCEPTED, managedFriend);
-
-            entityManager.merge(pendingFriendship);
-            entityManager.merge(managedUser);
-
-        } catch (NoResultException e) {
-            throw new RuntimeException("Pending friendship invitation not found from user: " + friend.getUsername() + " to user: " + user.getUsername());
+        if (count == 0) {
+            FriendshipEntity reverseFriendship = new FriendshipEntity();
+            reverseFriendship.setRequester(acceptingUser);
+            reverseFriendship.setAddressee(invitingUser);
+            reverseFriendship.setCreatedDate(new Date());
+            reverseFriendship.setStatus(FriendshipStatus.ACCEPTED);
+            entityManager.persist(reverseFriendship);
         }
+
+        entityManager.flush();
     }
 }

@@ -12,7 +12,7 @@ public interface SpendRepository {
     SpendEntity update(SpendEntity spend);
     CategoryEntity createCategory(CategoryEntity category);
     Optional<CategoryEntity> findCategoryById(UUID id);
-    Optional<CategoryEntity> findCategoryByUsernameAndSpendName(String username, String name);
+    Optional<CategoryEntity> findCategoryByUsernameAndCategoryName(String username, String name);
     Optional<SpendEntity> findById(UUID id);
     List<SpendEntity> findByUsername(String username);
     List<SpendEntity> findByUsernameAndSpendDescription(String username, String description);
