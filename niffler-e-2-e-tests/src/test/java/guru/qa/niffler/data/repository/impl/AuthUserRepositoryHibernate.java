@@ -43,16 +43,22 @@ public class AuthUserRepositoryHibernate implements AuthUserRepository {
 
     @Override
     public AuthUserEntity update(AuthUserEntity user) {
-        return null;
+        entityManager.joinTransaction();
+        return entityManager.merge(user);
     }
 
     @Override
-    public void delete(AuthUserEntity user) {
-
+    public void remove(AuthUserEntity user) {
+        entityManager.joinTransaction();
+        AuthUserEntity managedUser = entityManager.find(AuthUserEntity.class, user.getId());
+        if (managedUser != null) {
+            entityManager.remove(managedUser);
+        }
     }
 
     @Override
     public List<AuthUserEntity> findAll() {
-        return List.of();
+        return entityManager.createQuery("SELECT u FROM AuthUserEntity u", AuthUserEntity.class)
+                .getResultList();
     }
 }

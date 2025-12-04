@@ -5,6 +5,7 @@ import guru.qa.niffler.data.dao.AuthAuthorityDao;
 import guru.qa.niffler.data.dao.AuthUserDao;
 import guru.qa.niffler.data.dao.UdUserDao;
 import guru.qa.niffler.data.dao.impl.*;
+import guru.qa.niffler.data.tpl.XaTransactionTemplate;
 import guru.qa.niffler.model.*;
 import guru.qa.niffler.service.SpendDbClient;
 import guru.qa.niffler.service.UsersDbClient;
@@ -17,6 +18,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.Date;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class JdbcTest {
 
@@ -49,7 +53,7 @@ public class JdbcTest {
 
     static UsersDbClient usersDbClient = new UsersDbClient();
     @ValueSource(strings = {
-            "valent-07"
+            "valent-08"
     })
     @ParameterizedTest
     void springJdbcTest(String username) {
@@ -72,7 +76,7 @@ public class JdbcTest {
                         new Date(),
                         new CategoryJson(
                                 null,
-                                "test-cat-name-10",
+                                "test-cat-name-01",
                                 "cat",
                                 false
                         ),

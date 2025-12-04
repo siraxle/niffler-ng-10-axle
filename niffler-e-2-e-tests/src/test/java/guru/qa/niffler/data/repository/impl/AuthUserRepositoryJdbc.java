@@ -169,7 +169,7 @@ public class AuthUserRepositoryJdbc implements AuthUserRepository {
     }
 
     @Override
-    public void delete(AuthUserEntity user) {
+    public void remove(AuthUserEntity user) {
         try (PreparedStatement deleteAuthoritiesPs = holder(CFG.authJdbcUrl()).connection().prepareStatement(
                 "DELETE FROM authority WHERE user_id = ?"
         );
@@ -221,7 +221,7 @@ public class AuthUserRepositoryJdbc implements AuthUserRepository {
                 if (authorityStr != null) {
                     AuthorityEntity authority = new AuthorityEntity();
                     authority.setId(rs.getObject("authority_id", UUID.class));
-                    authority.setAuthority(Authority.valueOf(authorityStr.toUpperCase()));
+                    authority.setAuthority(Authority.valueOf(authorityStr));
                     authority.setUser(currentUser);
                     currentUser.getAuthorities().add(authority);
                 }

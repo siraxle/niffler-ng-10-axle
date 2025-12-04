@@ -12,5 +12,5 @@ public interface FriendshipRepository {
     List<FriendshipEntity> findByRequester(String username);
     List<FriendshipEntity> findByAddressee(String username);
     FriendshipEntity update(FriendshipEntity friendship);
-    void delete(FriendshipEntity friendship);
+    void remove(FriendshipEntity friendship);
 }

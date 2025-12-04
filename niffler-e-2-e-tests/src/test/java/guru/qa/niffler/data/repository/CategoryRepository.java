@@ -12,6 +12,6 @@ public interface CategoryRepository {
     Optional<CategoryEntity> findByUsernameAndName(String username, String name);
     List<CategoryEntity> findByUsername(String username);
     CategoryEntity update(CategoryEntity category);
-    void delete(CategoryEntity category);
+    void remove(CategoryEntity category);
     List<CategoryEntity> findAll();
 }

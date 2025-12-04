@@ -14,7 +14,7 @@ import java.util.UUID;
 
 import static guru.qa.niffler.data.tpl.Connections.holder;
 
-public class UserDataRepositoryJdbc implements UserDataUserRepository {
+public class UserdataRepositoryJdbc implements UserDataUserRepository {
 
     private static final Config CFG = Config.getInstance();
 
@@ -112,7 +112,7 @@ public class UserDataRepositoryJdbc implements UserDataUserRepository {
     }
 
     @Override
-    public void delete(UserEntity user) {
+    public void remove(UserEntity user) {
         try (PreparedStatement ps = holder(CFG.userdataJdbcUrl()).connection().prepareStatement(
                 "DELETE FROM \"user\" WHERE id = ?"
         )) {
@@ -141,26 +141,17 @@ public class UserDataRepositoryJdbc implements UserDataUserRepository {
 
     @Override
     public void addIncomeInvitation(UserEntity requester, UserEntity addressee) {
-        // Входящее приглашение для addressee от requester
-        // requester -> addressee (PENDING)
         createFriendship(requester, addressee, FriendshipStatus.PENDING);
     }
 
     @Override
     public void addOutcomeInvitation(UserEntity requester, UserEntity addressee) {
-        // Исходящее приглашение от requester к addressee
-        // requester -> addressee (PENDING)
-        // По сути то же самое что addIncomeInvitation, но с точки зрения другого пользователя
         createFriendship(requester, addressee, FriendshipStatus.PENDING);
     }
 
     @Override
     public void addFriend(UserEntity requester, UserEntity addressee) {
-        // Двунаправленная дружба: создаем две записи ACCEPTED
-        // requester -> addressee (ACCEPTED)
         createFriendship(requester, addressee, FriendshipStatus.ACCEPTED);
-
-        // addressee -> requester (ACCEPTED) - обратная связь
         createFriendship(addressee, requester, FriendshipStatus.ACCEPTED);
     }
 
@@ -180,7 +171,6 @@ public class UserDataRepositoryJdbc implements UserDataUserRepository {
 
     @Override
     public void removeFriend(UserEntity user, UserEntity friend) {
-        // существующая реализация - остается без изменений
         try (PreparedStatement ps = holder(CFG.userdataJdbcUrl()).connection().prepareStatement(
                 "DELETE FROM friendship WHERE (requester_id = ? AND addressee_id = ?) OR (requester_id = ? AND addressee_id = ?)"
         )) {
@@ -241,16 +231,44 @@ public class UserDataRepositoryJdbc implements UserDataUserRepository {
     }
 
     @Override
-    public void acceptFriend(UserEntity user, UserEntity friend) {
-        try (PreparedStatement ps = holder(CFG.userdataJdbcUrl()).connection().prepareStatement(
-                "UPDATE friendship SET status = ? WHERE requester_id = ? AND addressee_id = ?"
-        )) {
-            ps.setString(1, FriendshipStatus.ACCEPTED.name());
-            ps.setObject(2, friend.getId());
-            ps.setObject(3, user.getId());
-            ps.executeUpdate();
+    public void acceptFriend(UserEntity acceptingUser, UserEntity invitingUser) {
+        try {
+            try (PreparedStatement updatePs = holder(CFG.userdataJdbcUrl()).connection().prepareStatement(
+                    "UPDATE friendship SET status = ? WHERE requester_id = ? AND addressee_id = ?"
+            )) {
+                updatePs.setString(1, FriendshipStatus.ACCEPTED.name());
+                updatePs.setObject(2, invitingUser.getId());
+                updatePs.setObject(3, acceptingUser.getId());
+                int updated = updatePs.executeUpdate();
+
+                if (updated == 0) {
+                    throw new RuntimeException("Friendship invitation not found from " +
+                            invitingUser.getUsername() + " to " + acceptingUser.getUsername());
+                }
+            }
+            boolean reverseExists;
+            try (PreparedStatement checkPs = holder(CFG.userdataJdbcUrl()).connection().prepareStatement(
+                    "SELECT 1 FROM friendship WHERE requester_id = ? AND addressee_id = ?"
+            )) {
+                checkPs.setObject(1, acceptingUser.getId());
+                checkPs.setObject(2, invitingUser.getId());
+                try (ResultSet rs = checkPs.executeQuery()) {
+                    reverseExists = rs.next();
+                }
+            }
+            if (!reverseExists) {
+                try (PreparedStatement insertPs = holder(CFG.userdataJdbcUrl()).connection().prepareStatement(
+                        "INSERT INTO friendship (requester_id, addressee_id, created_date, status) VALUES (?, ?, ?, ?)"
+                )) {
+                    insertPs.setObject(1, acceptingUser.getId());
+                    insertPs.setObject(2, invitingUser.getId());
+                    insertPs.setDate(3, new java.sql.Date(System.currentTimeMillis()));
+                    insertPs.setString(4, FriendshipStatus.ACCEPTED.name());
+                    insertPs.executeUpdate();
+                }
+            }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Failed to accept friend invitation", e);
         }
     }
 

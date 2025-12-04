@@ -27,7 +27,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 
-public class UsersDbClient {
+public class UsersDbClient implements UsersClient {
     private static final Config CFG = Config.getInstance();
     private static final PasswordEncoder pe = PasswordEncoderFactories.createDelegatingPasswordEncoder();
     private final AuthUserRepository authUserRepository = new AuthUserRepositoryHibernate();
@@ -53,18 +53,7 @@ public class UsersDbClient {
             CFG.userdataJdbcUrl()
     );
 
-//    public UserJson createUser(UserJson user) {
-//        return xaTxTemplate.execute(() -> {
-//                    AuthUserEntity authUser = authUserEntity(user);
-//                    authUserRepository.create(authUser);
-//                    return UserJson.fromEntity(
-//                            udUserRepository.create(UserEntity.fromJson(user))
-//                            // тут должен быть null или параметр friendsState 36:28 урок 6.2
-//                    );
-//                }
-//        );
-//    }
-
+    @Override
     public UserJson createUser(String username, String password) {
         return xaTxTemplate.execute(() -> {
                     AuthUserEntity authUser = authUserEntity(username, password);
@@ -75,6 +64,94 @@ public class UsersDbClient {
                     );
                 }
         );
+    }
+
+    @Override
+    public void createFriends(UserJson targetUser, int count) {
+        xaTxTemplate.execute(() -> {
+            UserEntity targetEntity = udUserRepository.findById(targetUser.id())
+                    .orElseThrow(() -> new IllegalArgumentException("Target user not found with id: " + targetUser.id()));
+            for (int i = 0; i < count; i++) {
+                UserEntity friendEntity = createRandomUser("friend_" + (i + 1) + "_" + targetUser.username());
+                UserEntity savedFriend = udUserRepository.create(friendEntity);
+                udUserRepository.addFriend(targetEntity, savedFriend);
+                udUserRepository.addFriend(savedFriend, targetEntity);
+//                udUserRepository.acceptFriend(savedFriend, targetEntity);
+//                udUserRepository.acceptFriend(targetEntity, savedFriend);
+            }
+            return null;
+        });
+    }
+
+    @Override
+    public Optional<UserJson> findUserByUsername(String username) {
+        return xaTxTemplate.execute(() -> {
+            Optional<UserEntity> user = udUserRepository.findByUsername(username);
+            return user.map(UserJson::fromEntity);
+        });
+    }
+
+    @Override
+    public Optional<UserJson> findUserById(UUID id) {
+        return xaTxTemplate.execute(() -> {
+            Optional<UserEntity> user = udUserRepository.findById(id);
+            return user.map(UserJson::fromEntity);
+        });
+    }
+
+    @Override
+    public void deleteUser(String username) {
+        xaTxTemplate.execute(() -> {
+            Optional<UserEntity> user = udUserRepository.findByUsername(username);
+            user.ifPresent(udUserRepository::remove);
+            return null;
+        });
+    }
+
+    @Override
+    public boolean userExists(String username) {
+        return findUserByUsername(username).isPresent();
+    }
+
+    @Override
+    public void addIncomeInvitation(UserJson targetUser, int count) {
+        if (count > 0) {
+            UserEntity targetEntity = udUserRepository.findById(
+                    targetUser.id()
+            ).orElseThrow();
+            for (int i = 0; i < count; i++) {
+                xaTxTemplate.execute(() -> {
+                            String username = RandomDataUtils.randomUsername();
+                            AuthUserEntity authUser = authUserEntity(username, "12345");
+                            authUserRepository.create(authUser);
+                            UserEntity adressee = udUserRepository.create(userEntity(username));
+                            udUserRepository.addIncomeInvitation(targetEntity, adressee);
+                            return null;
+                        }
+                );
+            }
+        }
+    }
+
+    @Override
+    public void addOutcomeInvitation(UserJson targetUser, int count) {
+        if (count > 0) {
+            UserEntity targetEntity = udUserRepository.findById(
+                    targetUser.id()
+            ).orElseThrow();
+            for (int i = 0; i < count; i++) {
+                xaTxTemplate.execute(() -> {
+                            String username = RandomDataUtils.randomUsername();
+                            AuthUserEntity authUser = authUserEntity(username, "12345");
+                            authUserRepository.create(authUser);
+                            UserEntity adressee = udUserRepository.create(userEntity(username));
+                            udUserRepository.addOutcomeInvitation(targetEntity, adressee);
+                            return null;
+                        }
+                );
+
+            }
+        }
     }
 
     private static UserEntity userEntity(String username) {
@@ -106,73 +183,14 @@ public class UsersDbClient {
         return authUser;
     }
 
-    public Optional<UserJson> findUserByUsername(String username) {
-        return xaTxTemplate.execute(() -> {
-            Optional<UserEntity> user = udUserRepository.findByUsername(username);
-            return user.map(UserJson::fromEntity);
-        });
-    }
-
-    public Optional<UserJson> findUserById(UUID id) {
-        return xaTxTemplate.execute(() -> {
-            Optional<UserEntity> user = udUserRepository.findById(id);
-            return user.map(UserJson::fromEntity);
-        });
-    }
-
-    public void deleteUser(String username) {
-        xaTxTemplate.execute(() -> {
-            Optional<UserEntity> user = udUserRepository.findByUsername(username);
-            user.ifPresent(udUserRepository::delete);
-            return null;
-        });
-    }
-
-    public boolean userExists(String username) {
-        return findUserByUsername(username).isPresent();
-    }
-
-    public void addIncomeInvitation(UserJson targetUser, int count) {
-        if (count > 0) {
-            UserEntity targetEntity = udUserRepository.findById(
-                    targetUser.id()
-            ).orElseThrow();
-            for (int i = 0; i < count; i++) {
-                xaTxTemplate.execute(() -> {
-                            String username = RandomDataUtils.randomUsername();
-                            AuthUserEntity authUser = authUserEntity(username, "12345");
-                            authUserRepository.create(authUser);
-                            UserEntity adressee = udUserRepository.create(userEntity(username));
-                            udUserRepository.addIncomeInvitation(targetEntity, adressee);
-                            return null;
-                        }
-                );
-
-            }
-        }
-    }
-
-    public void addOutcomeInvitation(UserJson targetUser, int count) {
-        if (count > 0) {
-            UserEntity targetEntity = udUserRepository.findById(
-                    targetUser.id()
-            ).orElseThrow();
-            for (int i = 0; i < count; i++) {
-                xaTxTemplate.execute(() -> {
-                            String username = RandomDataUtils.randomUsername();
-                            AuthUserEntity authUser = authUserEntity(username, "12345");
-                            authUserRepository.create(authUser);
-                            UserEntity adressee = udUserRepository.create(userEntity(username));
-                            udUserRepository.addOutcomeInvitation(targetEntity, adressee);
-                            return null;
-                        }
-                );
-
-            }
-        }
-    }
-
-    void addFriend(UserEntity requester, UserEntity addressee) {
+    private UserEntity createRandomUser(String prefix) {
+        UserEntity user = new UserEntity();
+        user.setUsername(prefix + "_" + UUID.randomUUID().toString().substring(0, 8));
+        user.setCurrency(CurrencyValues.USD);
+        user.setFirstname("Test");
+        user.setSurname("User");
+        user.setFullname("Test User");
+        return user;
     }
 
 }

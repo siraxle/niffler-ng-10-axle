@@ -7,9 +7,11 @@ import java.util.Optional;
 
 public interface SpendClient {
 
-  SpendJson createSpend(SpendJson spend);
+    SpendJson createSpend(SpendJson spend);
 
-  CategoryJson createCategory(CategoryJson category);
+    CategoryJson createCategory(CategoryJson category);
 
-  Optional<CategoryJson> findCategoryByNameAndUsername(String categoryName, String username);
+    Optional<CategoryJson> findCategoryByNameAndUsername(String categoryName, String username);
+
+    CategoryJson updateCategory(CategoryJson category);
 }
