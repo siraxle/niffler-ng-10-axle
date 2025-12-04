@@ -4,7 +4,7 @@ import guru.qa.niffler.config.Config;
 import guru.qa.niffler.data.entity.spend.CategoryEntity;
 import guru.qa.niffler.data.entity.spend.SpendEntity;
 import guru.qa.niffler.data.mapper.SpendEntityRowMapper;
-import guru.qa.niffler.data.repository.SpendRepository;
+import guru.qa.niffler.data.repository.SpendAndCategoryRepository;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -19,18 +19,18 @@ import java.util.UUID;
 
 import static guru.qa.niffler.data.tpl.DataSources.dataSource;
 
-public class SpendRepositorySpringJdbc implements SpendRepository {
+public class SpendAndCategoryRepositorySpringJdbc implements SpendAndCategoryRepository {
 
     private static final Config CFG = Config.getInstance();
     private final JdbcTemplate jdbcTemplate;
 
-    public SpendRepositorySpringJdbc() {
+    public SpendAndCategoryRepositorySpringJdbc() {
         DataSource dataSource = dataSource(CFG.spendJdbcUrl());
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
     @Override
-    public SpendEntity create(SpendEntity spend) {
+    public SpendEntity createSpend(SpendEntity spend) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
@@ -53,48 +53,7 @@ public class SpendRepositorySpringJdbc implements SpendRepository {
     }
 
     @Override
-    public Optional<SpendEntity> findById(UUID id) {
-        String sql = "SELECT s.*, c.id as category_id, c.name as category_name, c.username as category_username, c.archived as category_archived " +
-                "FROM spend s JOIN category c ON s.category_id = c.id " +
-                "WHERE s.id = ?";
-
-        try {
-            SpendEntity spend = jdbcTemplate.queryForObject(sql, SpendEntityRowMapper.instance, id);
-            return Optional.ofNullable(spend);
-        } catch (Exception e) {
-            return Optional.empty();
-        }
-    }
-
-    @Override
-    public List<SpendEntity> findByUsername(String username) {
-        String sql = "SELECT s.*, c.id as category_id, c.name as category_name, c.username as category_username, c.archived as category_archived " +
-                "FROM spend s JOIN category c ON s.category_id = c.id " +
-                "WHERE s.username = ? ORDER BY s.spend_date DESC";
-
-        return jdbcTemplate.query(sql, SpendEntityRowMapper.instance, username);
-    }
-
-    @Override
-    public List<SpendEntity> findByUsernameAndSpendDescription(String username, String description) {
-        String sql = "SELECT s.*, c.id as category_id, c.name as category_name, c.username as category_username, c.archived as category_archived " +
-                "FROM spend s JOIN category c ON s.category_id = c.id " +
-                "WHERE s.username = ? AND s.description ILIKE ? ORDER BY s.spend_date DESC";
-
-        return jdbcTemplate.query(sql, SpendEntityRowMapper.instance, username, "%" + description + "%");
-    }
-
-    @Override
-    public List<SpendEntity> findByCategory(String categoryName, String username) {
-        String sql = "SELECT s.*, c.id as category_id, c.name as category_name, c.username as category_username, c.archived as category_archived " +
-                "FROM spend s JOIN category c ON s.category_id = c.id " +
-                "WHERE c.name = ? AND s.username = ? ORDER BY s.spend_date DESC";
-
-        return jdbcTemplate.query(sql, SpendEntityRowMapper.instance, categoryName, username);
-    }
-
-    @Override
-    public SpendEntity update(SpendEntity spend) {
+    public SpendEntity updateSpend(SpendEntity spend) {
         jdbcTemplate.update(
                 "UPDATE spend SET username = ?, spend_date = ?, currency = ?, amount = ?, description = ?, category_id = ? WHERE id = ?",
                 spend.getUsername(),
@@ -106,6 +65,56 @@ public class SpendRepositorySpringJdbc implements SpendRepository {
                 spend.getId()
         );
         return spend;
+    }
+
+    @Override
+    public Optional<SpendEntity> findSpendById(UUID id) {
+        String sql = "SELECT s.*, c.id as category_id, c.name as category_name, c.username as category_username, c.archived as category_archived " +
+                "FROM spend s JOIN category c ON s.category_id = c.id WHERE s.id = ?";
+
+        try {
+            SpendEntity spend = jdbcTemplate.queryForObject(sql, SpendEntityRowMapper.instance, id);
+            return Optional.ofNullable(spend);
+        } catch (Exception e) {
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public List<SpendEntity> findSpendsByUsername(String username) {
+        String sql = "SELECT s.*, c.id as category_id, c.name as category_name, c.username as category_username, c.archived as category_archived " +
+                "FROM spend s JOIN category c ON s.category_id = c.id WHERE s.username = ? ORDER BY s.spend_date DESC";
+
+        return jdbcTemplate.query(sql, SpendEntityRowMapper.instance, username);
+    }
+
+    @Override
+    public List<SpendEntity> findSpendsByUsernameAndDescription(String username, String description) {
+        String sql = "SELECT s.*, c.id as category_id, c.name as category_name, c.username as category_username, c.archived as category_archived " +
+                "FROM spend s JOIN category c ON s.category_id = c.id WHERE s.username = ? AND s.description ILIKE ? ORDER BY s.spend_date DESC";
+
+        return jdbcTemplate.query(sql, SpendEntityRowMapper.instance, username, "%" + description + "%");
+    }
+
+    @Override
+    public List<SpendEntity> findSpendsByCategory(String categoryName, String username) {
+        String sql = "SELECT s.*, c.id as category_id, c.name as category_name, c.username as category_username, c.archived as category_archived " +
+                "FROM spend s JOIN category c ON s.category_id = c.id WHERE c.name = ? AND s.username = ? ORDER BY s.spend_date DESC";
+
+        return jdbcTemplate.query(sql, SpendEntityRowMapper.instance, categoryName, username);
+    }
+
+    @Override
+    public void removeSpend(SpendEntity spend) {
+        jdbcTemplate.update("DELETE FROM spend WHERE id = ?", spend.getId());
+    }
+
+    @Override
+    public List<SpendEntity> findAllSpends() {
+        String sql = "SELECT s.*, c.id as category_id, c.name as category_name, c.username as category_username, c.archived as category_archived " +
+                "FROM spend s JOIN category c ON s.category_id = c.id ORDER BY s.spend_date DESC";
+
+        return jdbcTemplate.query(sql, SpendEntityRowMapper.instance);
     }
 
     @Override
@@ -129,6 +138,18 @@ public class SpendRepositorySpringJdbc implements SpendRepository {
     }
 
     @Override
+    public CategoryEntity updateCategory(CategoryEntity category) {
+        jdbcTemplate.update(
+                "UPDATE category SET name = ?, username = ?, archived = ? WHERE id = ?",
+                category.getName(),
+                category.getUsername(),
+                category.isArchived(),
+                category.getId()
+        );
+        return category;
+    }
+
+    @Override
     public Optional<CategoryEntity> findCategoryById(UUID id) {
         String sql = "SELECT * FROM category WHERE id = ?";
         try {
@@ -147,7 +168,7 @@ public class SpendRepositorySpringJdbc implements SpendRepository {
     }
 
     @Override
-    public Optional<CategoryEntity> findCategoryByUsernameAndCategoryName(String username, String name) {
+    public Optional<CategoryEntity> findCategoryByUsernameAndName(String username, String name) {
         String sql = "SELECT * FROM category WHERE username = ? AND name = ?";
         try {
             CategoryEntity category = jdbcTemplate.queryForObject(sql, (rs, rowNum) -> {
@@ -165,8 +186,16 @@ public class SpendRepositorySpringJdbc implements SpendRepository {
     }
 
     @Override
-    public void remove(SpendEntity spend) {
-        jdbcTemplate.update("DELETE FROM spend WHERE id = ?", spend.getId());
+    public List<CategoryEntity> findCategoriesByUsername(String username) {
+        String sql = "SELECT * FROM category WHERE username = ? ORDER BY name";
+        return jdbcTemplate.query(sql, (rs, rowNum) -> {
+            CategoryEntity cat = new CategoryEntity();
+            cat.setId(rs.getObject("id", UUID.class));
+            cat.setName(rs.getString("name"));
+            cat.setUsername(rs.getString("username"));
+            cat.setArchived(rs.getBoolean("archived"));
+            return cat;
+        }, username);
     }
 
     @Override
@@ -175,11 +204,15 @@ public class SpendRepositorySpringJdbc implements SpendRepository {
     }
 
     @Override
-    public List<SpendEntity> findAll() {
-        String sql = "SELECT s.*, c.id as category_id, c.name as category_name, c.username as category_username, c.archived as category_archived " +
-                "FROM spend s JOIN category c ON s.category_id = c.id " +
-                "ORDER BY s.spend_date DESC";
-
-        return jdbcTemplate.query(sql, SpendEntityRowMapper.instance);
+    public List<CategoryEntity> findAllCategories() {
+        String sql = "SELECT * FROM category ORDER BY username, name";
+        return jdbcTemplate.query(sql, (rs, rowNum) -> {
+            CategoryEntity cat = new CategoryEntity();
+            cat.setId(rs.getObject("id", UUID.class));
+            cat.setName(rs.getString("name"));
+            cat.setUsername(rs.getString("username"));
+            cat.setArchived(rs.getBoolean("archived"));
+            return cat;
+        });
     }
 }
