@@ -106,7 +106,6 @@ public class UserdataUserRepositoryHibernate implements UserDataUserRepository {
 
     @Override
     public List<UserEntity> findFriends(UserEntity user) {
-        // Упрощенный запрос без CASE
         String jpql = """
             SELECT f.addressee FROM FriendshipEntity f 
             WHERE f.requester.id = :userId AND f.status = :status

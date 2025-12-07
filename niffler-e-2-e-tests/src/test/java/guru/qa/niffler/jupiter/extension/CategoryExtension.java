@@ -4,6 +4,7 @@ import guru.qa.niffler.jupiter.annotation.Category;
 import guru.qa.niffler.jupiter.annotation.User;
 import guru.qa.niffler.model.CategoryJson;
 import guru.qa.niffler.service.SpendApiClient;
+import guru.qa.niffler.service.SpendClient;
 import guru.qa.niffler.utils.RandomDataUtils;
 import org.junit.jupiter.api.extension.*;
 import org.junit.platform.commons.support.AnnotationSupport;
@@ -11,7 +12,7 @@ import org.junit.platform.commons.support.AnnotationSupport;
 public class CategoryExtension implements BeforeEachCallback, ParameterResolver, AfterTestExecutionCallback {
 
     public static final ExtensionContext.Namespace NAMESPACE = ExtensionContext.Namespace.create(CategoryExtension.class);
-    private final SpendApiClient spendApiClient = new SpendApiClient();
+    private final SpendClient spendClient = new SpendApiClient();
 
     @Override
     public void beforeEach(ExtensionContext context) throws Exception {
@@ -30,7 +31,7 @@ public class CategoryExtension implements BeforeEachCallback, ParameterResolver,
                         ? RandomDataUtils.randomeCategoryName()
                         : anno.category();
 
-                CategoryJson created = spendApiClient.createCategory(
+                CategoryJson created = spendClient.createCategory(
                         new CategoryJson(null, categoryName, username, false)
                 );
 
@@ -41,7 +42,7 @@ public class CategoryExtension implements BeforeEachCallback, ParameterResolver,
                             created.username(),
                             true
                     );
-                    created = spendApiClient.updateCategory(archivedCategory).body();
+                    created = spendClient.updateCategory(archivedCategory);
                 }
 
                 context.getStore(NAMESPACE).put(context.getUniqueId(), created);
@@ -69,7 +70,7 @@ public class CategoryExtension implements BeforeEachCallback, ParameterResolver,
                     category.username(),
                     true
             );
-            spendApiClient.updateCategory(archivedCategory);
+            spendClient.updateCategory(archivedCategory);
         }
     }
 }

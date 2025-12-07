@@ -76,7 +76,7 @@ public class JdbcTest {
                         new Date(),
                         new CategoryJson(
                                 null,
-                                "test-cat-name-01",
+                                "test-cat-name-04",
                                 "cat",
                                 false
                         ),

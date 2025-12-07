@@ -14,7 +14,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class SpendApiClient {
+public class SpendApiClient implements SpendClient{
 
     private static final Config CFG = Config.getInstance();
 
@@ -98,7 +98,7 @@ public class SpendApiClient {
     }
 
 
-    public Response<CategoryJson> updateCategory(CategoryJson category) {
+    public CategoryJson updateCategory(CategoryJson category) {
         final Response<CategoryJson> response;
         try {
             response = spendApi.updateCategory(category)
@@ -107,7 +107,7 @@ public class SpendApiClient {
             throw new AssertionError(e);
         }
         assertEquals(200, response.code());
-        return response;
+        return response.body();
     }
 
 
