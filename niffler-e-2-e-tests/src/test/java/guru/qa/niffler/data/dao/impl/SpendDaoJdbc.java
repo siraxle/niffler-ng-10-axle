@@ -108,11 +108,11 @@ public class SpendDaoJdbc implements SpendDao {
     public List<SpendEntity> findAll() {
         List<SpendEntity> spends = new ArrayList<>();
         String sql = """
-        SELECT s.*, c.name as category_name, c.archived as category_archived 
-        FROM spend s 
-        JOIN category c ON s.category_id = c.id 
-        ORDER BY s.spend_date DESC
-        """;
+                SELECT s.*, c.name as category_name, c.archived as category_archived 
+                FROM spend s 
+                JOIN category c ON s.category_id = c.id 
+                ORDER BY s.spend_date DESC
+                """;
 
         try (PreparedStatement ps = holder(CFG.spendJdbcUrl()).connection().prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {

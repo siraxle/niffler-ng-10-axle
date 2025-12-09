@@ -8,6 +8,7 @@ import guru.qa.niffler.jupiter.extension.BrowserExtension;
 import guru.qa.niffler.jupiter.extension.TestMethodContextExtension;
 import guru.qa.niffler.model.CurrencyValues;
 import guru.qa.niffler.model.SpendJson;
+import guru.qa.niffler.model.UserJson;
 import guru.qa.niffler.page.LoginPage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,6 +38,24 @@ public class SpendingWebTest {
         Selenide.open(CFG.frontUrl(), LoginPage.class)
                 .login("cat", "123456")
                 .editSpending(spending.description())
+                .setNewSpendingDescription(newDescription)
+                .save()
+                .checkThatTableContains(newDescription);
+    }
+
+    @User(
+            spendings = @Spending(
+                    amount = 89900,
+                    description = "Обучение Niffler 2.0 юбилейный поток!",
+                    category = "Обучение"
+    ))
+//    @DisableByIssue("2")
+    @Test
+    void spendingDescriptionShouldBeEditedByTableAction1(UserJson user) {
+        final String newDescription = user.testData().spendings().getFirst().description();
+        Selenide.open(CFG.frontUrl(), LoginPage.class)
+                .login(user.username(), user.testData().password())
+                .editSpending(newDescription)
                 .setNewSpendingDescription(newDescription)
                 .save()
                 .checkThatTableContains(newDescription);

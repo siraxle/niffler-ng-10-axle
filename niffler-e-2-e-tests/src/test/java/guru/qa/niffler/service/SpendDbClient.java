@@ -4,7 +4,9 @@ import guru.qa.niffler.config.Config;
 import guru.qa.niffler.data.entity.spend.CategoryEntity;
 import guru.qa.niffler.data.entity.spend.SpendEntity;
 import guru.qa.niffler.data.repository.SpendAndCategoryRepository;
+import guru.qa.niffler.data.repository.impl.SpendAndCategoryRepositoryHibernate;
 import guru.qa.niffler.data.repository.impl.SpendAndCategoryRepositoryJdbc;
+import guru.qa.niffler.data.repository.impl.SpendAndCategoryRepositorySpringJdbc;
 import guru.qa.niffler.data.tpl.DataSources;
 import guru.qa.niffler.data.tpl.JdbcTransactionTemplate;
 import guru.qa.niffler.data.tpl.XaTransactionTemplate;
@@ -19,7 +21,9 @@ public class SpendDbClient implements SpendClient {
 
     private static final Config CFG = Config.getInstance();
 
-    private final SpendAndCategoryRepository spendAndCategoryRepository = new SpendAndCategoryRepositoryJdbc();
+//    private final SpendAndCategoryRepository spendAndCategoryRepository = new SpendAndCategoryRepositoryJdbc();
+//    private final SpendAndCategoryRepository spendAndCategoryRepository = new SpendAndCategoryRepositorySpringJdbc();
+    private final SpendAndCategoryRepository spendAndCategoryRepository = new SpendAndCategoryRepositoryHibernate();
 
     private final TransactionTemplate transactionTemplate = new TransactionTemplate(
             new JdbcTransactionManager(
@@ -41,8 +45,12 @@ public class SpendDbClient implements SpendClient {
         return xaTxTemplate.execute(() -> {
             SpendEntity spendEntity = SpendEntity.fromJson(spend);
             if (spendEntity.getCategory().getId() == null) {
-                CategoryEntity categoryEntity = spendAndCategoryRepository.createCategory(spendEntity.getCategory());
-                spendEntity.setCategory(categoryEntity);
+                spendAndCategoryRepository.createCategory(spendEntity.getCategory());
+            } else {
+                CategoryEntity managedCategory = spendAndCategoryRepository
+                        .findCategoryById(spendEntity.getCategory().getId())
+                        .orElseThrow(() -> new IllegalArgumentException("Category not found"));
+                spendEntity.setCategory(managedCategory);
             }
             return SpendJson.fromEntity(
                     spendAndCategoryRepository.createSpend(spendEntity)
@@ -50,7 +58,6 @@ public class SpendDbClient implements SpendClient {
         });
     }
 
-    @Override
     public CategoryJson createCategory(CategoryJson category) {
         return xaTxTemplate.execute(() -> {
             CategoryEntity categoryEntity = CategoryEntity.fromJson(category);
@@ -59,7 +66,6 @@ public class SpendDbClient implements SpendClient {
         });
     }
 
-    @Override
     public CategoryJson updateCategory(CategoryJson category) {
         return xaTxTemplate.execute(() -> {
             CategoryEntity categoryEntity = CategoryEntity.fromJson(category);

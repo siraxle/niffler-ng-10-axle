@@ -3,18 +3,23 @@ package guru.qa.niffler.data.dao.impl;
 import guru.qa.niffler.config.Config;
 import guru.qa.niffler.data.dao.SpendDao;
 import guru.qa.niffler.data.entity.spend.SpendEntity;
+import guru.qa.niffler.data.extractor.SpendEntityRowExtractor;
 import guru.qa.niffler.data.mapper.SpendEntityRowMapper;
-import guru.qa.niffler.data.tpl.DataSources;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
-import javax.sql.DataSource;
+import javax.annotation.Nonnull;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import static guru.qa.niffler.data.tpl.DataSources.dataSource;
+import static java.util.Objects.requireNonNull;
 
 public class SpendDaoSpringJdbc implements SpendDao {
 
@@ -22,7 +27,7 @@ public class SpendDaoSpringJdbc implements SpendDao {
 
     @Override
     public SpendEntity create(SpendEntity spend) {
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(DataSources.dataSource(CFG.spendJdbcUrl()));
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource(CFG.spendJdbcUrl()));
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
@@ -46,54 +51,51 @@ public class SpendDaoSpringJdbc implements SpendDao {
 
     @Override
     public Optional<SpendEntity> findById(UUID id) {
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(DataSources.dataSource(CFG.spendJdbcUrl()));
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource(CFG.spendJdbcUrl()));
         return Optional.ofNullable(
                 jdbcTemplate.queryForObject(
                         """
-                        SELECT s.*, c.name as category_name, c.archived as category_archived 
-                        FROM spend s 
-                        JOIN category c ON s.category_id = c.id 
-                        WHERE s.id = ?
-                        """,
+                                SELECT s.*, c.name as category_name, c.archived as category_archived 
+                                FROM spend s 
+                                JOIN category c ON s.category_id = c.id 
+                                WHERE s.id = ?
+                                """,
                         SpendEntityRowMapper.instance,
                         id
                 )
         );
     }
 
+    @Nonnull
     @Override
     public List<SpendEntity> findAllByUsername(String username) {
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(DataSources.dataSource(CFG.spendJdbcUrl()));
-        String sql = """
-            SELECT s.*, c.name as name, c.archived as archived 
-            FROM spend s 
-            JOIN category c ON s.category_id = c.id 
-            WHERE s.username = ? 
-            ORDER BY s.spend_date DESC
-            """;
-
-        return jdbcTemplate.query(sql, SpendEntityRowMapper.instance, username);
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource(CFG.spendJdbcUrl()));
+        try {
+            return requireNonNull(jdbcTemplate.query(
+                    "SELECT * FROM \"spend\" WHERE username = ?",
+                    SpendEntityRowExtractor.instance,
+                    username
+            ));
+        } catch (EmptyResultDataAccessException e) {
+            return Collections.emptyList();
+        }
     }
 
     @Override
     public void delete(SpendEntity spend) {
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(DataSources.dataSource(CFG.spendJdbcUrl()));
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource(CFG.spendJdbcUrl()));
         jdbcTemplate.update("DELETE FROM spend WHERE id = ?", spend.getId());
     }
 
+    @Nonnull
     @Override
     public List<SpendEntity> findAll() {
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(DataSources.dataSource(CFG.spendJdbcUrl()));
-        String sql = """
-        SELECT s.*, c.name as category_name, c.archived as category_archived 
-        FROM spend s 
-        JOIN category c ON s.category_id = c.id 
-        ORDER BY s.spend_date DESC
-        """;
-
-        return jdbcTemplate.query(sql, SpendEntityRowMapper.instance);
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource(CFG.spendJdbcUrl()));
+        return requireNonNull(jdbcTemplate.query(
+                "SELECT * FROM \"spend\"",
+                SpendEntityRowExtractor.instance
+        ));
     }
-
 
 
 }
