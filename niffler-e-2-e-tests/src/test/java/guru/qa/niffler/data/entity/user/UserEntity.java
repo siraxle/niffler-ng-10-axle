@@ -54,17 +54,34 @@ public class UserEntity implements Serializable {
   @OneToMany(fetch = EAGER, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "user")
   private List<PushTokenEntity> pushTokens = new ArrayList<>();
 
+//  public void addFriends(FriendshipStatus status, UserEntity... friends) {
+//    List<FriendshipEntity> friendsEntities = Stream.of(friends)
+//        .map(f -> {
+//          FriendshipEntity fe = new FriendshipEntity();
+//          fe.setRequester(this);
+//          fe.setAddressee(f);
+//          fe.setStatus(status);
+//          fe.setCreatedDate(new Date());
+//          return fe;
+//        }).toList();
+//    this.friendshipRequests.addAll(friendsEntities);
+//  }
+
   public void addFriends(FriendshipStatus status, UserEntity... friends) {
-    List<FriendshipEntity> friendsEntities = Stream.of(friends)
-        .map(f -> {
-          FriendshipEntity fe = new FriendshipEntity();
-          fe.setRequester(this);
-          fe.setAddressee(f);
-          fe.setStatus(status);
-          fe.setCreatedDate(new Date());
-          return fe;
-        }).toList();
-    this.friendshipRequests.addAll(friendsEntities);
+    for (UserEntity f : friends) {
+      // Проверяем, нет ли уже такой связи в коллекции
+      boolean alreadyExists = this.friendshipRequests.stream()
+              .anyMatch(fe -> fe.getAddressee().equals(f));
+
+      if (!alreadyExists) {
+        FriendshipEntity fe = new FriendshipEntity();
+        fe.setRequester(this);
+        fe.setAddressee(f);
+        fe.setStatus(status);
+        fe.setCreatedDate(new Date());
+        this.friendshipRequests.add(fe);
+      }
+    }
   }
 
   public void addInvitations(UserEntity... invitations) {

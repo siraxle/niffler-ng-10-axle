@@ -207,9 +207,19 @@ class UserCreationTransactionInvariantsTest {
         String firstname = RandomDataUtils.randomeName();
         String surname = RandomDataUtils.randomeSurname();
         String fullname = firstname + " " + surname;
+        CurrencyValues currency = CurrencyValues.USD;
 
         return new UserJson(
-                null, username, CurrencyValues.USD, firstname, surname, fullname, null, null
+                null,
+                username,
+                firstname,
+                surname,
+                fullname,
+                currency,
+                null,
+                null,
+                null,
+                null
         );
     }
 

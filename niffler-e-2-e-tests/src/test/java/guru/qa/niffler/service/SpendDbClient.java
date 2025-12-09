@@ -40,20 +40,6 @@ public class SpendDbClient implements SpendClient {
     );
 
 
-//    @Override
-//    public SpendJson createSpend(SpendJson spend) {
-//        return jdbcTxTemplate.execute(() -> {
-//            SpendEntity spendEntity = SpendEntity.fromJson(spend);
-//            if (spendEntity.getCategory().getId() == null) {
-//                CategoryEntity categoryEntity = spendAndCategoryRepository.createCategory(spendEntity.getCategory());
-//                spendEntity.setCategory(categoryEntity);
-//            }
-//            return SpendJson.fromEntity(
-//                    spendAndCategoryRepository.createSpend(spendEntity)
-//            );
-//        });
-//    }
-
     @Override
     public SpendJson createSpend(SpendJson spend) {
         return xaTxTemplate.execute(() -> {

@@ -23,6 +23,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.*;
 
+import static java.util.Objects.requireNonNull;
+
 
 public class UsersDbClient implements UsersClient {
     private static final Config CFG = Config.getInstance();
@@ -49,9 +51,21 @@ public class UsersDbClient implements UsersClient {
             CFG.userdataJdbcUrl()
     );
 
+    //    @Override
+//    public UserJson createUser(String username, String password) {
+//        return xaTxTemplate.execute(() -> {
+//                    AuthUserEntity authUser = authUserEntity(username, password);
+//                    authUserRepository.create(authUser);
+//                    return UserJson.fromEntity(
+//                            udUserRepository.create(userEntity(username)),
+//                            null
+//                    );
+//                }
+//        );
+//    }
     @Override
     public UserJson createUser(String username, String password) {
-        return xaTxTemplate.execute(() -> {
+        return requireNonNull(xaTxTemplate.execute(() -> {
                     AuthUserEntity authUser = authUserEntity(username, password);
                     authUserRepository.create(authUser);
                     return UserJson.fromEntity(
@@ -59,18 +73,21 @@ public class UsersDbClient implements UsersClient {
                             null
                     );
                 }
-        );
+        ));
     }
 
     @Override
     public List<UserJson> createFriends(UserJson targetUser, int count) {
+        System.out.println("DEBUG: Creating friends for user id=" + targetUser.id());
         return xaTxTemplate.execute(() -> {
             List<UserJson> friends = new ArrayList<>();
             UserEntity targetEntity = udUserRepository.findById(targetUser.id())
                     .orElseThrow(() -> new IllegalArgumentException("Target user not found with id: " + targetUser.id()));
+            System.out.println("DEBUG: Target entity loaded: " + targetEntity.getUsername());
 
             for (int i = 0; i < count; i++) {
                 UserEntity friendEntity = createRandomUser("friend_" + (i + 1) + "_" + targetUser.username());
+                System.out.println("DEBUG: Creating friend: " + friendEntity.getUsername());
                 UserEntity savedFriend = udUserRepository.create(friendEntity);
                 udUserRepository.addFriend(targetEntity, savedFriend);
                 udUserRepository.addFriend(savedFriend, targetEntity);
