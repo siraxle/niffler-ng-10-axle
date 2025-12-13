@@ -1,4 +1,4 @@
-package guru.qa.niffler.service;
+package guru.qa.niffler.service.impl.db;
 
 import guru.qa.niffler.config.Config;
 import guru.qa.niffler.data.entity.auth.AuthUserEntity;
@@ -15,6 +15,7 @@ import guru.qa.niffler.data.tpl.XaTransactionTemplate;
 import guru.qa.niffler.model.Authority;
 import guru.qa.niffler.model.CurrencyValues;
 import guru.qa.niffler.model.UserJson;
+import guru.qa.niffler.service.UsersClient;
 import guru.qa.niffler.utils.RandomDataUtils;
 import org.springframework.jdbc.support.JdbcTransactionManager;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
@@ -138,7 +139,7 @@ public class UsersDbClient implements UsersClient {
                 String username = RandomDataUtils.randomUsername();
 
                 xaTxTemplate.execute(() -> {
-                    AuthUserEntity authUser = authUserEntity(username, "12345");
+                    AuthUserEntity authUser = authUserEntity(username, "123456");
                     authUserRepository.create(authUser);
                     UserEntity adressee = udUserRepository.create(userEntity(username));
                     udUserRepository.addIncomeInvitation(targetEntity, adressee);
@@ -166,7 +167,7 @@ public class UsersDbClient implements UsersClient {
                 String username = RandomDataUtils.randomUsername();
 
                 xaTxTemplate.execute(() -> {
-                    AuthUserEntity authUser = authUserEntity(username, "12345");
+                    AuthUserEntity authUser = authUserEntity(username, "123456");
                     authUserRepository.create(authUser);
                     UserEntity adressee = udUserRepository.create(userEntity(username));
                     udUserRepository.addOutcomeInvitation(targetEntity, adressee);

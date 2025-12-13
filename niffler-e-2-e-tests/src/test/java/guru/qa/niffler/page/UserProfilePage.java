@@ -43,6 +43,7 @@ public class UserProfilePage {
     }
 
     public void verifyCategoryVisible(String categoryName) {
+
         getCategories().findBy(text(categoryName)).shouldBe(visible);
     }
 

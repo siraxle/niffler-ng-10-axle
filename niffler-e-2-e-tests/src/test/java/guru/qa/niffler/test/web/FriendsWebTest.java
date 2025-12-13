@@ -7,11 +7,11 @@ import guru.qa.niffler.jupiter.extension.BrowserExtension;
 import guru.qa.niffler.jupiter.extension.UsersQueueExtension;
 import guru.qa.niffler.model.UserJson;
 import guru.qa.niffler.page.LoginPage;
+import guru.qa.niffler.service.UsersClient;
+import guru.qa.niffler.service.impl.db.UsersDbClient;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-
-import static guru.qa.niffler.jupiter.extension.UsersQueueExtension.UserType.Type.*;
 
 @ExtendWith({BrowserExtension.class, UsersQueueExtension.class})
 public class FriendsWebTest {
@@ -28,28 +28,73 @@ public class FriendsWebTest {
                 .isFriendNameExist(user.testData().friends().getFirst().username());
     }
 
+    @User(
+            username = "empty_user"
+    )
     @Test
-    void friendsTableShouldBeEmptyForNewUser(@UsersQueueExtension.UserType(EMPTY) UsersQueueExtension.StaticUser user) {
+    void friendsTableShouldBeEmptyForNewUser(UserJson user) {
         int friendsCount = Selenide.open(CFG.frontUrl(), LoginPage.class)
-                .login(user.username(), user.password())
+                .login(user.username(), user.testData().password())
                 .goToFriendsPage()
                 .getFriendsCount();
         Assertions.assertEquals(0, friendsCount);
     }
 
+    //TODO Тест падает, хотя в БД incomeInvitations есть, на фронт не подтягивается incomeInvitations
+    @User(
+            username = "diana",
+            incomeInvitations = 1 // Создаем входящее приглашение
+    )
     @Test
-    void incomeInvitationBePresentInFriendsTable(@UsersQueueExtension.UserType(WITH_INCOME_REQUEST) UsersQueueExtension.StaticUser user) throws InterruptedException {
+    void incomeInvitationBePresentInFriendsTable(UserJson user) throws InterruptedException {
         Selenide.open(CFG.frontUrl(), LoginPage.class)
-                .login(user.username(), user.password())
+                .login(user.username(), user.testData().password())
                 .goToFriendsPage()
-                .hasIncomeRequest(user.income()); // проверяем что есть запрос от charlie
+                .hasIncomeRequest(user.testData().incomeInvitations().getFirst().username());
     }
 
+
+    //TODO Тест падает, хотя в БД incomeInvitations есть, на фронт не подтягивается incomeInvitations
+    @User(
+            incomeInvitations = 1
+    )
     @Test
-    void outcomeInvitationBePresentInAllPeoplesTable(@UsersQueueExtension.UserType(WITH_OUTCOME_REQUEST) UsersQueueExtension.StaticUser user) {
+    void incomeInvitationBePresentInFriendsTable1(UserJson user) throws InterruptedException {
+        // новый пользователь + 1 приглашение
+        String inviterUsername = user.testData().incomeInvitations().getFirst().username();
+
+        UsersClient usersClient = new UsersDbClient();
+        boolean exists = usersClient.findUserByUsername("charlie").isPresent();
+        System.out.println("Пользователь " + inviterUsername + " существует в БД: " + exists);
+        Assertions.assertTrue(exists);
+
         Selenide.open(CFG.frontUrl(), LoginPage.class)
-                .login(user.username(), user.password())
-                .goToAllPeoplePage()
-                .hasOutcomeRequest(user.outcome()); // проверяем что есть исходящий запрос к diana
+                .login(user.username(), user.testData().password())
+                .goToFriendsPage()
+                .hasIncomeRequest(inviterUsername);
     }
+
+    @User(
+            username = "charlie",
+            outcomeInvitations = 1
+    )
+    @Test
+    void outcomeInvitationBePresentInAllPeoplesTable(UserJson user) {
+        Selenide.open(CFG.frontUrl(), LoginPage.class)
+                .login(user.username(), user.testData().password())
+                .goToAllPeoplePage()
+                .hasOutcomeRequest(user.testData().outcomeInvitations().getFirst().username());
+    }
+
+    @User(outcomeInvitations = 1)
+    @Test
+    void outcomeInvitationBePresentInAllPeopleTable(UserJson user) {
+        String inviteeUsername = user.testData().outcomeInvitations().getFirst().username();
+
+        Selenide.open(CFG.frontUrl(), LoginPage.class)
+                .login(user.username(), user.testData().password())
+                .goToAllPeoplePage()
+                .hasOutcomeRequest(inviteeUsername);
+    }
+
 }

@@ -5,10 +5,8 @@ import guru.qa.niffler.jupiter.annotation.User;
 import guru.qa.niffler.model.CategoryJson;
 import guru.qa.niffler.model.SpendJson;
 import guru.qa.niffler.model.UserJson;
-import guru.qa.niffler.service.SpendApiClient;
 import guru.qa.niffler.service.SpendClient;
-import guru.qa.niffler.service.SpendDbClient;
-import guru.qa.niffler.utils.RandomDataUtils;
+import guru.qa.niffler.service.impl.db.SpendDbClient;
 import org.junit.jupiter.api.extension.*;
 import org.junit.platform.commons.support.AnnotationSupport;
 
@@ -69,6 +67,8 @@ public class SpendingExtension implements BeforeEachCallback, ParameterResolver 
         });
     }
 
+
+
     @Override
     public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
         return parameterContext.getParameter().getType().isAssignableFrom(SpendJson[].class);
@@ -83,6 +83,27 @@ public class SpendingExtension implements BeforeEachCallback, ParameterResolver 
         final ExtensionContext methodContext = context();
         return methodContext.getStore(NAMESPACE)
                 .get(methodContext.getUniqueId(), SpendJson[].class);
+    }
+
+    private void updateUserTestData(UserJson user, List<SpendJson> spendings) {
+        List<SpendJson> updatedSpendings = new ArrayList<>(user.testData().spendings());
+        updatedSpendings.addAll(spendings);
+
+        guru.qa.niffler.model.TestData updatedTestData = new guru.qa.niffler.model.TestData(
+                user.testData().password(),
+                user.testData().incomeInvitations(),
+                user.testData().outcomeInvitations(),
+                user.testData().friends(),
+                user.testData().categories(),
+                updatedSpendings
+        );
+
+        UserJson updatedUser = user.addTestData(updatedTestData);
+        ExtensionContext methodContext = TestMethodContextExtension.context();
+        methodContext.getStore(UserExtension.NAMESPACE).put(
+                methodContext.getUniqueId(),
+                updatedUser
+        );
     }
 
 }

@@ -1,6 +1,6 @@
 package guru.qa.niffler.test.rest;
 
-import guru.qa.niffler.service.AuthApiClient;
+import guru.qa.niffler.service.impl.api.AuthApiClient;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
