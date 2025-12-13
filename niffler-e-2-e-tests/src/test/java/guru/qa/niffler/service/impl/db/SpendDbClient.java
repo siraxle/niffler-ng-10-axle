@@ -1,17 +1,16 @@
-package guru.qa.niffler.service;
+package guru.qa.niffler.service.impl.db;
 
 import guru.qa.niffler.config.Config;
 import guru.qa.niffler.data.entity.spend.CategoryEntity;
 import guru.qa.niffler.data.entity.spend.SpendEntity;
 import guru.qa.niffler.data.repository.SpendAndCategoryRepository;
 import guru.qa.niffler.data.repository.impl.SpendAndCategoryRepositoryHibernate;
-import guru.qa.niffler.data.repository.impl.SpendAndCategoryRepositoryJdbc;
-import guru.qa.niffler.data.repository.impl.SpendAndCategoryRepositorySpringJdbc;
 import guru.qa.niffler.data.tpl.DataSources;
 import guru.qa.niffler.data.tpl.JdbcTransactionTemplate;
 import guru.qa.niffler.data.tpl.XaTransactionTemplate;
 import guru.qa.niffler.model.CategoryJson;
 import guru.qa.niffler.model.SpendJson;
+import guru.qa.niffler.service.SpendClient;
 import org.springframework.jdbc.support.JdbcTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 

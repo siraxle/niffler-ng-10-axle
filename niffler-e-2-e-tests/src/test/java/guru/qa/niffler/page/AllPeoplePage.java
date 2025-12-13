@@ -2,6 +2,7 @@ package guru.qa.niffler.page;
 
 import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.SelenideElement;
+import org.junit.jupiter.api.Assertions;
 import org.openqa.selenium.By;
 
 import static com.codeborne.selenide.Condition.text;
@@ -17,4 +18,6 @@ public class AllPeoplePage {
         requestRow.find(waitingFlag).shouldBe(visible);
         return this;
     }
+
+
 }

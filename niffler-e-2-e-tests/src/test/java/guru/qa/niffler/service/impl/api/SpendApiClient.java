@@ -1,9 +1,10 @@
-package guru.qa.niffler.service;
+package guru.qa.niffler.service.impl.api;
 
 import guru.qa.niffler.api.SpendApi;
 import guru.qa.niffler.config.Config;
 import guru.qa.niffler.model.CategoryJson;
 import guru.qa.niffler.model.SpendJson;
+import guru.qa.niffler.service.SpendClient;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
@@ -14,7 +15,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class SpendApiClient implements SpendClient{
+public class SpendApiClient implements SpendClient {
 
     private static final Config CFG = Config.getInstance();
 
@@ -25,6 +26,7 @@ public class SpendApiClient implements SpendClient{
 
     private final SpendApi spendApi = retrofit.create(SpendApi.class);
 
+    @Override
     public SpendJson createSpend(SpendJson spend) {
         final Response<SpendJson> response;
         try {
@@ -85,6 +87,7 @@ public class SpendApiClient implements SpendClient{
         return response;
     }
 
+    @Override
     public CategoryJson createCategory(CategoryJson category) {
         final Response<CategoryJson> response;
         try {
@@ -97,7 +100,7 @@ public class SpendApiClient implements SpendClient{
         return response.body();
     }
 
-
+    @Override
     public CategoryJson updateCategory(CategoryJson category) {
         final Response<CategoryJson> response;
         try {
@@ -123,8 +126,17 @@ public class SpendApiClient implements SpendClient{
         return response.body();
     }
 
-
+    @Override
     public Optional<CategoryJson> findCategoryByNameAndUsername(String categoryName, String username) {
-        throw new UnsupportedOperationException("Not implemented :(");
+        final Response<List<CategoryJson>> response;
+        try {
+            response = spendApi.getAllCategories(username).execute();
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
+        assertEquals(200, response.code());
+        return response.body().stream()
+                .filter(c -> c.name().equals(categoryName))
+                .findFirst();
     }
 }

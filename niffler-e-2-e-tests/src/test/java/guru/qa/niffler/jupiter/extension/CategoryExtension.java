@@ -1,13 +1,13 @@
 package guru.qa.niffler.jupiter.extension;
 
+import com.github.jknack.handlebars.internal.lang3.ArrayUtils;
 import guru.qa.niffler.jupiter.annotation.Category;
 import guru.qa.niffler.jupiter.annotation.User;
 import guru.qa.niffler.model.CategoryJson;
+import guru.qa.niffler.model.TestData;
 import guru.qa.niffler.model.UserJson;
-import guru.qa.niffler.service.SpendApiClient;
 import guru.qa.niffler.service.SpendClient;
-import guru.qa.niffler.service.SpendDbClient;
-import guru.qa.niffler.utils.RandomDataUtils;
+import guru.qa.niffler.service.impl.db.SpendDbClient;
 import org.junit.jupiter.api.extension.*;
 import org.junit.platform.commons.support.AnnotationSupport;
 
@@ -30,7 +30,7 @@ public class CategoryExtension implements BeforeEachCallback, ParameterResolver,
                 context.getRequiredTestMethod(),
                 User.class
         ).ifPresent(userAnnotation -> {
-            if (userAnnotation.categories().length > 0) {
+            if (ArrayUtils.isNotEmpty(userAnnotation.categories())) {
 
                 Optional<UserJson> testUser = UserExtension.createdUser();
                 final String username = testUser.isPresent() ? testUser.get().username() : userAnnotation.username();
@@ -56,12 +56,33 @@ public class CategoryExtension implements BeforeEachCallback, ParameterResolver,
                     }
                     result.add(created);
                 }
+
+                context.getStore(NAMESPACE).put(
+                        context.getUniqueId(),
+                        result.stream().toArray(CategoryJson[]::new)
+                );
+
                 if (testUser.isPresent()) {
-                    testUser.get().testData().categories().addAll(result);
-                } else {
-                    context.getStore(NAMESPACE).put(
-                            context.getUniqueId(),
-                            result.stream().toArray(CategoryJson[]::new));
+                    UserJson user = testUser.get();
+                    List<CategoryJson> updatedCategories = new ArrayList<>(user.testData().categories());
+                    updatedCategories.addAll(result);
+
+                    TestData updatedTestData = new TestData(
+                            user.testData().password(),
+                            user.testData().incomeInvitations(),
+                            user.testData().outcomeInvitations(),
+                            user.testData().friends(),
+                            updatedCategories,
+                            user.testData().spendings()
+                    );
+
+                    UserJson updatedUser = user.addTestData(updatedTestData);
+
+                    ExtensionContext methodContext = TestMethodContextExtension.context();
+                    methodContext.getStore(UserExtension.NAMESPACE).put(
+                            methodContext.getUniqueId(),
+                            updatedUser
+                    );
                 }
             }
         });
@@ -74,12 +95,12 @@ public class CategoryExtension implements BeforeEachCallback, ParameterResolver,
 
     @Override
     public CategoryJson[] resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
-        return createdCategory();
+        return createdCategories();
     }
 
     @Override
     public void afterTestExecution(ExtensionContext context) throws Exception {
-        CategoryJson[] categories = createdCategory();
+        CategoryJson[] categories = createdCategories();
         if (categories != null) {
             for (CategoryJson category : categories) {
                 if (!category.archived()) {
@@ -95,7 +116,7 @@ public class CategoryExtension implements BeforeEachCallback, ParameterResolver,
         }
     }
 
-    public static CategoryJson[] createdCategory() {
+    public static CategoryJson[] createdCategories() {
         final ExtensionContext methodContext = context();
         return methodContext.getStore(NAMESPACE)
                 .get(methodContext.getUniqueId(), CategoryJson[].class);

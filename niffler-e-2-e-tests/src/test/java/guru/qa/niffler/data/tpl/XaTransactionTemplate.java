@@ -28,6 +28,7 @@ public class XaTransactionTemplate {
     public <T> T execute(Supplier<T>... actions) {
         UserTransaction ut = new UserTransactionImp();
         try {
+            ut.setTransactionTimeout(60);
             ut.begin();
             T result = null;
             for (Supplier<T> action : actions) {

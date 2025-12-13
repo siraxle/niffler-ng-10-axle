@@ -74,7 +74,6 @@ public class FriendsPage {
     }
 
     public void hasIncomeRequest(String incomeFriendName) throws InterruptedException {
-        Thread.sleep(2000);
         boolean result = allPeopleCollection
                 .findBy(text(incomeFriendName))
                 .find(acceptBtn)

@@ -2,11 +2,9 @@ package guru.qa.niffler.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import guru.qa.niffler.data.entity.user.FriendshipEntity;
 import guru.qa.niffler.data.entity.user.FriendshipStatus;
 import guru.qa.niffler.data.entity.user.UserEntity;
 
-import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 public record UserJson(
