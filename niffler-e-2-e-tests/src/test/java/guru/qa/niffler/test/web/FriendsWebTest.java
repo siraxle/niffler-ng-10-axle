@@ -47,10 +47,13 @@ public class FriendsWebTest {
     )
     @Test
     void incomeInvitationBePresentInFriendsTable(UserJson user) {
+        String inviterUsername = user.testData().incomeInvitations().getFirst().username();
+
         Selenide.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
                 .goToFriendsPage()
-                .hasIncomeRequest(user.testData().incomeInvitations().getFirst().username());
+                .searchFriend(inviterUsername)
+                .hasIncomeRequest(inviterUsername);
     }
 
 
@@ -71,6 +74,7 @@ public class FriendsWebTest {
         Selenide.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
                 .goToFriendsPage()
+                .searchFriend(inviterUsername)
                 .hasIncomeRequest(inviterUsername);
     }
 
@@ -80,10 +84,12 @@ public class FriendsWebTest {
     )
     @Test
     void outcomeInvitationBePresentInAllPeoplesTable(UserJson user) {
+        String outcomeInvitationUsername = user.testData().outcomeInvitations().getFirst().username();
         Selenide.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
                 .goToAllPeoplePage()
-                .hasOutcomeRequest(user.testData().outcomeInvitations().getFirst().username());
+                .searchPeople(outcomeInvitationUsername)
+                .hasOutcomeRequest(outcomeInvitationUsername);
     }
 
     @User(outcomeInvitations = 1)
@@ -94,6 +100,7 @@ public class FriendsWebTest {
         Selenide.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
                 .goToAllPeoplePage()
+                .searchPeople(inviteeUsername)
                 .hasOutcomeRequest(inviteeUsername);
     }
 

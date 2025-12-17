@@ -21,16 +21,17 @@ public class ProfileTest {
     private static final Config CFG = Config.getInstance();
 
     @User(
-            username = "cat",
+            username = "dog",
             categories = @Category(archived = true)
     )
     @Test
     void archivedCategoryShouldPresentInCategoriesList(UserJson user) {
+        String categoryName = user.testData().categories().getFirst().name();
         Selenide.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
                 .goToProfile()
                 .toggleShowArchived()
-                .verifyCategoryVisible(user.testData().categories().getFirst().name());
+                .verifyCategoryVisible(categoryName);
     }
 
     @User(
@@ -64,11 +65,13 @@ public class ProfileTest {
     )
     @Test
     void archivedCategoryShouldPresentInCategoriesList3(UserJson user) {
+        String categoryName = user.testData().categories().getFirst().name();
+
         Selenide.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
                 .goToProfile()
                 .toggleShowArchived()
-                .verifyCategoryVisible(user.testData().categories().getFirst().name());
+                .verifyCategoryVisible(categoryName);
     }
 
     @User(
@@ -77,10 +80,12 @@ public class ProfileTest {
     )
     @Test
     void activeCategoryShouldPresentInCategoriesList(UserJson user) {
+        String categoryName = user.testData().categories().getFirst().name();
+
         Selenide.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
                 .goToProfile()
-                .verifyCategoryVisible(user.testData().categories().getFirst().name());
+                .verifyCategoryVisible(categoryName);
     }
 
     @User(
@@ -88,11 +93,13 @@ public class ProfileTest {
     )
     @Test
     void activeCategoryShouldPresentInCategoriesList2(UserJson user) {
+        String categoryName = user.testData().categories().getFirst().name();
+
         Selenide.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
                 .goToProfile()
                 .toggleShowArchived()
-                .verifyCategoryVisible(user.testData().categories().getFirst().name());
+                .verifyCategoryVisible(categoryName);
     }
 
     @User(
@@ -100,9 +107,11 @@ public class ProfileTest {
     )
     @Test
     void activeCategoryShouldBeVisibleWithoutToggle(UserJson user) {
+        String categoryName = user.testData().categories().getFirst().name();
+
         Selenide.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
                 .goToProfile()
-                .verifyCategoryVisible(user.testData().categories().getFirst().name());
+                .verifyCategoryVisible(categoryName);
     }
 }

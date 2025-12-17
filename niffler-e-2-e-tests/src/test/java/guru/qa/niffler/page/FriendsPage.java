@@ -4,6 +4,7 @@ import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.SelenideElement;
 import org.junit.jupiter.api.Assertions;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 
 import static com.codeborne.selenide.CollectionCondition.size;
 import static com.codeborne.selenide.Condition.text;
@@ -69,9 +70,11 @@ public class FriendsPage {
     }
 
     public FriendsPage searchFriend(String friendName) {
-        searchInput.setValue(friendName);
+        searchInput.setValue(friendName).sendKeys(Keys.ENTER);;
         return this;
     }
+
+
 
     public void hasIncomeRequest(String incomeFriendName){
         allPeopleCollection
