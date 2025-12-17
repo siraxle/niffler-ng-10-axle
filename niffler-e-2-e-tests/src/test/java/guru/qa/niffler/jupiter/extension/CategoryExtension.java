@@ -57,31 +57,12 @@ public class CategoryExtension implements BeforeEachCallback, ParameterResolver,
                     result.add(created);
                 }
 
-                context.getStore(NAMESPACE).put(
-                        context.getUniqueId(),
-                        result.stream().toArray(CategoryJson[]::new)
-                );
-
                 if (testUser.isPresent()) {
-                    UserJson user = testUser.get();
-                    List<CategoryJson> updatedCategories = new ArrayList<>(user.testData().categories());
-                    updatedCategories.addAll(result);
-
-                    TestData updatedTestData = new TestData(
-                            user.testData().password(),
-                            user.testData().incomeInvitations(),
-                            user.testData().outcomeInvitations(),
-                            user.testData().friends(),
-                            updatedCategories,
-                            user.testData().spendings()
-                    );
-
-                    UserJson updatedUser = user.addTestData(updatedTestData);
-
-                    ExtensionContext methodContext = TestMethodContextExtension.context();
-                    methodContext.getStore(UserExtension.NAMESPACE).put(
-                            methodContext.getUniqueId(),
-                            updatedUser
+                    testUser.get().testData().categories().addAll(result);
+                } else {
+                    context.getStore(NAMESPACE).put(
+                            context.getUniqueId(),
+                            result.stream().toArray(CategoryJson[]::new)
                     );
                 }
             }

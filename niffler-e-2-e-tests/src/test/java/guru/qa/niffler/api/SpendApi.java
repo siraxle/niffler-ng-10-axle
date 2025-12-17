@@ -12,25 +12,25 @@ public interface SpendApi {
     @POST("/internal/spends/add")
     Call<SpendJson> createSpend(@Body SpendJson spend);
 
-    @PATCH("/internal/spends/edit")
+    @PATCH("internal/spends/edit")
     Call<SpendJson> editSpend(@Body SpendJson spend);
 
-    @GET("/internal/spends/{id}")
+    @GET("internal/spends/{id}")
     Call<SpendJson> getSpend(@Path("id") int id, @Query("username") String username);
 
-    @GET("/internal/spends/all")
+    @GET("internal/spends/all")
     Call<List<SpendJson>> getAllSpends(@Query("username") String username);
 
-    @DELETE("/internal/spends/remove")
+    @DELETE("internal/spends/remove")
     Call<Void> removeSpend(@Query("username") String username, @Query("ids") List<String> ids);
 
-    @POST("/internal/categories/add")
+    @POST("internal/categories/add")
     Call<CategoryJson> createCategory(@Body CategoryJson category);
 
-    @PATCH("/internal/categories/update")
+    @PATCH("internal/categories/update")
     Call<CategoryJson> updateCategory(@Body CategoryJson category);
 
-    @GET("/internal/categories/all")
+    @GET("internal/categories/all")
     Call<List<CategoryJson>> getAllCategories(@Query("username") String username);
 
 }

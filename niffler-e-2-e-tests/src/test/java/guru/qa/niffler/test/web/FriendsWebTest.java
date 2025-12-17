@@ -46,7 +46,7 @@ public class FriendsWebTest {
             incomeInvitations = 1 // Создаем входящее приглашение
     )
     @Test
-    void incomeInvitationBePresentInFriendsTable(UserJson user) throws InterruptedException {
+    void incomeInvitationBePresentInFriendsTable(UserJson user) {
         Selenide.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
                 .goToFriendsPage()
@@ -59,7 +59,7 @@ public class FriendsWebTest {
             incomeInvitations = 1
     )
     @Test
-    void incomeInvitationBePresentInFriendsTable1(UserJson user) throws InterruptedException {
+    void incomeInvitationBePresentInFriendsTable1(UserJson user) {
         // новый пользователь + 1 приглашение
         String inviterUsername = user.testData().incomeInvitations().getFirst().username();
 

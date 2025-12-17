@@ -37,7 +37,7 @@ public class SpendingExtension implements BeforeEachCallback, ParameterResolver 
                 List<SpendJson> result = new ArrayList<>();
 
                 for (Spending spendAnno : userAnno.spendings()) {
-                    SpendJson spendJson = spendClient.createSpend(
+                    SpendJson created = spendClient.createSpend(
                             new SpendJson(
                                     null,
                                     new Date(),
@@ -53,7 +53,6 @@ public class SpendingExtension implements BeforeEachCallback, ParameterResolver 
                                     username
                             )
                     );
-                    SpendJson created = spendClient.createSpend(spendJson);
                     result.add(created);
                 }
                 if (testUser.isPresent()) {
@@ -83,27 +82,6 @@ public class SpendingExtension implements BeforeEachCallback, ParameterResolver 
         final ExtensionContext methodContext = context();
         return methodContext.getStore(NAMESPACE)
                 .get(methodContext.getUniqueId(), SpendJson[].class);
-    }
-
-    private void updateUserTestData(UserJson user, List<SpendJson> spendings) {
-        List<SpendJson> updatedSpendings = new ArrayList<>(user.testData().spendings());
-        updatedSpendings.addAll(spendings);
-
-        guru.qa.niffler.model.TestData updatedTestData = new guru.qa.niffler.model.TestData(
-                user.testData().password(),
-                user.testData().incomeInvitations(),
-                user.testData().outcomeInvitations(),
-                user.testData().friends(),
-                user.testData().categories(),
-                updatedSpendings
-        );
-
-        UserJson updatedUser = user.addTestData(updatedTestData);
-        ExtensionContext methodContext = TestMethodContextExtension.context();
-        methodContext.getStore(UserExtension.NAMESPACE).put(
-                methodContext.getUniqueId(),
-                updatedUser
-        );
     }
 
 }

@@ -73,11 +73,10 @@ public class FriendsPage {
         return this;
     }
 
-    public void hasIncomeRequest(String incomeFriendName) throws InterruptedException {
-        boolean result = allPeopleCollection
+    public void hasIncomeRequest(String incomeFriendName){
+        allPeopleCollection
                 .findBy(text(incomeFriendName))
                 .find(acceptBtn)
-                .is(visible);
-        Assertions.assertTrue(result);
+                .shouldBe(visible);
     }
 }

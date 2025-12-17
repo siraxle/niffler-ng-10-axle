@@ -12,13 +12,11 @@ import guru.qa.niffler.page.LoginPage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-@ExtendWith({BrowserExtension.class, UserExtension.class, SpendingExtension.class, CategoryExtension.class, UsersQueueExtension.class})
+@ExtendWith({BrowserExtension.class, UserExtension.class, SpendingExtension.class, CategoryExtension.class})
 public class SpendingWebTest {
 
     private static final Config CFG = Config.getInstance();
 
-//    TODO тест не проходит, ошибки транзакции от atomics
-//    не удается использовать юзера, который уже есть в БД
     @User(
             username = "cat",
             spendings = @Spending(
@@ -29,14 +27,12 @@ public class SpendingWebTest {
             )
     )
     @Test
-    void spendingDescriptionShouldBeEditedByTableAction(UserJson user, SpendJson[] spendings) {
-        // spending создан для пользователя "cat", берем первый из массива
-        SpendJson spending = spendings[0];
+    void spendingDescriptionShouldBeEditedByTableAction(UserJson user) {
+        SpendJson spending = user.testData().spendings().getFirst();
         final String newDescription = "Обучение Niffler Next Generation";
 
         Selenide.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
-                // проверяем, что исходный спендинг есть в таблице
                 .checkThatTableContains(spending.description())
                 .editSpending(spending.description())
                 .setNewSpendingDescription(newDescription)
@@ -65,4 +61,5 @@ public class SpendingWebTest {
                 .save()
                 .checkThatTableContains(newDescription);
     }
+
 }

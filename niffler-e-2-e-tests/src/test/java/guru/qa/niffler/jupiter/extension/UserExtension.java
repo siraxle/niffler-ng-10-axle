@@ -45,6 +45,7 @@ public class UserExtension implements BeforeEachCallback, ParameterResolver {
             List<UserJson> incomeInvitations = new ArrayList<>();
             List<UserJson> outcomeInvitations = new ArrayList<>();
             List<UserJson> friends = new ArrayList<>();
+            List<CategoryJson> categories = new ArrayList<>();
             List<SpendJson> spendings = new ArrayList<>();
 
             if (existingUser.isPresent()) {
@@ -65,35 +66,13 @@ public class UserExtension implements BeforeEachCallback, ParameterResolver {
                 friends = usersClient.createFriends(user, userAnnotation.friends());
             }
 
-            // создание спендингов
-            if (userAnnotation.spendings().length > 0) {
-                for (Spending spendingAnno : userAnnotation.spendings()) {
-                    SpendJson spendJson = new SpendJson(
-                            null,
-                            new Date(),
-                            new CategoryJson(
-                                    null,
-                                    spendingAnno.category(),
-                                    username,
-                                    false
-                            ),
-                            spendingAnno.currency(),
-                            spendingAnno.amount(),
-                            spendingAnno.description(),
-                            username
-                    );
-                    SpendJson createdSpend = spendClient.createSpend(spendJson);
-                    spendings.add(createdSpend);
-                }
-            }
-
             final TestData testData = new TestData(
                     DEFAULT_PASSWORD,
                     incomeInvitations,
                     outcomeInvitations,
                     friends,
-                    new ArrayList<>(), // категории
-                    spendings         // спендинги
+                    categories, // категории
+                    spendings  // спендинги
             );
             context.getStore(NAMESPACE).put(
                     context.getUniqueId(),
