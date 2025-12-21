@@ -2,6 +2,8 @@ package guru.qa.niffler.page;
 
 import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.SelenideElement;
+import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 
 import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Condition.visible;
@@ -17,6 +19,7 @@ public class UserProfilePage {
     private final ElementsCollection categories = $$x("//h2[text()='Categories']/../following-sibling::div[contains(@class, 'MuiGrid-item')]");
     private final ElementsCollection editCategoriesButtons = $$x("//button[@aria-label='Edit category']");
     private final ElementsCollection archiveCategoriesButtons = $$x("//button[@aria-label='Archive category']");
+    private final By searchInput = By.xpath(".//input[@id='category']");
 
     public UserProfilePage setUsername(String username) {
         usernameInput.setValue(username);
@@ -43,12 +46,12 @@ public class UserProfilePage {
     }
 
     public void verifyCategoryVisible(String categoryName) {
+
         getCategories().findBy(text(categoryName)).shouldBe(visible);
     }
 
     public UserProfilePage editCategory(int index, String newName) {
         editCategoriesButtons.get(index).click();
-        // нужен дополнительный метод для ввода нового имени
         return this;
     }
 

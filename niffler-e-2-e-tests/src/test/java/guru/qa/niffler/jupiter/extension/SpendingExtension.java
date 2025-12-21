@@ -5,10 +5,8 @@ import guru.qa.niffler.jupiter.annotation.User;
 import guru.qa.niffler.model.CategoryJson;
 import guru.qa.niffler.model.SpendJson;
 import guru.qa.niffler.model.UserJson;
-import guru.qa.niffler.service.SpendApiClient;
 import guru.qa.niffler.service.SpendClient;
-import guru.qa.niffler.service.SpendDbClient;
-import guru.qa.niffler.utils.RandomDataUtils;
+import guru.qa.niffler.service.impl.db.SpendDbClient;
 import org.junit.jupiter.api.extension.*;
 import org.junit.platform.commons.support.AnnotationSupport;
 
@@ -39,7 +37,7 @@ public class SpendingExtension implements BeforeEachCallback, ParameterResolver 
                 List<SpendJson> result = new ArrayList<>();
 
                 for (Spending spendAnno : userAnno.spendings()) {
-                    SpendJson spendJson = spendClient.createSpend(
+                    SpendJson created = spendClient.createSpend(
                             new SpendJson(
                                     null,
                                     new Date(),
@@ -55,7 +53,6 @@ public class SpendingExtension implements BeforeEachCallback, ParameterResolver 
                                     username
                             )
                     );
-                    SpendJson created = spendClient.createSpend(spendJson);
                     result.add(created);
                 }
                 if (testUser.isPresent()) {
@@ -68,6 +65,8 @@ public class SpendingExtension implements BeforeEachCallback, ParameterResolver 
             }
         });
     }
+
+
 
     @Override
     public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {

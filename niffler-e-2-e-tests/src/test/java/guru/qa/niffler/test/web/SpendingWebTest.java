@@ -4,17 +4,15 @@ import com.codeborne.selenide.Selenide;
 import guru.qa.niffler.config.Config;
 import guru.qa.niffler.jupiter.annotation.Spending;
 import guru.qa.niffler.jupiter.annotation.User;
-import guru.qa.niffler.jupiter.extension.BrowserExtension;
-import guru.qa.niffler.jupiter.extension.TestMethodContextExtension;
+import guru.qa.niffler.jupiter.extension.*;
 import guru.qa.niffler.model.CurrencyValues;
 import guru.qa.niffler.model.SpendJson;
 import guru.qa.niffler.model.UserJson;
 import guru.qa.niffler.page.LoginPage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.extension.ExtensionContext;
 
-@ExtendWith(BrowserExtension.class)
+@ExtendWith({BrowserExtension.class})
 public class SpendingWebTest {
 
     private static final Config CFG = Config.getInstance();
@@ -22,21 +20,20 @@ public class SpendingWebTest {
     @User(
             username = "cat",
             spendings = @Spending(
-                    category = "Учеба7",
+                    category = "Учеба0",
                     amount = 89900,
                     currency = CurrencyValues.RUB,
                     description = "Обучение Niffler 2.0 юбилейный поток!"
             )
     )
-//    @DisableByIssue("2")
     @Test
-    void spendingDescriptionShouldBeEditedByTableAction(SpendJson spending) {
-        ExtensionContext ctx = TestMethodContextExtension.context();
-
+    void spendingDescriptionShouldBeEditedByTableAction(UserJson user) {
+        SpendJson spending = user.testData().spendings().getFirst();
         final String newDescription = "Обучение Niffler Next Generation";
 
         Selenide.open(CFG.frontUrl(), LoginPage.class)
-                .login("cat", "123456")
+                .login(user.username(), user.testData().password())
+                .checkThatTableContains(spending.description())
                 .editSpending(spending.description())
                 .setNewSpendingDescription(newDescription)
                 .save()
@@ -46,18 +43,23 @@ public class SpendingWebTest {
     @User(
             spendings = @Spending(
                     amount = 89900,
-                    description = "Обучение Niffler 2.0 юбилейный поток!",
+                    description = "Исходное описание",
                     category = "Обучение"
-    ))
-//    @DisableByIssue("2")
+            )
+    )
     @Test
-    void spendingDescriptionShouldBeEditedByTableAction1(UserJson user) {
-        final String newDescription = user.testData().spendings().getFirst().description();
+    void spendingDescriptionShouldBeEditedByTableAction3(UserJson user) {
+        SpendJson originalSpending = user.testData().spendings().getFirst();
+        final String originalDescription = originalSpending.description();
+        final String newDescription = "Обновлённое описание после редактирования";
+
         Selenide.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
-                .editSpending(newDescription)
+                .checkThatTableContains(originalDescription)
+                .editSpending(originalDescription)
                 .setNewSpendingDescription(newDescription)
                 .save()
                 .checkThatTableContains(newDescription);
     }
+
 }

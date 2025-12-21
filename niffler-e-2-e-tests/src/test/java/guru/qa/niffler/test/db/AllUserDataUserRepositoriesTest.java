@@ -146,7 +146,7 @@ public class AllUserDataUserRepositoriesTest {
             repository.create(user1);
             repository.create(user2);
 
-            repository.addIncomeInvitation(user2, user1);
+            repository.addInvitation(user2, user1);
 
             List<UserEntity> invitations = repository.findPendingInvitations(user1);
             boolean found = invitations.stream()
@@ -190,7 +190,7 @@ public class AllUserDataUserRepositoriesTest {
             repository.create(user1);
             repository.create(user2);
 
-            repository.addOutcomeInvitation(user1, user2);
+            repository.addInvitation(user1, user2);
 
             List<UserEntity> invitations = repository.findPendingInvitations(user2);
             boolean found = invitations.stream()
@@ -262,7 +262,7 @@ public class AllUserDataUserRepositoriesTest {
             repository.create(user1);
             repository.create(user2);
 
-            repository.addIncomeInvitation(user2, user1);
+            repository.addInvitation(user2, user1);
 
             List<UserEntity> invitations = repository.findPendingInvitations(user1);
 
@@ -287,7 +287,7 @@ public class AllUserDataUserRepositoriesTest {
             repository.create(user1);
             repository.create(user2);
 
-            repository.addIncomeInvitation(user2, user1);
+            repository.addInvitation(user2, user1);
             repository.acceptFriend(user1, user2);
 
             List<UserEntity> friends = repository.findFriends(user1);

@@ -20,11 +20,9 @@ public interface UserDataUserRepository {
     List<UserEntity> findAll();
 
     // методы для работы с друзьями
-    void addIncomeInvitation(UserEntity requester, UserEntity addressee);
+    void addInvitation(UserEntity user1, UserEntity user2);
 
     void addFriend(UserEntity requester, UserEntity addressee);
-
-    void addOutcomeInvitation(UserEntity requester, UserEntity addressee);
 
     void removeFriend(UserEntity user, UserEntity friend);
 

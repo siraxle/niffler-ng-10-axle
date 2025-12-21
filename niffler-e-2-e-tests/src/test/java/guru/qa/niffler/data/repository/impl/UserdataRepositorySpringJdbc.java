@@ -103,12 +103,7 @@ public class UserdataRepositorySpringJdbc implements UserDataUserRepository {
     }
 
     @Override
-    public void addIncomeInvitation(UserEntity requester, UserEntity addressee) {
-        createFriendship(requester, addressee, FriendshipStatus.PENDING);
-    }
-
-    @Override
-    public void addOutcomeInvitation(UserEntity requester, UserEntity addressee) {
+    public void addInvitation(UserEntity requester, UserEntity addressee) {
         createFriendship(requester, addressee, FriendshipStatus.PENDING);
     }
 
