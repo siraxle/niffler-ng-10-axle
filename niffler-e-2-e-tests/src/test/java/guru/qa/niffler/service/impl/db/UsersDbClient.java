@@ -129,7 +129,7 @@ public class UsersDbClient implements UsersClient {
                     AuthUserEntity authUser = authUserEntity(username, DEFAULT_PASSWORD);
                     authUserRepository.create(authUser);
                     UserEntity adressee = udUserRepository.create(userEntity(username));
-                    udUserRepository.addInvitation(targetEntity, adressee);
+                    udUserRepository.addInvitation(adressee, targetEntity);
                     return null;
                 });
 

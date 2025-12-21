@@ -40,10 +40,9 @@ public class FriendsWebTest {
         Assertions.assertEquals(0, friendsCount);
     }
 
-    //TODO Тест падает, хотя в БД incomeInvitations есть, на фронт не подтягивается incomeInvitations
     @User(
             username = "diana",
-            incomeInvitations = 1 // Создаем входящее приглашение
+            incomeInvitations = 1
     )
     @Test
     void incomeInvitationBePresentInFriendsTable(UserJson user) {
@@ -56,14 +55,11 @@ public class FriendsWebTest {
                 .hasIncomeRequest(inviterUsername);
     }
 
-
-    //TODO Тест падает, хотя в БД incomeInvitations есть, на фронт не подтягивается incomeInvitations
     @User(
             incomeInvitations = 1
     )
     @Test
     void incomeInvitationBePresentInFriendsTable1(UserJson user) {
-        // новый пользователь + 1 приглашение
         String inviterUsername = user.testData().incomeInvitations().getFirst().username();
 
         UsersClient usersClient = new UsersDbClient();

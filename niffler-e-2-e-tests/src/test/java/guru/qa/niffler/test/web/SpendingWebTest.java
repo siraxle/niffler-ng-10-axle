@@ -12,7 +12,7 @@ import guru.qa.niffler.page.LoginPage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-@ExtendWith({BrowserExtension.class, UserExtension.class, SpendingExtension.class, CategoryExtension.class})
+@ExtendWith({BrowserExtension.class})
 public class SpendingWebTest {
 
     private static final Config CFG = Config.getInstance();
@@ -20,7 +20,7 @@ public class SpendingWebTest {
     @User(
             username = "cat",
             spendings = @Spending(
-                    category = "Учеба7",
+                    category = "Учеба0",
                     amount = 89900,
                     currency = CurrencyValues.RUB,
                     description = "Обучение Niffler 2.0 юбилейный поток!"

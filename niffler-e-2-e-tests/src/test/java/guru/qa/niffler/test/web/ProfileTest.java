@@ -16,7 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.Optional;
 
-@ExtendWith({BrowserExtension.class, UserExtension.class, CategoryExtension.class})
+@ExtendWith({BrowserExtension.class})
 public class ProfileTest {
     private static final Config CFG = Config.getInstance();
 
