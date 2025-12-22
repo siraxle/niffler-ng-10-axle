@@ -6,6 +6,7 @@ import guru.qa.niffler.data.entity.user.FriendshipStatus;
 import guru.qa.niffler.data.entity.user.UserEntity;
 import lombok.NonNull;
 
+import javax.annotation.Nullable;
 import java.util.UUID;
 
 public record UserJson(
@@ -30,7 +31,7 @@ public record UserJson(
         @JsonIgnore
         TestData testData) {
 
-    public static @NonNull UserJson fromEntity(@NonNull UserEntity entity, @NonNull FriendshipStatus friendshipStatus) {
+    public static @NonNull UserJson fromEntity(@NonNull UserEntity entity, @Nullable FriendshipStatus friendshipStatus) {
         return new UserJson(
                 entity.getId(),
                 entity.getUsername(),

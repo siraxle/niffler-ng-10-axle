@@ -2,6 +2,7 @@ package guru.qa.niffler.page;
 
 import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.SelenideElement;
+import io.qameta.allure.Step;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 
@@ -15,13 +16,14 @@ public class AllPeoplePage {
     private final By waitingFlag = By.xpath(".//span[text() = 'Waiting...']");
     private final By searchInput = By.xpath(".//input[@placeholder='Search']");
 
+    @Step("Проверить наличие исходящего запроса к пользователю: {targetUserName}")
     public AllPeoplePage hasOutcomeRequest(String targetUserName) {
         SelenideElement requestRow = allPeopleTable.findBy(text(targetUserName));
         requestRow.find(waitingFlag).shouldBe(visible);
         return this;
     }
 
-
+    @Step("Поиск пользователя: {outcomeInvitationUsername}")
     public AllPeoplePage searchPeople(String outcomeInvitationUsername) {
         $(searchInput).setValue(outcomeInvitationUsername).sendKeys(Keys.ENTER);
         return this;
