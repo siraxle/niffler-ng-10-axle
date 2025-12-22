@@ -3,11 +3,17 @@ package guru.qa.niffler.service.impl.api;
 import com.fasterxml.jackson.databind.JsonNode;
 import guru.qa.niffler.api.GhAPI;
 import guru.qa.niffler.config.Config;
+import guru.qa.niffler.model.SpendJson;
+import lombok.NonNull;
 import lombok.SneakyThrows;
+import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
+import java.io.IOException;
 import java.util.Objects;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 public class GhAPIClient {
@@ -22,14 +28,17 @@ public class GhAPIClient {
 
     private final GhAPI ghApi = retrofit.create(GhAPI.class);
 
-    @SneakyThrows
-    public String issueState(String issueNumber) {
-
-        JsonNode response = ghApi.issue(
-                "Bearer " + System.getenv(GH_TOKEN_ENV),
-                issueNumber
-        ).execute().body();
-
-        return Objects.requireNonNull(response).get("state").asText();
+    public @NonNull String issueState(@NonNull String issueNumber) {
+        final Response<JsonNode> response;
+        try {
+            response = ghApi.issue(
+                    "Bearer " + System.getenv(GH_TOKEN_ENV),
+                    issueNumber
+            ).execute();
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
+        assertEquals(200, response.code());
+        return Objects.requireNonNull(response.body()).get("state").asText();
     }
 }

@@ -75,7 +75,7 @@ public class SpendAndCategoryRepositoryHibernate implements SpendAndCategoryRepo
         entityManager.joinTransaction();
         SpendEntity managedSpend = entityManager.find(SpendEntity.class, spend.getId());
         if (managedSpend != null) {
-            entityManager.remove(managedSpend);
+            entityManager.remove(entityManager.contains(managedSpend) ? managedSpend : entityManager.merge(managedSpend));
         }
     }
 
@@ -132,7 +132,7 @@ public class SpendAndCategoryRepositoryHibernate implements SpendAndCategoryRepo
         entityManager.joinTransaction();
         CategoryEntity managedCategory = entityManager.find(CategoryEntity.class, category.getId());
         if (managedCategory != null) {
-            entityManager.remove(managedCategory);
+            entityManager.remove(entityManager.contains(managedCategory) ? managedCategory : entityManager.merge(managedCategory));
         }
     }
 

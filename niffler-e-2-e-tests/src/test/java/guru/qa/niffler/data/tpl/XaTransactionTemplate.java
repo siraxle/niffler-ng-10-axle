@@ -24,8 +24,7 @@ public class XaTransactionTemplate {
         return this;
     }
 
-    @Nullable
-    public <T> T execute(Supplier<T>... actions) {
+    public @Nullable <T> T execute(Supplier<T>... actions) {
         UserTransaction ut = new UserTransactionImp();
         try {
             ut.setTransactionTimeout(60);
