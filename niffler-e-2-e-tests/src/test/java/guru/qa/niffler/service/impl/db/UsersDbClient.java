@@ -17,16 +17,19 @@ import guru.qa.niffler.model.CurrencyValues;
 import guru.qa.niffler.model.UserJson;
 import guru.qa.niffler.service.UsersClient;
 import guru.qa.niffler.utils.RandomDataUtils;
+import lombok.NonNull;
 import org.springframework.jdbc.support.JdbcTransactionManager;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.*;
 
 import static java.util.Objects.requireNonNull;
 
-
+@ParametersAreNonnullByDefault
 public class UsersDbClient implements UsersClient {
     private static final Config CFG = Config.getInstance();
     public static final String DEFAULT_PASSWORD = "123456";
@@ -55,7 +58,8 @@ public class UsersDbClient implements UsersClient {
     );
 
     @Override
-    public UserJson createUser(String username, String password) {
+    @Nullable
+    public UserJson createUser(@NonNull String username, @NonNull String password) {
         return requireNonNull(xaTxTemplate.execute(() -> {
                     AuthUserEntity authUser = authUserEntity(username, password);
                     authUserRepository.create(authUser);
@@ -68,14 +72,14 @@ public class UsersDbClient implements UsersClient {
     }
 
     @Override
-    public List<UserJson> createFriends(UserJson targetUser, int count) {
-        return xaTxTemplate.execute(() -> {
+    @NonNull
+    public List<UserJson> createFriends(@NonNull UserJson targetUser, int count) {
+        List<UserJson> result = xaTxTemplate.execute(() -> {
             List<UserJson> friends = new ArrayList<>();
             UserEntity targetEntity = udUserRepository.findById(targetUser.id())
                     .orElseThrow(() -> new IllegalArgumentException("Target user not found with id: " + targetUser.id()));
             for (int i = 0; i < count; i++) {
                 UserEntity friendEntity = createRandomUser("friend_" + (i + 1) + "_" + targetUser.username());
-                System.out.println("DEBUG: Creating friend: " + friendEntity.getUsername());
                 UserEntity savedFriend = udUserRepository.create(friendEntity);
                 udUserRepository.addFriend(targetEntity, savedFriend);
                 udUserRepository.addFriend(savedFriend, targetEntity);
@@ -83,26 +87,29 @@ public class UsersDbClient implements UsersClient {
             }
             return friends;
         });
+        return result != null ? result : Collections.emptyList();
     }
 
     @Override
-    public Optional<UserJson> findUserByUsername(String username) {
-        return xaTxTemplate.execute(() -> {
+    @NonNull
+    public Optional<UserJson> findUserByUsername(@NonNull String username) {
+        return requireNonNull(xaTxTemplate.execute(() -> {
             Optional<UserEntity> user = udUserRepository.findByUsername(username);
             return user.map(u -> UserJson.fromEntity(u, null));
-        });
+        }));
     }
 
     @Override
-    public Optional<UserJson> findUserById(UUID id) {
-        return xaTxTemplate.execute(() -> {
+    @NonNull
+    public Optional<UserJson> findUserById(@NonNull UUID id) {
+        return requireNonNull(xaTxTemplate.execute(() -> {
             Optional<UserEntity> user = udUserRepository.findById(id);
             return user.map(u -> UserJson.fromEntity(u, null));
-        });
+        }));
     }
 
     @Override
-    public void deleteUser(String username) {
+    public void deleteUser(@NonNull String username) {
         xaTxTemplate.execute(() -> {
             Optional<UserEntity> user = udUserRepository.findByUsername(username);
             user.ifPresent(udUserRepository::remove);
@@ -111,12 +118,13 @@ public class UsersDbClient implements UsersClient {
     }
 
     @Override
-    public boolean userExists(String username) {
+    public boolean userExists(@NonNull String username) {
         return findUserByUsername(username).isPresent();
     }
 
     @Override
-    public List<UserJson> addIncomeInvitation(UserJson targetUser, int count) {
+    @NonNull
+    public List<UserJson> addIncomeInvitation(@NonNull UserJson targetUser, int count) {
         if (count > 0) {
             UserEntity targetEntity = udUserRepository.findById(targetUser.id())
                     .orElseThrow();
@@ -144,7 +152,8 @@ public class UsersDbClient implements UsersClient {
     }
 
     @Override
-    public List<UserJson> addOutcomeInvitation(UserJson targetUser, int count) {
+    @NonNull
+    public List<UserJson> addOutcomeInvitation(@NonNull UserJson targetUser, int count) {
         if (count > 0) {
             UserEntity targetEntity = udUserRepository.findById(targetUser.id())
                     .orElseThrow();
@@ -171,14 +180,16 @@ public class UsersDbClient implements UsersClient {
         return Collections.emptyList();
     }
 
-    private static UserEntity userEntity(String username) {
+    @NonNull
+    private static UserEntity userEntity(@NonNull String username) {
         UserEntity entity = new UserEntity();
         entity.setUsername(username);
         entity.setCurrency(CurrencyValues.RUB);
         return entity;
     }
 
-    private static AuthUserEntity authUserEntity(String username, String password) {
+    @NonNull
+    private static AuthUserEntity authUserEntity(@NonNull String username, @NonNull String password) {
         AuthUserEntity authUser = new AuthUserEntity();
         authUser.setUsername(username);
         authUser.setPassword(pe.encode(password));
@@ -200,14 +211,15 @@ public class UsersDbClient implements UsersClient {
         return authUser;
     }
 
-    private UserEntity createRandomUser(String prefix) {
+    @NonNull
+    private UserEntity createRandomUser(@NonNull String prefix) {
         UserEntity user = new UserEntity();
-        user.setUsername(prefix + "_" + UUID.randomUUID().toString().substring(0, 8));
+        String uniqueSuffix = UUID.randomUUID().toString().substring(0, 8);
+        user.setUsername(prefix + "_" + uniqueSuffix);
         user.setCurrency(CurrencyValues.USD);
-        user.setFirstname("Test");
-        user.setSurname("User");
-        user.setFullname("Test User");
+        user.setFirstname(RandomDataUtils.randomeName()); // Используем случайное имя
+        user.setSurname(RandomDataUtils.randomeSurname()); // Используем случайную фамилию
+        user.setFullname(user.getFirstname() + " " + user.getSurname()); // Формируем полное имя
         return user;
     }
-
 }

@@ -10,12 +10,13 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
 import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-
+@ParametersAreNonnullByDefault
 public class GhAPIClient {
 
     private static final Config CFG = Config.getInstance();
@@ -28,7 +29,7 @@ public class GhAPIClient {
 
     private final GhAPI ghApi = retrofit.create(GhAPI.class);
 
-    public @NonNull String issueState(@NonNull String issueNumber) {
+    public @NonNull String issueState(String issueNumber) {
         final Response<JsonNode> response;
         try {
             response = ghApi.issue(

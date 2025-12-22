@@ -11,17 +11,20 @@ import guru.qa.niffler.data.tpl.XaTransactionTemplate;
 import guru.qa.niffler.model.CategoryJson;
 import guru.qa.niffler.model.SpendJson;
 import guru.qa.niffler.service.SpendClient;
+import lombok.NonNull;
 import org.springframework.jdbc.support.JdbcTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.Objects;
 import java.util.Optional;
 
+@ParametersAreNonnullByDefault
 public class SpendDbClient implements SpendClient {
 
     private static final Config CFG = Config.getInstance();
 
-//    private final SpendAndCategoryRepository spendAndCategoryRepository = new SpendAndCategoryRepositoryJdbc();
-//    private final SpendAndCategoryRepository spendAndCategoryRepository = new SpendAndCategoryRepositorySpringJdbc();
     private final SpendAndCategoryRepository spendAndCategoryRepository = new SpendAndCategoryRepositoryHibernate();
 
     private final TransactionTemplate transactionTemplate = new TransactionTemplate(
@@ -38,9 +41,9 @@ public class SpendDbClient implements SpendClient {
             CFG.spendJdbcUrl()
     );
 
-
     @Override
-    public SpendJson createSpend(SpendJson spend) {
+    @Nullable
+    public SpendJson createSpend(@NonNull SpendJson spend) {
         return xaTxTemplate.execute(() -> {
             SpendEntity spendEntity = SpendEntity.fromJson(spend);
             if (spendEntity.getCategory().getId() == null) {
@@ -57,7 +60,8 @@ public class SpendDbClient implements SpendClient {
         });
     }
 
-    public CategoryJson createCategory(CategoryJson category) {
+    @Nullable
+    public CategoryJson createCategory(@NonNull CategoryJson category) {
         return xaTxTemplate.execute(() -> {
             CategoryEntity categoryEntity = CategoryEntity.fromJson(category);
             CategoryEntity createdCategory = spendAndCategoryRepository.createCategory(categoryEntity);
@@ -65,7 +69,8 @@ public class SpendDbClient implements SpendClient {
         });
     }
 
-    public CategoryJson updateCategory(CategoryJson category) {
+    @Nullable
+    public CategoryJson updateCategory(@NonNull CategoryJson category) {
         return xaTxTemplate.execute(() -> {
             CategoryEntity categoryEntity = CategoryEntity.fromJson(category);
             CategoryEntity updatedCategory = spendAndCategoryRepository.updateCategory(categoryEntity);
@@ -73,12 +78,12 @@ public class SpendDbClient implements SpendClient {
         });
     }
 
-
     @Override
-    public Optional<CategoryJson> findCategoryByNameAndUsername(String categoryName, String username) {
-        return xaTxTemplate.execute(() -> {
+    @NonNull
+    public Optional<CategoryJson> findCategoryByNameAndUsername(@NonNull String categoryName, @NonNull String username) {
+        return Objects.requireNonNull(xaTxTemplate.execute(() -> {
             Optional<CategoryEntity> category = spendAndCategoryRepository.findCategoryByUsernameAndName(username, categoryName);
             return category.map(CategoryJson::fromEntity);
-        });
+        }));
     }
 }

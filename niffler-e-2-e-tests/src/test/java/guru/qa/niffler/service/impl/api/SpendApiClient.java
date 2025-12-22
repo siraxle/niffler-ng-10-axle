@@ -19,6 +19,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@ParametersAreNonnullByDefault
 public class SpendApiClient implements SpendClient {
 
     private static final Config CFG = Config.getInstance();

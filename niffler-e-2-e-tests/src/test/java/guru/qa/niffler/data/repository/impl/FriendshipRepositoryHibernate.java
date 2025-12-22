@@ -8,22 +8,26 @@ import guru.qa.niffler.data.repository.FriendshipRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
+import lombok.NonNull;
 
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import static guru.qa.niffler.data.jpa.EntityManagers.em;
 
+@ParametersAreNonnullByDefault
 public class FriendshipRepositoryHibernate implements FriendshipRepository {
 
     private static final Config CFG = Config.getInstance();
     private final EntityManager entityManager = em(CFG.userdataJdbcUrl());
 
     @Override
-    public FriendshipEntity create(FriendshipEntity friendship) {
+    @Nullable
+    public FriendshipEntity create(@NonNull FriendshipEntity friendship) {
         entityManager.joinTransaction();
-
-        // Используем find() вместо merge() - просто получаем ссылку на существующий объект
         UserEntity managedRequester = entityManager.find(UserEntity.class, friendship.getRequester().getId());
         UserEntity managedAddressee = entityManager.find(UserEntity.class, friendship.getAddressee().getId());
 
@@ -34,7 +38,6 @@ public class FriendshipRepositoryHibernate implements FriendshipRepository {
             throw new IllegalArgumentException("Addressee not found with id: " + friendship.getAddressee().getId());
         }
 
-        // Устанавливаем найденные managed объекты
         friendship.setRequester(managedRequester);
         friendship.setAddressee(managedAddressee);
 
@@ -44,7 +47,8 @@ public class FriendshipRepositoryHibernate implements FriendshipRepository {
     }
 
     @Override
-    public Optional<FriendshipEntity> findById(FriendShipId id) {
+    @NonNull
+    public Optional<FriendshipEntity> findById(@NonNull FriendShipId id) {
         String jpql = "SELECT f FROM FriendshipEntity f WHERE f.requester.id = :requesterId AND f.addressee.id = :addresseeId";
         TypedQuery<FriendshipEntity> query = entityManager.createQuery(jpql, FriendshipEntity.class);
         query.setParameter("requesterId", id.getRequester());
@@ -58,31 +62,36 @@ public class FriendshipRepositoryHibernate implements FriendshipRepository {
     }
 
     @Override
-    public List<FriendshipEntity> findByRequester(String username) {
-        return entityManager.createQuery(
+    @NonNull
+    public List<FriendshipEntity> findByRequester(@NonNull String username) {
+        List<FriendshipEntity> result = entityManager.createQuery(
                         "SELECT f FROM FriendshipEntity f WHERE f.requester.username = :username ORDER BY f.createdDate DESC",
                         FriendshipEntity.class)
                 .setParameter("username", username)
                 .getResultList();
+        return result != null ? result : Collections.emptyList();
     }
 
     @Override
-    public List<FriendshipEntity> findByAddressee(String username) {
-        return entityManager.createQuery(
+    @NonNull
+    public List<FriendshipEntity> findByAddressee(@NonNull String username) {
+        List<FriendshipEntity> result = entityManager.createQuery(
                         "SELECT f FROM FriendshipEntity f WHERE f.addressee.username = :username ORDER BY f.createdDate DESC",
                         FriendshipEntity.class)
                 .setParameter("username", username)
                 .getResultList();
+        return result != null ? result : Collections.emptyList();
     }
 
     @Override
-    public FriendshipEntity update(FriendshipEntity friendship) {
+    @Nullable
+    public FriendshipEntity update(@NonNull FriendshipEntity friendship) {
         entityManager.joinTransaction();
         return entityManager.merge(friendship);
     }
 
     @Override
-    public void remove(FriendshipEntity friendship) {
+    public void remove(@NonNull FriendshipEntity friendship) {
         entityManager.joinTransaction();
         FriendShipId id = new FriendShipId();
         id.setRequester(friendship.getRequester().getId());

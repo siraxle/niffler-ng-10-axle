@@ -7,7 +7,11 @@ import guru.qa.niffler.data.entity.user.UserEntity;
 import guru.qa.niffler.data.repository.UserDataUserRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
+import lombok.NonNull;
 
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -15,6 +19,7 @@ import java.util.UUID;
 
 import static guru.qa.niffler.data.jpa.EntityManagers.em;
 
+@ParametersAreNonnullByDefault
 public class UserdataUserRepositoryHibernate implements UserDataUserRepository {
 
     private static final Config CFG = Config.getInstance();
@@ -22,6 +27,7 @@ public class UserdataUserRepositoryHibernate implements UserDataUserRepository {
     private final EntityManager entityManager = em(CFG.userdataJdbcUrl());
 
     @Override
+    @Nullable
     public UserEntity create(UserEntity user) {
         entityManager.joinTransaction();
         entityManager.persist(user);
@@ -30,11 +36,13 @@ public class UserdataUserRepositoryHibernate implements UserDataUserRepository {
     }
 
     @Override
+    @NonNull
     public Optional<UserEntity> findById(UUID id) {
         return Optional.ofNullable(entityManager.find(UserEntity.class, id));
     }
 
     @Override
+    @NonNull
     public Optional<UserEntity> findByUsername(String username) {
         try {
             return Optional.of(entityManager.createQuery(
@@ -48,6 +56,7 @@ public class UserdataUserRepositoryHibernate implements UserDataUserRepository {
     }
 
     @Override
+    @Nullable
     public UserEntity update(UserEntity user) {
         entityManager.joinTransaction();
         UserEntity merged = entityManager.merge(user);
@@ -66,9 +75,13 @@ public class UserdataUserRepositoryHibernate implements UserDataUserRepository {
     }
 
     @Override
+    @NonNull
     public List<UserEntity> findAll() {
-        return entityManager.createQuery("SELECT u FROM UserEntity u ORDER BY u.username", UserEntity.class)
+        List<UserEntity> result = entityManager.createQuery(
+                        "SELECT u FROM UserEntity u ORDER BY u.username",
+                        UserEntity.class)
                 .getResultList();
+        return result != null ? result : Collections.emptyList();
     }
 
     @Override
@@ -99,6 +112,7 @@ public class UserdataUserRepositoryHibernate implements UserDataUserRepository {
     }
 
     @Override
+    @NonNull
     public List<UserEntity> findFriends(UserEntity user) {
         String jpql = """
             SELECT f.addressee FROM FriendshipEntity f 
@@ -108,23 +122,26 @@ public class UserdataUserRepositoryHibernate implements UserDataUserRepository {
             WHERE f.addressee.id = :userId AND f.status = :status
             """;
 
-        return entityManager.createQuery(jpql, UserEntity.class)
+        List<UserEntity> result = entityManager.createQuery(jpql, UserEntity.class)
                 .setParameter("userId", user.getId())
                 .setParameter("status", FriendshipStatus.ACCEPTED)
                 .getResultList();
+        return result != null ? result : Collections.emptyList();
     }
 
     @Override
+    @NonNull
     public List<UserEntity> findPendingInvitations(UserEntity user) {
         String jpql = """
                 SELECT f.requester FROM FriendshipEntity f 
                 WHERE f.addressee.id = :userId AND f.status = :status
                 """;
 
-        return entityManager.createQuery(jpql, UserEntity.class)
+        List<UserEntity> result = entityManager.createQuery(jpql, UserEntity.class)
                 .setParameter("userId", user.getId())
                 .setParameter("status", FriendshipStatus.PENDING)
                 .getResultList();
+        return result != null ? result : Collections.emptyList();
     }
 
     @Override
