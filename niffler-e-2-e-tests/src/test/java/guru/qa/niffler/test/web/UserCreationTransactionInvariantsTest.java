@@ -47,13 +47,13 @@ class UserCreationTransactionInvariantsTest {
         // Шаг 1: Создаем в auth БД - УСПЕХ
         AuthUserEntity authUser = createAuthUserEntity(username);
         AuthUserEntity createdAuth = authDao.create(authUser);
-        assertNonnull(createdAuth.getId(), "User should be created in auth DB");
+        assertNotNull(createdAuth.getId(), "User should be created in auth DB");
         System.out.println("Created in auth DB: " + createdAuth.getId());
 
         UserEntity userEntity = createUserEntity(username);
         UserEntity createdUser = userDao.create(userEntity);
 
-        assertNonnull(createdUser.getId(), "User should be created in userdata DB");
+        assertNotNull(createdUser.getId(), "User should be created in userdata DB");
         System.out.println("Created in userdata DB: " + createdUser.getId());
 
         // Проверяем что ОБА пользователя существуют
@@ -77,7 +77,7 @@ class UserCreationTransactionInvariantsTest {
         var userAuth = createUserAuthJson(username);
         var createdAuth = authClient.createUser(userAuth);
 
-        assertNonnull(createdAuth.id(), "User should be created in auth DB with transaction");
+        assertNotNull(createdAuth.id(), "User should be created in auth DB with transaction");
         System.out.println("✓ Created in auth DB with transaction: " + createdAuth.id());
 
         // Проверяем атомарность: если бы была ошибка при создании authorities, все откатилось бы
@@ -153,7 +153,7 @@ class UserCreationTransactionInvariantsTest {
 
         // Шаг 1: Первое создание - УСПЕХ
         UserJson firstUser = usersDbClient.createUserSpringJdbc(createUserJson(username));
-        assertNonnull(firstUser.id());
+        assertNotNull(firstUser.id());
         System.out.println("✓ First creation successful: " + firstUser.id());
 
         // Шаг 2: Второе создание с тем же username - ОШИБКА
