@@ -16,10 +16,10 @@ import guru.qa.niffler.data.tpl.XaTransactionTemplate;
 import guru.qa.niffler.model.Authority;
 import guru.qa.niffler.model.AuthorityJson;
 import guru.qa.niffler.model.UserAuthJson;
-import lombok.NonNull;
 import org.springframework.jdbc.support.JdbcTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.*;
@@ -48,7 +48,7 @@ public class AuthDbClient {
     );
 
     @Nullable
-    public UserAuthJson createUser(@NonNull UserAuthJson user) {
+    public UserAuthJson createUser(UserAuthJson user) {
         return xaTxTemplate.execute(() -> {
             AuthUserEntity createdUser = authUserDao.create(toAuthUserEntity(user));
 
@@ -67,24 +67,24 @@ public class AuthDbClient {
         });
     }
 
-    @NonNull
-    public Optional<UserAuthJson> findUserByUsername(@NonNull String username) {
+    @Nonnull
+    public Optional<UserAuthJson> findUserByUsername(String username) {
         return Objects.requireNonNull(xaTxTemplate.execute(() -> {
             Optional<AuthUserEntity> user = authUserDao.findByUsername(username);
             return user.map(UserAuthJson::fromEntity);
         }));
     }
 
-    @NonNull
-    public Optional<UserAuthJson> findUserById(@NonNull UUID id) {
+    @Nonnull
+    public Optional<UserAuthJson> findUserById(UUID id) {
         return Objects.requireNonNull(xaTxTemplate.execute(() -> {
             Optional<AuthUserEntity> user = authUserDao.findById(id);
             return user.map(UserAuthJson::fromEntity);
         }));
     }
 
-    @NonNull
-    public List<AuthorityJson> getUserAuthorities(@NonNull String username) {
+    @Nonnull
+    public List<AuthorityJson> getUserAuthorities(String username) {
         return Objects.requireNonNull(xaTxTemplate.execute(() -> {
             Optional<AuthUserEntity> user = authUserDao.findByUsername(username);
 
@@ -100,8 +100,8 @@ public class AuthDbClient {
         }));
     }
 
-    @NonNull
-    public List<AuthorityJson> getUserAuthoritiesById(@NonNull UUID userId) {
+    @Nonnull
+    public List<AuthorityJson> getUserAuthoritiesById(UUID userId) {
         return Objects.requireNonNull(xaTxTemplate.execute(() -> {
             List<AuthorityEntity> authorities = authAuthorityDao.findAuthoritiesByUserId(userId);
             if (authorities != null) {
@@ -114,7 +114,7 @@ public class AuthDbClient {
     }
 
     @Nullable
-    public UserAuthJson updateUser(@NonNull UserAuthJson user) {
+    public UserAuthJson updateUser(UserAuthJson user) {
         return xaTxTemplate.execute(() -> {
             AuthUserEntity userEntity = toAuthUserEntity(user);
             userEntity.setId(user.id());
@@ -124,7 +124,7 @@ public class AuthDbClient {
         });
     }
 
-    public void deleteUser(@NonNull String username) {
+    public void deleteUser(String username) {
         // Удаляем из auth БД
         xaTxTemplate.execute(() -> {
             Optional<AuthUserEntity> user = authUserDao.findByUsername(username);
@@ -150,12 +150,12 @@ public class AuthDbClient {
         });
     }
 
-    public boolean userExists(@NonNull String username) {
+    public boolean userExists(String username) {
         return findUserByUsername(username).isPresent();
     }
 
-    @NonNull
-    private AuthUserEntity toAuthUserEntity(@NonNull UserAuthJson userJson) {
+    @Nonnull
+    private AuthUserEntity toAuthUserEntity(UserAuthJson userJson) {
         AuthUserEntity entity = new AuthUserEntity();
         entity.setUsername(userJson.username());
         entity.setPassword(userJson.password());

@@ -11,10 +11,10 @@ import guru.qa.niffler.data.tpl.XaTransactionTemplate;
 import guru.qa.niffler.model.CategoryJson;
 import guru.qa.niffler.model.SpendJson;
 import guru.qa.niffler.service.SpendClient;
-import lombok.NonNull;
 import org.springframework.jdbc.support.JdbcTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Objects;
@@ -43,7 +43,7 @@ public class SpendDbClient implements SpendClient {
 
     @Override
     @Nullable
-    public SpendJson createSpend(@NonNull SpendJson spend) {
+    public SpendJson createSpend(SpendJson spend) {
         return xaTxTemplate.execute(() -> {
             SpendEntity spendEntity = SpendEntity.fromJson(spend);
             if (spendEntity.getCategory().getId() == null) {
@@ -61,7 +61,7 @@ public class SpendDbClient implements SpendClient {
     }
 
     @Nullable
-    public CategoryJson createCategory(@NonNull CategoryJson category) {
+    public CategoryJson createCategory(CategoryJson category) {
         return xaTxTemplate.execute(() -> {
             CategoryEntity categoryEntity = CategoryEntity.fromJson(category);
             CategoryEntity createdCategory = spendAndCategoryRepository.createCategory(categoryEntity);
@@ -70,7 +70,7 @@ public class SpendDbClient implements SpendClient {
     }
 
     @Nullable
-    public CategoryJson updateCategory(@NonNull CategoryJson category) {
+    public CategoryJson updateCategory(CategoryJson category) {
         return xaTxTemplate.execute(() -> {
             CategoryEntity categoryEntity = CategoryEntity.fromJson(category);
             CategoryEntity updatedCategory = spendAndCategoryRepository.updateCategory(categoryEntity);
@@ -79,8 +79,8 @@ public class SpendDbClient implements SpendClient {
     }
 
     @Override
-    @NonNull
-    public Optional<CategoryJson> findCategoryByNameAndUsername(@NonNull String categoryName, @NonNull String username) {
+    @Nonnull
+    public Optional<CategoryJson> findCategoryByNameAndUsername(String categoryName, String username) {
         return Objects.requireNonNull(xaTxTemplate.execute(() -> {
             Optional<CategoryEntity> category = spendAndCategoryRepository.findCategoryByUsernameAndName(username, categoryName);
             return category.map(CategoryJson::fromEntity);

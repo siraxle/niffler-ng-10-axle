@@ -142,3 +142,15 @@ tasks.register('printVersion') {
         println project.version
     }
 }
+
+
+test {
+    options {
+        systemProperties(System.getProperties())
+    }
+    testLogging {
+        showStandardStreams = true
+        exceptionFormat = 'full'
+    }
+    useJUnitPlatform()
+}

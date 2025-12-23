@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Assertions;
 import org.openqa.selenium.By;
 
 import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
 
 import static com.codeborne.selenide.CollectionCondition.size;
 import static com.codeborne.selenide.Condition.text;
@@ -17,6 +18,7 @@ import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selectors.byText;
 import static com.codeborne.selenide.Selenide.*;
 
+@ParametersAreNonnullByDefault
 public class FriendsPage {
 
     @Getter
@@ -41,6 +43,7 @@ public class FriendsPage {
 
 
     @Step("Удалить друга {friendName}")
+    @Nonnull
     public FriendsPage removeFriend(String friendName) {
         SelenideElement friendRow = friendsCollection
                 .find(text(friendName));
@@ -49,6 +52,7 @@ public class FriendsPage {
     }
 
     @Step("Проверить, что друг {friendName} удален")
+    @Nonnull
     public FriendsPage verifyFriendRemoved(String friendName) {
         friendsTable.shouldNotHave(text(friendName));
         return this;
@@ -64,6 +68,7 @@ public class FriendsPage {
     }
 
     @Step("Принять запрос в друзья от {requesterName}")
+    @Nonnull
     public FriendsPage acceptFriendRequest(String requesterName) {
         SelenideElement requestRow = friendsCollection.findBy(text(requesterName));
         requestRow.find(acceptBtn).click();
@@ -71,6 +76,7 @@ public class FriendsPage {
     }
 
     @Step("Отклонить запрос в друзья от {requesterName}")
+    @Nonnull
     public FriendsPage declineFriendRequest(String requesterName) {
         SelenideElement requestRow = friendsCollection.findBy(text(requesterName));
         requestRow.find(declineBtn).click();
@@ -87,23 +93,27 @@ public class FriendsPage {
     }
 
     @Step("Получить количество друзей")
+    @Nonnull
     public Integer getFriendsCount() {
         return friendsCollection.size();
     }
 
     @Step("Проверить количество друзей: ожидается {expectedCount}")
+    @Nonnull
     public FriendsPage checkFriendsCount(int expectedCount) {
         friendsCollection.shouldHave(size(expectedCount));
         return this;
     }
 
     @Step("Поиск друга {friendName}")
+    @Nonnull
     public FriendsPage searchFriend(String friendName) {
         searchField.search(friendName);
         return this;
     }
 
     @Step("Очистить поиск")
+    @Nonnull
     public FriendsPage clearSearch() {
         searchField.clearIfNotEmpty();
         return this;
@@ -118,6 +128,7 @@ public class FriendsPage {
     }
 
     @Step("Принять запрос дружбы от пользователя {username}")
+    @Nonnull
     public FriendsPage acceptIncomeInvitation(String username) {
         searchField.search(username);
         requestsRow.get(0)
@@ -127,6 +138,7 @@ public class FriendsPage {
     }
 
     @Step("Отклонить запрос дружбы от пользователя {username}")
+    @Nonnull
     public FriendsPage declineIncomeInvitation(String username) {
         searchField.search(username);
         requestsRow.get(0)
@@ -138,13 +150,15 @@ public class FriendsPage {
     }
 
     @Step("Проверить, что список входящих приглашений пуст")
-    public @Nonnull FriendsPage checkIncomeInvitationListIsEmpty() {
+    @Nonnull
+    public FriendsPage checkIncomeInvitationListIsEmpty() {
         requestsRow.first().shouldNotBe(visible);
         return this;
     }
 
-    @Step("Проверить, что список друзей не пуст")
-    public @Nonnull FriendsPage checkFriendsListIsNotEmpty() {
+    @Step("Провер|ить, что список друзей не пуст")
+    @Nonnull
+    public FriendsPage checkFriendsListIsNotEmpty() {
         myFriendsRows.first().shouldBe(visible);
         return this;
     }

@@ -84,7 +84,7 @@ public class AllSpendAndCategoryRepositoriesTest {
             CategoryEntity category = createTestCategory(testUsername, testCategoryName);
             CategoryEntity created = repository.createCategory(category);
 
-            assertNotNull(created.getId());
+            assertNonnull(created.getId());
             assertEquals(testCategoryName, created.getName());
             assertEquals(testUsername, created.getUsername());
             assertFalse(created.isArchived());
@@ -235,12 +235,12 @@ public class AllSpendAndCategoryRepositoriesTest {
             CategoryEntity savedCategory = repository.createCategory(createTestCategory(testUsername, testCategoryName));
             SpendEntity savedSpend = createTestSpend(repository, testUsername, savedCategory, testSpendDescription);
 
-            assertNotNull(savedSpend.getId());
+            assertNonnull(savedSpend.getId());
             assertEquals(testUsername, savedSpend.getUsername());
             assertEquals(testSpendDescription, savedSpend.getDescription());
             assertEquals(100.0, savedSpend.getAmount());
             assertEquals(CurrencyValues.USD, savedSpend.getCurrency());
-            assertNotNull(savedSpend.getCategory());
+            assertNonnull(savedSpend.getCategory());
             assertEquals(savedCategory.getId(), savedSpend.getCategory().getId());
 
             Optional<SpendEntity> foundSpend = repository.findSpendById(savedSpend.getId());
@@ -394,7 +394,7 @@ public class AllSpendAndCategoryRepositoriesTest {
             // 1. CREATE
             CategoryEntity category = createTestCategory(localTestUsername, localTestCategoryName);
             CategoryEntity created = repository.createCategory(category);
-            assertNotNull(created.getId());
+            assertNonnull(created.getId());
 
             // 2. READ (поиск по ID)
             Optional<CategoryEntity> foundById = repository.findCategoryById(created.getId());
@@ -437,7 +437,7 @@ public class AllSpendAndCategoryRepositoriesTest {
             // Создаем категорию
             CategoryEntity category = createTestCategory(testUsername, testCategoryName);
             CategoryEntity createdCategory = repository.createCategory(category);
-            assertNotNull(createdCategory.getId());
+            assertNonnull(createdCategory.getId());
 
             // Создаем трату с этой категорией
             SpendEntity spend = createTestSpend(repository, testUsername, createdCategory, "Test spend with category");
@@ -485,9 +485,9 @@ public class AllSpendAndCategoryRepositoriesTest {
             // Это должно создать категорию автоматически (если логика в репозитории это поддерживает)
             SpendEntity createdSpend = repository.createSpend(spend);
 
-            assertNotNull(createdSpend.getId());
-            assertNotNull(createdSpend.getCategory());
-            assertNotNull(createdSpend.getCategory().getId());
+            assertNonnull(createdSpend.getId());
+            assertNonnull(createdSpend.getCategory());
+            assertNonnull(createdSpend.getCategory().getId());
             assertEquals(testCategoryName, createdSpend.getCategory().getName());
             assertEquals(testUsername, createdSpend.getCategory().getUsername());
 
@@ -498,7 +498,7 @@ public class AllSpendAndCategoryRepositoriesTest {
     @DisplayName("Категория не должна быть null при создании траты")
     @ParameterizedTest(name = "{0}")
     @MethodSource("repositories")
-    void spendCategoryNotNullTest(String repoName, SpendAndCategoryRepository repository) {
+    void spendCategoryNonnullTest(String repoName, SpendAndCategoryRepository repository) {
         xaTxTemplate.execute(() -> {
             CategoryEntity savedCategory = repository.createCategory(createTestCategory(testUsername, testCategoryName));
 
@@ -511,8 +511,8 @@ public class AllSpendAndCategoryRepositoriesTest {
             spend.setCategory(savedCategory); // категория с ID
 
             SpendEntity createdSpend = repository.createSpend(spend);
-            assertNotNull(createdSpend.getCategory());
-            assertNotNull(createdSpend.getCategory().getId());
+            assertNonnull(createdSpend.getCategory());
+            assertNonnull(createdSpend.getCategory().getId());
 
             return null;
         });

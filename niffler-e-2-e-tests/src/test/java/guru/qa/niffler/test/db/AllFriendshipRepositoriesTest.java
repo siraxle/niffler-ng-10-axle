@@ -78,7 +78,7 @@ public class AllFriendshipRepositoriesTest {
             FriendshipEntity friendship = createTestFriendship(savedUser1, savedUser2);
             FriendshipEntity created = friendshipRepository.create(friendship);
 
-            assertNotNull(created);
+            assertNonnull(created);
             assertEquals(savedUser1.getId(), created.getRequester().getId());
             assertEquals(savedUser2.getId(), created.getAddressee().getId());
             assertEquals(FriendshipStatus.PENDING, created.getStatus());

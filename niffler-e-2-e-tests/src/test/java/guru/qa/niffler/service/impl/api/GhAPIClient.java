@@ -3,13 +3,11 @@ package guru.qa.niffler.service.impl.api;
 import com.fasterxml.jackson.databind.JsonNode;
 import guru.qa.niffler.api.GhAPI;
 import guru.qa.niffler.config.Config;
-import guru.qa.niffler.model.SpendJson;
-import lombok.NonNull;
-import lombok.SneakyThrows;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
+import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
 import java.util.Objects;
@@ -29,7 +27,7 @@ public class GhAPIClient {
 
     private final GhAPI ghApi = retrofit.create(GhAPI.class);
 
-    public @NonNull String issueState(String issueNumber) {
+    public @Nonnull String issueState(String issueNumber) {
         final Response<JsonNode> response;
         try {
             response = ghApi.issue(

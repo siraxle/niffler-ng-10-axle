@@ -19,7 +19,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static guru.qa.niffler.data.tpl.DataSources.dataSource;
-import static java.util.Objects.requireNonNull;
+import static java.util.Objects.requireNonnull;
 
 public class SpendDaoSpringJdbc implements SpendDao {
 
@@ -71,7 +71,7 @@ public class SpendDaoSpringJdbc implements SpendDao {
     public List<SpendEntity> findAllByUsername(String username) {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource(CFG.spendJdbcUrl()));
         try {
-            return requireNonNull(jdbcTemplate.query(
+            return requireNonnull(jdbcTemplate.query(
                     "SELECT * FROM \"spend\" WHERE username = ?",
                     SpendEntityRowExtractor.instance,
                     username
@@ -91,7 +91,7 @@ public class SpendDaoSpringJdbc implements SpendDao {
     @Override
     public List<SpendEntity> findAll() {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource(CFG.spendJdbcUrl()));
-        return requireNonNull(jdbcTemplate.query(
+        return requireNonnull(jdbcTemplate.query(
                 "SELECT * FROM \"spend\"",
                 SpendEntityRowExtractor.instance
         ));

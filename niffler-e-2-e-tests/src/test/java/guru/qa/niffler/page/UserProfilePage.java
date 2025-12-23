@@ -5,11 +5,15 @@ import com.codeborne.selenide.SelenideElement;
 import io.qameta.allure.Step;
 
 import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
+
+import java.util.Objects;
 
 import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.$$;
 
+@ParametersAreNonnullByDefault
 public class UserProfilePage {
 
     // Поля профиля
@@ -31,46 +35,54 @@ public class UserProfilePage {
     private final ElementsCollection categoryCommon = $$(".MuiChip-filled.MuiChip-colorPrimary");
 
     @Step("Установить имя: {name}")
+    @Nonnull
     public UserProfilePage setName(String name) {
         nameInput.setValue(name);
         return this;
     }
 
     @Step("Сохранить изменения в профиле")
+    @Nonnull
     public UserProfilePage saveChanges() {
         saveChangesButton.click();
         return this;
     }
 
     @Step("Получить имя пользователя")
+    @Nonnull
     public String getUsername() {
-        return usernameInput.getValue();
+        return Objects.requireNonNull(usernameInput.getValue());
     }
 
     @Step("Получить имя")
+    @Nonnull
     public String getName() {
-        return nameInput.getValue();
+        return Objects.requireNonNull(nameInput.getValue());
     }
 
     @Step("Переключить отображение архивных категорий")
+    @Nonnull
     public UserProfilePage toggleShowArchived() {
         showArchivedSwitch.click();
         return this;
     }
 
     @Step("Добавить категорию: {category}")
+    @Nonnull
     public UserProfilePage addCategory(String category) {
         categoryInput.setValue(category).pressEnter();
         return this;
     }
 
     @Step("Проверить, что категория видна: {categoryName}")
+    @Nonnull
     public UserProfilePage verifyCategoryVisible(String categoryName) {
         categoryChips.findBy(text(categoryName)).shouldBe(visible);
         return this;
     }
 
     @Step("Редактировать категорию: {categoryName} -> {newName}")
+    @Nonnull
     public UserProfilePage editCategory(String categoryName, String newName) {
         int index = getCategoryIndex(categoryName);
         if (index >= 0) {
@@ -81,6 +93,7 @@ public class UserProfilePage {
     }
 
     @Step("Архивировать категорию: {categoryName}")
+    @Nonnull
     public UserProfilePage archiveCategory(String categoryName) {
         int index = getCategoryIndex(categoryName);
         if (index >= 0) {
@@ -90,24 +103,28 @@ public class UserProfilePage {
     }
 
     @Step("Загрузить аватар: {filePath}")
+    @Nonnull
     public UserProfilePage uploadAvatar(String filePath) {
         avatarInput.uploadFromClasspath(filePath);
         return this;
     }
 
     @Step("Нажать кнопку загрузки изображения")
+    @Nonnull
     public UserProfilePage clickUploadPictureButton() {
         uploadPictureButton.click();
         return this;
     }
 
     @Step("Зарегистрировать Passkey")
+    @Nonnull
     public UserProfilePage registerPasskey() {
         registerPasskeyButton.click();
         return this;
     }
 
     @Step("Проверить, что профиль содержит текст: {expectedTexts}")
+    @Nonnull
     public UserProfilePage verifyProfileContainsText(String... expectedTexts) {
         for (String text : expectedTexts) {
             $("body").shouldHave(text(text));
@@ -126,18 +143,21 @@ public class UserProfilePage {
     }
 
     @Step("Проверить количество категорий: ожидается {expectedCount}")
+    @Nonnull
     public UserProfilePage verifyCategoriesCount(int expectedCount) {
         categoryChips.shouldHave(com.codeborne.selenide.CollectionCondition.size(expectedCount));
         return this;
     }
 
     @Step("Проверить, что кнопка сохранения активна")
+    @Nonnull
     public UserProfilePage verifySaveButtonEnabled() {
         saveChangesButton.shouldBe(com.codeborne.selenide.Condition.enabled);
         return this;
     }
 
     @Step("Проверить, что кнопка сохранения неактивна")
+    @Nonnull
     public UserProfilePage verifySaveButtonDisabled() {
         saveChangesButton.shouldBe(com.codeborne.selenide.Condition.disabled);
         return this;
@@ -153,31 +173,36 @@ public class UserProfilePage {
     }
 
     @Step("Выбрать категорию: {categoryName}")
+    @Nonnull
     public UserProfilePage selectCategory(String categoryName) {
         categoryChips.findBy(text(categoryName)).click();
         return this;
     }
 
     @Step("Проверить имя: ожидается {expectedName}")
+    @Nonnull
     public UserProfilePage verifyName(String expectedName) {
         nameInput.shouldHave(value(expectedName));
         return this;
     }
 
     @Step("Проверить поле Name")
+    @Nonnull
     public UserProfilePage checkName(String name) {
         nameInput.shouldHave(value(name));
         return this;
     }
 
     @Step("Проверить, что категория {category} существует")
-    public @Nonnull UserProfilePage checkCategoryExists(String category) {
+    @Nonnull
+    public UserProfilePage checkCategoryExists(String category) {
         categoryCommon.find(text(category)).shouldBe(visible);
         return this;
     }
 
     @Step("Проверить, что изменение юзернейма недоступно")
-    public @Nonnull UserProfilePage checkUsernameDisabled() {
+    @Nonnull
+    public UserProfilePage checkUsernameDisabled() {
         usernameInput.shouldBe(disabled);
         return this;
     }

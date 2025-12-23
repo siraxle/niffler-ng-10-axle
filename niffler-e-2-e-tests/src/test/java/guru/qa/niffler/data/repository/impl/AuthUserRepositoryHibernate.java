@@ -5,7 +5,7 @@ import guru.qa.niffler.data.entity.auth.AuthUserEntity;
 import guru.qa.niffler.data.repository.AuthUserRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
-import lombok.NonNull;
+import javax.annotation.Nonnull;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Collections;
@@ -23,19 +23,19 @@ public class AuthUserRepositoryHibernate implements AuthUserRepository {
     private final EntityManager entityManager = em(CFG.authJdbcUrl());
 
     @Override
-    public @NonNull AuthUserEntity create(AuthUserEntity user) {
+    public @Nonnull AuthUserEntity create(AuthUserEntity user) {
         entityManager.joinTransaction();
         entityManager.persist(user);
         return user;
     }
 
     @Override
-    public @NonNull Optional<AuthUserEntity> findById(UUID id) {
+    public @Nonnull Optional<AuthUserEntity> findById(UUID id) {
         return Optional.ofNullable(entityManager.find(AuthUserEntity.class, id));
     }
 
     @Override
-    public @NonNull Optional<AuthUserEntity> findByUsername(String username) {
+    public @Nonnull Optional<AuthUserEntity> findByUsername(String username) {
         try {
             return Optional.of(entityManager.createQuery("SELECT u FROM AuthUserEntity u where u.username =: username", AuthUserEntity.class)
                     .setParameter("username", username)
@@ -46,7 +46,7 @@ public class AuthUserRepositoryHibernate implements AuthUserRepository {
     }
 
     @Override
-    public @NonNull AuthUserEntity update(AuthUserEntity user) {
+    public @Nonnull AuthUserEntity update(AuthUserEntity user) {
         entityManager.joinTransaction();
         return entityManager.merge(user);
     }
@@ -61,7 +61,7 @@ public class AuthUserRepositoryHibernate implements AuthUserRepository {
     }
 
     @Override
-    public @NonNull List<AuthUserEntity> findAll() {
+    public @Nonnull List<AuthUserEntity> findAll() {
         List<AuthUserEntity> authUserEntities = entityManager.createQuery("SELECT u FROM AuthUserEntity u", AuthUserEntity.class)
                 .getResultList();
         return authUserEntities != null ? authUserEntities : Collections.emptyList();

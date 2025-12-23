@@ -7,13 +7,16 @@ import guru.qa.niffler.page.EditSpendingPage;
 import io.qameta.allure.Step;
 import lombok.Getter;
 import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
+
+import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
 
 import static com.codeborne.selenide.CollectionCondition.size;
 import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.*;
 
+@ParametersAreNonnullByDefault
 public class SpendingTable {
 
     @Getter
@@ -31,12 +34,14 @@ public class SpendingTable {
     private final SelenideElement nextPageButton = $("#page-next");
 
     @Step("Проверить, что таблица содержит трату: {description}")
+    @Nonnull
     public SpendingTable checkThatTableContains(String description) {
         spendingRows.findBy(text(description)).shouldBe(visible);
         return this;
     }
 
     @Step("Выбрать период: {period}")
+    @Nonnull
     public SpendingTable selectPeriod(String period) {
         periodSelect.click();
         Selenide.sleep(300);
@@ -45,6 +50,7 @@ public class SpendingTable {
     }
 
     @Step("Редактировать трату: {description}")
+    @Nonnull
     public EditSpendingPage editSpending(String description) {
         spendingRows.find(text(description))
                 .find(editButton)
@@ -53,6 +59,7 @@ public class SpendingTable {
     }
 
     @Step("Удалить трату: {description}")
+    @Nonnull
     public SpendingTable deleteSpending(String description) {
         selectSpending(description);
         deleteButton.shouldBe(visible).click();
@@ -64,6 +71,7 @@ public class SpendingTable {
     }
 
     @Step("Отменить удаление траты: {description}")
+    @Nonnull
     public SpendingTable cancelDeleteSpending(String description) {
         selectSpending(description);
         deleteButton.shouldBe(visible).click();
@@ -76,18 +84,21 @@ public class SpendingTable {
     }
 
     @Step("Поиск траты: {str}")
+    @Nonnull
     public SpendingTable searchSpending(String str) {
         searchField.search(str);
         return this;
     }
 
     @Step("Очистить поиск")
+    @Nonnull
     public SpendingTable clearSearch() {
         searchField.clearIfNotEmpty();
         return this;
     }
 
     @Step("Проверить, что таблица содержит траты: {expectedSpends}")
+    @Nonnull
     public SpendingTable checkTableContains(String... expectedSpends) {
         for (String spend : expectedSpends) {
             spendingRows.findBy(text(spend)).shouldBe(visible);
@@ -96,24 +107,28 @@ public class SpendingTable {
     }
 
     @Step("Проверить размер таблицы: ожидается {expectedSize}")
+    @Nonnull
     public SpendingTable checkTableSize(int expectedSize) {
         spendingRows.shouldHave(size(expectedSize));
         return this;
     }
 
     @Step("Перейти на предыдущую страницу")
+    @Nonnull
     public SpendingTable goToPreviousPage() {
         previousPageButton.shouldBe(visible).click();
         return this;
     }
 
     @Step("Перейти на следующую страницу")
+    @Nonnull
     public SpendingTable goToNextPage() {
         nextPageButton.shouldBe(visible).click();
         return this;
     }
 
     @Step("Проверить кнопки навигации: предыдущая - {prevEnabled}, следующая - {nextEnabled}")
+    @Nonnull
     public SpendingTable checkPageButtonsEnabled(boolean prevEnabled, boolean nextEnabled) {
         if (prevEnabled) {
             previousPageButton.shouldBe(visible);

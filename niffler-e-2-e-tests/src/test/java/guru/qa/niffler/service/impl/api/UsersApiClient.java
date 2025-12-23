@@ -7,11 +7,11 @@ import guru.qa.niffler.config.Config;
 import guru.qa.niffler.model.TestData;
 import guru.qa.niffler.model.UserJson;
 import guru.qa.niffler.service.UsersClient;
-import lombok.NonNull;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
@@ -45,7 +45,7 @@ public class UsersApiClient implements UsersClient {
     private final UserApi userApi = userdataRetrofit.create(UserApi.class);
 
     @Override
-    @NonNull
+    @Nonnull
     public Optional<UserJson> findUserByUsername(String username) {
         try {
             Response<UserJson> response = userApi.currentUser(username).execute();
@@ -62,7 +62,7 @@ public class UsersApiClient implements UsersClient {
     }
 
     @Override
-    @Nullable
+    @Nonnull
     public UserJson createUser(String username, String password) {
         try {
             authApi.requestRegisterForm().execute();
@@ -89,7 +89,7 @@ public class UsersApiClient implements UsersClient {
     }
 
     @Override
-    @NonNull
+    @Nonnull
     public List<UserJson> createFriends(UserJson targetUser, int count) {
         final List<UserJson> result = new ArrayList<>();
         if (count > 0) {
@@ -119,7 +119,7 @@ public class UsersApiClient implements UsersClient {
     }
 
     @Override
-    @NonNull
+    @Nonnull
     public Optional<UserJson> findUserById(UUID id) {
         // получаем ВСЕХ пользователей и фильтруем
         try {
@@ -146,7 +146,7 @@ public class UsersApiClient implements UsersClient {
     }
 
     @Override
-    @NonNull
+    @Nonnull
     public List<UserJson> addIncomeInvitation(UserJson targetUser, int count) {
         final List<UserJson> result = new ArrayList<>();
         if (count > 0) {
@@ -171,7 +171,7 @@ public class UsersApiClient implements UsersClient {
     }
 
     @Override
-    @NonNull
+    @Nonnull
     public List<UserJson> addOutcomeInvitation(UserJson targetUser, int count) {
         final List<UserJson> result = new ArrayList<>();
         if (count > 0) {

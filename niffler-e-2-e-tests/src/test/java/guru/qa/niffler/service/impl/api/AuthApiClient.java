@@ -1,14 +1,13 @@
 package guru.qa.niffler.service.impl.api;
 
 import guru.qa.niffler.api.AuthApi;
-import lombok.NonNull;
 import okhttp3.JavaNetCookieJar;
 import okhttp3.OkHttpClient;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
-import javax.annotation.Nullable;
+import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
 import java.net.CookieManager;
@@ -29,8 +28,8 @@ public class AuthApiClient {
 
     private final AuthApi authApi = retrofit.create(AuthApi.class);
 
-    @Nullable
-    public Response<Void> register(@NonNull String username, @NonNull String password) throws IOException {
+    @Nonnull
+    public Response<Void> register( String username, String password) throws IOException {
         authApi.requestRegisterForm().execute();
         return authApi.register(
                 username,

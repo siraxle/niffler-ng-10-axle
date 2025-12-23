@@ -6,17 +6,22 @@ import io.qameta.allure.Step;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 
+import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
+
 import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.$$x;
 
+@ParametersAreNonnullByDefault
 public class AllPeoplePage {
     private final ElementsCollection allPeopleTable = $$x("//tbody[@id='all']/tr");
     private final By waitingFlag = By.xpath(".//span[text() = 'Waiting...']");
     private final By searchInput = By.xpath(".//input[@placeholder='Search']");
 
     @Step("Проверить наличие исходящего запроса к пользователю: {targetUserName}")
+    @Nonnull
     public AllPeoplePage hasOutcomeRequest(String targetUserName) {
         SelenideElement requestRow = allPeopleTable.findBy(text(targetUserName));
         requestRow.find(waitingFlag).shouldBe(visible);
@@ -24,6 +29,7 @@ public class AllPeoplePage {
     }
 
     @Step("Поиск пользователя: {outcomeInvitationUsername}")
+    @Nonnull
     public AllPeoplePage searchPeople(String outcomeInvitationUsername) {
         $(searchInput).setValue(outcomeInvitationUsername).sendKeys(Keys.ENTER);
         return this;

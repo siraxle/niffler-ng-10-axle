@@ -8,8 +8,8 @@ import guru.qa.niffler.data.repository.FriendshipRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
-import lombok.NonNull;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Collections;
@@ -25,8 +25,8 @@ public class FriendshipRepositoryHibernate implements FriendshipRepository {
     private final EntityManager entityManager = em(CFG.userdataJdbcUrl());
 
     @Override
-    @Nullable
-    public FriendshipEntity create(@NonNull FriendshipEntity friendship) {
+    @Nonnull
+    public FriendshipEntity create(FriendshipEntity friendship) {
         entityManager.joinTransaction();
         UserEntity managedRequester = entityManager.find(UserEntity.class, friendship.getRequester().getId());
         UserEntity managedAddressee = entityManager.find(UserEntity.class, friendship.getAddressee().getId());
@@ -47,8 +47,8 @@ public class FriendshipRepositoryHibernate implements FriendshipRepository {
     }
 
     @Override
-    @NonNull
-    public Optional<FriendshipEntity> findById(@NonNull FriendShipId id) {
+    @Nonnull
+    public Optional<FriendshipEntity> findById(FriendShipId id) {
         String jpql = "SELECT f FROM FriendshipEntity f WHERE f.requester.id = :requesterId AND f.addressee.id = :addresseeId";
         TypedQuery<FriendshipEntity> query = entityManager.createQuery(jpql, FriendshipEntity.class);
         query.setParameter("requesterId", id.getRequester());
@@ -62,8 +62,8 @@ public class FriendshipRepositoryHibernate implements FriendshipRepository {
     }
 
     @Override
-    @NonNull
-    public List<FriendshipEntity> findByRequester(@NonNull String username) {
+    @Nonnull
+    public List<FriendshipEntity> findByRequester(String username) {
         List<FriendshipEntity> result = entityManager.createQuery(
                         "SELECT f FROM FriendshipEntity f WHERE f.requester.username = :username ORDER BY f.createdDate DESC",
                         FriendshipEntity.class)
@@ -73,8 +73,8 @@ public class FriendshipRepositoryHibernate implements FriendshipRepository {
     }
 
     @Override
-    @NonNull
-    public List<FriendshipEntity> findByAddressee(@NonNull String username) {
+    @Nonnull
+    public List<FriendshipEntity> findByAddressee(String username) {
         List<FriendshipEntity> result = entityManager.createQuery(
                         "SELECT f FROM FriendshipEntity f WHERE f.addressee.username = :username ORDER BY f.createdDate DESC",
                         FriendshipEntity.class)
@@ -84,14 +84,14 @@ public class FriendshipRepositoryHibernate implements FriendshipRepository {
     }
 
     @Override
-    @Nullable
-    public FriendshipEntity update(@NonNull FriendshipEntity friendship) {
+    @Nonnull
+    public FriendshipEntity update(FriendshipEntity friendship) {
         entityManager.joinTransaction();
         return entityManager.merge(friendship);
     }
 
     @Override
-    public void remove(@NonNull FriendshipEntity friendship) {
+    public void remove(FriendshipEntity friendship) {
         entityManager.joinTransaction();
         FriendShipId id = new FriendShipId();
         id.setRequester(friendship.getRequester().getId());

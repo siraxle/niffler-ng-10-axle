@@ -7,8 +7,8 @@ import guru.qa.niffler.data.entity.user.UserEntity;
 import guru.qa.niffler.data.repository.UserDataUserRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
-import lombok.NonNull;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Collections;
@@ -27,7 +27,7 @@ public class UserdataUserRepositoryHibernate implements UserDataUserRepository {
     private final EntityManager entityManager = em(CFG.userdataJdbcUrl());
 
     @Override
-    @Nullable
+    @Nonnull
     public UserEntity create(UserEntity user) {
         entityManager.joinTransaction();
         entityManager.persist(user);
@@ -36,13 +36,13 @@ public class UserdataUserRepositoryHibernate implements UserDataUserRepository {
     }
 
     @Override
-    @NonNull
+    @Nonnull
     public Optional<UserEntity> findById(UUID id) {
         return Optional.ofNullable(entityManager.find(UserEntity.class, id));
     }
 
     @Override
-    @NonNull
+    @Nonnull
     public Optional<UserEntity> findByUsername(String username) {
         try {
             return Optional.of(entityManager.createQuery(
@@ -56,7 +56,7 @@ public class UserdataUserRepositoryHibernate implements UserDataUserRepository {
     }
 
     @Override
-    @Nullable
+    @Nonnull
     public UserEntity update(UserEntity user) {
         entityManager.joinTransaction();
         UserEntity merged = entityManager.merge(user);
@@ -75,7 +75,7 @@ public class UserdataUserRepositoryHibernate implements UserDataUserRepository {
     }
 
     @Override
-    @NonNull
+    @Nonnull
     public List<UserEntity> findAll() {
         List<UserEntity> result = entityManager.createQuery(
                         "SELECT u FROM UserEntity u ORDER BY u.username",
@@ -112,7 +112,7 @@ public class UserdataUserRepositoryHibernate implements UserDataUserRepository {
     }
 
     @Override
-    @NonNull
+    @Nonnull
     public List<UserEntity> findFriends(UserEntity user) {
         String jpql = """
             SELECT f.addressee FROM FriendshipEntity f 
@@ -130,7 +130,7 @@ public class UserdataUserRepositoryHibernate implements UserDataUserRepository {
     }
 
     @Override
-    @NonNull
+    @Nonnull
     public List<UserEntity> findPendingInvitations(UserEntity user) {
         String jpql = """
                 SELECT f.requester FROM FriendshipEntity f 

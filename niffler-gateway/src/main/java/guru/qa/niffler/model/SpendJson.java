@@ -6,7 +6,7 @@ import guru.qa.niffler.validation.UnixEpochOrLater;
 import jakarta.annotation.Nonnull;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Nonnull;
 
 import java.util.Date;
 import java.util.UUID;
@@ -15,17 +15,17 @@ public record SpendJson(
     @JsonProperty("id")
     UUID id,
     @JsonProperty("spendDate")
-    @NotNull(message = "Spend date can not be null")
+    @Nonnull(message = "Spend date can not be null")
     @UnixEpochOrLater(message = "Spend date must not be future or less than 01.01.1970")
     Date spendDate,
     @JsonProperty("category")
-    @NotNull(message = "Category can not be null")
+    @Nonnull(message = "Category can not be null")
     @Valid CategoryJson category,
     @JsonProperty("currency")
-    @NotNull(message = "Currency can not be null")
+    @Nonnull(message = "Currency can not be null")
     CurrencyValues currency,
     @JsonProperty("amount")
-    @NotNull(message = "Amount can not be null")
+    @Nonnull(message = "Amount can not be null")
     @DecimalMin(value = "0.01", message = "Amount should be greater than 0.01")
     Double amount,
     @JsonProperty("description")

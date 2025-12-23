@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import guru.qa.niffler.data.entity.user.FriendshipStatus;
 import guru.qa.niffler.data.entity.user.UserEntity;
-import lombok.NonNull;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.UUID;
 
@@ -31,7 +31,7 @@ public record UserJson(
         @JsonIgnore
         TestData testData) {
 
-    public static @NonNull UserJson fromEntity(@NonNull UserEntity entity, @Nullable FriendshipStatus friendshipStatus) {
+    public static @Nonnull UserJson fromEntity(@Nonnull UserEntity entity, @Nullable FriendshipStatus friendshipStatus) {
         return new UserJson(
                 entity.getId(),
                 entity.getUsername(),
@@ -46,7 +46,7 @@ public record UserJson(
         );
     }
 
-    public @NonNull UserJson addTestData(TestData testData) {
+    public @Nonnull UserJson addTestData(TestData testData) {
         return new UserJson(
                 id,
                 username,

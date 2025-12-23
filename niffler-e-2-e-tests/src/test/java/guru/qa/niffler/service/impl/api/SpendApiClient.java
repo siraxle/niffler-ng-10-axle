@@ -5,11 +5,11 @@ import guru.qa.niffler.config.Config;
 import guru.qa.niffler.model.CategoryJson;
 import guru.qa.niffler.model.SpendJson;
 import guru.qa.niffler.service.SpendClient;
-import lombok.NonNull;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
@@ -68,7 +68,7 @@ public class SpendApiClient implements SpendClient {
         return response.body();
     }
 
-    public @NonNull List<SpendJson> allSpends(String username) {
+    public @Nonnull List<SpendJson> allSpends(String username) {
         final Response<List<SpendJson>> response;
         try {
             response = spendApi.getAllSpends(username)
@@ -119,7 +119,7 @@ public class SpendApiClient implements SpendClient {
     }
 
 
-    public @NonNull List<CategoryJson> getAllCategories(String username) {
+    public @Nonnull List<CategoryJson> getAllCategories(String username) {
         final Response<List<CategoryJson>> response;
         try {
             response = spendApi.getAllCategories(username)
@@ -132,7 +132,7 @@ public class SpendApiClient implements SpendClient {
     }
 
     @Override
-    public @Nullable Optional<CategoryJson> findCategoryByNameAndUsername(String categoryName, String username) {
+    public @Nonnull Optional<CategoryJson> findCategoryByNameAndUsername(String categoryName, String username) {
         final Response<List<CategoryJson>> response;
         try {
             response = spendApi.getAllCategories(username).execute();

@@ -71,7 +71,7 @@ public class AllAuthUserRepositoriesTest {
             AuthUserEntity user = createTestUser(testUsername);
             AuthUserEntity created = repository.create(user);
 
-            assertNotNull(created.getId());
+            assertNonnull(created.getId());
             assertEquals(testUsername, created.getUsername());
             return null;
         });
@@ -172,7 +172,7 @@ public class AllAuthUserRepositoriesTest {
             // 1. CREATE
             AuthUserEntity user = createTestUser(testUsername);
             AuthUserEntity created = repository.create(user);
-            assertNotNull(created.getId());
+            assertNonnull(created.getId());
             assertEquals(testUsername, created.getUsername());
 
             // 2. READ (поиск по ID)
@@ -221,8 +221,8 @@ public class AllAuthUserRepositoriesTest {
             AuthUserEntity created1 = repository.create(user1);
             AuthUserEntity created2 = repository.create(user2);
 
-            assertNotNull(created1.getId());
-            assertNotNull(created2.getId());
+            assertNonnull(created1.getId());
+            assertNonnull(created2.getId());
 
             List<AuthUserEntity> allUsers = repository.findAll();
             assertTrue(allUsers.size() >= 2);
@@ -245,7 +245,7 @@ public class AllAuthUserRepositoriesTest {
 
             // Для Hibernate проверяем загрузку authorities
             if (repository instanceof AuthUserRepositoryHibernate) {
-                assertNotNull(created.getAuthorities());
+                assertNonnull(created.getAuthorities());
                 assertFalse(created.getAuthorities().isEmpty());
             }
 

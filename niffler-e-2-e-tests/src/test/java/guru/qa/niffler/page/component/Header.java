@@ -4,8 +4,12 @@ import com.codeborne.selenide.SelenideElement;
 import guru.qa.niffler.page.*;
 import io.qameta.allure.Step;
 
+import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
+
 import static com.codeborne.selenide.Selenide.$x;
 
+@ParametersAreNonnullByDefault
 public class Header {
 
     private final SelenideElement menuButton = $x("//button[@aria-label='Menu']");
@@ -17,12 +21,14 @@ public class Header {
     private final SelenideElement logoButton = $x("//a[@href='/main']");
 
     @Step("Открыть меню в хедере")
+    @Nonnull
     public Header openMenu() {
         menuButton.click();
         return this;
     }
 
     @Step("Перейти на страницу друзей")
+    @Nonnull
     public FriendsPage toFriendsPage() {
         openMenu();
         friendsButton.click();
@@ -30,6 +36,7 @@ public class Header {
     }
 
     @Step("Перейти на страницу всех пользователей")
+    @Nonnull
     public AllPeoplePage toAllPeoplesPage() {
         openMenu();
         allPeopleButton.click();
@@ -37,6 +44,7 @@ public class Header {
     }
 
     @Step("Перейти на страницу профиля пользователя")
+    @Nonnull
     public UserProfilePage toProfilePage() {
         openMenu();
         profileButton.click();
@@ -44,6 +52,7 @@ public class Header {
     }
 
     @Step("Выполнить выход из системы")
+    @Nonnull
     public LoginPage signOut() {
         openMenu();
         signOutButton.click();
@@ -51,12 +60,14 @@ public class Header {
     }
 
     @Step("Перейти на страницу добавления траты")
+    @Nonnull
     public EditSpendingPage toAddSpendingPage() {
         addSpendingButton.click();
         return new EditSpendingPage();
     }
 
     @Step("Перейти на главную страницу")
+    @Nonnull
     public MainPage toMainPage() {
         logoButton.click();
         return new MainPage();

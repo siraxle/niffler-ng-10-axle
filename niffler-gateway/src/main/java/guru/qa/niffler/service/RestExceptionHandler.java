@@ -28,7 +28,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 
 import static guru.qa.niffler.service.utils.ValidationExceptionMessageResolver.resolveHandlerMethodValidationException;
 import static guru.qa.niffler.service.utils.ValidationExceptionMessageResolver.resolveMethodArgumentNotValidException;
-import static java.util.Objects.requireNonNull;
+import static java.util.Objects.requireNonnull;
 
 @RestControllerAdvice
 @ParametersAreNonnullByDefault
@@ -65,7 +65,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         .status(status)
         .body(new ErrorJson(
             appName + ": " + ENTITY_VALIDATION_ERROR,
-            requireNonNull(HttpStatus.resolve(status.value())).getReasonPhrase(),
+            requireNonnull(HttpStatus.resolve(status.value())).getReasonPhrase(),
             status.value(),
             resolveHandlerMethodValidationException(ex),
             ((ServletWebRequest) request).getRequest().getRequestURI()
@@ -139,7 +139,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
   private ResponseEntity<ErrorJson> handleForwardedException(HttpClientErrorException ex, HttpServletRequest request) {
     ErrorJson originalError = ex.getResponseBodyAs(ErrorJson.class);
     return ResponseEntity
-        .status(requireNonNull(originalError).status())
+        .status(requireNonnull(originalError).status())
         .body(new ErrorJson(
             originalError.type(),
             originalError.title(),

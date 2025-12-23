@@ -2,8 +2,8 @@ package guru.qa.niffler.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import guru.qa.niffler.data.entity.auth.AuthorityEntity;
-import lombok.NonNull;
 
+import javax.annotation.Nonnull;
 import java.util.UUID;
 
 public record AuthorityJson(
@@ -14,7 +14,7 @@ public record AuthorityJson(
         @JsonProperty("authority")
         Authority authority) {
 
-    public static @NonNull AuthorityJson fromEntity(@NonNull AuthorityEntity entity) {
+    public static @Nonnull AuthorityJson fromEntity(@Nonnull AuthorityEntity entity) {
         return new AuthorityJson(
                 entity.getId(),
                 entity.getUser().getId(),
@@ -22,7 +22,7 @@ public record AuthorityJson(
         );
     }
 
-    public static @NonNull AuthorityJson[] toAuthorityJsonArray(@NonNull AuthorityEntity[] entities) {
+    public static @Nonnull AuthorityJson[] toAuthorityJsonArray(@Nonnull AuthorityEntity[] entities) {
         AuthorityJson[] result = new AuthorityJson[entities.length];
         for (int i = 0; i < entities.length; i++) {
             result[i] = AuthorityJson.fromEntity(entities[i]);

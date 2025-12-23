@@ -52,7 +52,7 @@ public class AllUserDataUserRepositoriesTest {
             UserEntity user = createTestUser(testUsername);
             UserEntity created = repository.create(user);
 
-            assertNotNull(created.getId());
+            assertNonnull(created.getId());
             assertEquals(testUsername, created.getUsername());
             return null;
         });

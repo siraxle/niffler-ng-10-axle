@@ -3,9 +3,13 @@ package guru.qa.niffler.page;
 import com.codeborne.selenide.SelenideElement;
 import io.qameta.allure.Step;
 
+import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
+
 import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Selenide.$;
 
+@ParametersAreNonnullByDefault
 public class LoginPage {
     private final SelenideElement usernameInput = $("#username");
     private final SelenideElement passwordInput = $("#password");
@@ -14,6 +18,7 @@ public class LoginPage {
     private final SelenideElement errorForm = $("*.form__error");
 
     @Step("Выполнить вход с логином {username} и паролем {password}")
+    @Nonnull
     public MainPage login(String username, String password) {
         usernameInput.val(username);
         passwordInput.val(password);
@@ -22,6 +27,7 @@ public class LoginPage {
     }
 
     @Step("Попытка невалидного входа с логином {username} и паролем {password}")
+    @Nonnull
     public LoginPage invalidLogin(String username, String password) {
         usernameInput.val(username);
         passwordInput.val(password);

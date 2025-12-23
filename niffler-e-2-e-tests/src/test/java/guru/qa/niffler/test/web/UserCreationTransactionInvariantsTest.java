@@ -47,13 +47,13 @@ class UserCreationTransactionInvariantsTest {
         // Шаг 1: Создаем в auth БД - УСПЕХ
         AuthUserEntity authUser = createAuthUserEntity(username);
         AuthUserEntity createdAuth = authDao.create(authUser);
-        assertNotNull(createdAuth.getId(), "User should be created in auth DB");
+        assertNonnull(createdAuth.getId(), "User should be created in auth DB");
         System.out.println("Created in auth DB: " + createdAuth.getId());
 
         UserEntity userEntity = createUserEntity(username);
         UserEntity createdUser = userDao.create(userEntity);
 
-        assertNotNull(createdUser.getId(), "User should be created in userdata DB");
+        assertNonnull(createdUser.getId(), "User should be created in userdata DB");
         System.out.println("Created in userdata DB: " + createdUser.getId());
 
         // Проверяем что ОБА пользователя существуют
@@ -77,7 +77,7 @@ class UserCreationTransactionInvariantsTest {
         var userAuth = createUserAuthJson(username);
         var createdAuth = authClient.createUser(userAuth);
 
-        assertNotNull(createdAuth.id(), "User should be created in auth DB with transaction");
+        assertNonnull(createdAuth.id(), "User should be created in auth DB with transaction");
         System.out.println("✓ Created in auth DB with transaction: " + createdAuth.id());
 
         // Проверяем атомарность: если бы была ошибка при создании authorities, все откатилось бы
@@ -102,7 +102,7 @@ class UserCreationTransactionInvariantsTest {
 //        UserJson user = createUserJson(username);
 //        UserJson createdUser = usersDbClient.createUser(user);
 //
-//        assertNotNull(createdUser.id(), "User should be created in userdata DB");
+//        assertNonnull(createdUser.id(), "User should be created in userdata DB");
 //        System.out.println("✓ Created in userdata DB: " + createdUser.id());
 //
 //        Optional<UserJson> foundUser = usersDbClient.findUserByUsername(username);
@@ -125,7 +125,7 @@ class UserCreationTransactionInvariantsTest {
 //        UserJson user = createUserJson(username);
 //        UserJson createdUser = usersDbClient.createUserSpringJdbc(user);
 //
-//        assertNotNull(createdUser.id(), "User should be created in distributed transaction");
+//        assertNonnull(createdUser.id(), "User should be created in distributed transaction");
 //        System.out.println("✓ Created in distributed transaction: " + createdUser.id());
 //
 //        // Проверяем доступность через find (обе БД)
@@ -153,7 +153,7 @@ class UserCreationTransactionInvariantsTest {
 
         // Шаг 1: Первое создание - УСПЕХ
         UserJson firstUser = usersDbClient.createUserSpringJdbc(createUserJson(username));
-        assertNotNull(firstUser.id());
+        assertNonnull(firstUser.id());
         System.out.println("✓ First creation successful: " + firstUser.id());
 
         // Шаг 2: Второе создание с тем же username - ОШИБКА

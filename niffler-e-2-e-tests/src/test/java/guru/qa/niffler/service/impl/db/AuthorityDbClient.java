@@ -12,10 +12,10 @@ import guru.qa.niffler.data.tpl.JdbcTransactionTemplate;
 import guru.qa.niffler.data.tpl.XaTransactionTemplate;
 import guru.qa.niffler.model.Authority;
 import guru.qa.niffler.model.AuthorityJson;
-import lombok.NonNull;
 import org.springframework.jdbc.support.JdbcTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.*;
@@ -83,7 +83,7 @@ public class AuthorityDbClient {
         });
     }
 
-    @NonNull
+    @Nonnull
     public List<AuthorityJson> getAuthoritiesByUsername(String username) {
         return Objects.requireNonNull(xaTxTemplate.execute(() -> {
             UUID userId = getUserIdByUsername(username);
@@ -97,7 +97,7 @@ public class AuthorityDbClient {
         }));
     }
 
-    @NonNull
+    @Nonnull
     public List<AuthorityJson> getAuthoritiesByUserId(UUID userId) {
         return Objects.requireNonNull(xaTxTemplate.execute(() -> {
             List<AuthorityEntity> authorities = authAuthorityDao.findAuthoritiesByUserId(userId);
@@ -141,7 +141,7 @@ public class AuthorityDbClient {
         });
     }
 
-    @NonNull
+    @Nonnull
     private UUID getUserIdByUsername(String username) {
         return Objects.requireNonNull(xaTxTemplate.execute(() -> {
             Optional<AuthUserEntity> user = authUserDao.findByUsername(username);

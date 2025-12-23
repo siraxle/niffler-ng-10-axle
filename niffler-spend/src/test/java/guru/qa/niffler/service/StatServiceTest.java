@@ -25,7 +25,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNonnull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -217,8 +217,8 @@ class StatServiceTest {
     Map<String, List<SpendJson>> map = statService.bindSpendsToCategories(sortedSpends);
 
     assertEquals(2, map.size());
-    assertNotNull(map.get("Бар"));
-    assertNotNull(map.get("Рыбалка"));
+    assertNonnull(map.get("Бар"));
+    assertNonnull(map.get("Рыбалка"));
     List<SpendJson> barSpends = map.get("Бар");
     List<SpendJson> fishCatchSpends = map.get("Рыбалка");
     assertEquals(2, barSpends.size());
