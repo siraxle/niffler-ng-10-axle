@@ -39,7 +39,7 @@ public class PropertiesLogger implements ApplicationListener<ApplicationPrepared
       Arrays.sort(propertyNames);
       for (String propertyName : propertyNames) {
         String resolvedProperty = environment.getProperty(propertyName);
-        String sourceProperty = Objects.requireNonnull(propertySource.getProperty(propertyName)).toString();
+        String sourceProperty = Objects.requireNonNull(propertySource.getProperty(propertyName)).toString();
         if (Objects.equals(resolvedProperty, sourceProperty)) {
           LOG.info("{}={}", propertyName, resolvedProperty);
         } else {

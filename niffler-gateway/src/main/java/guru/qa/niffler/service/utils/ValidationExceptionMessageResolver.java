@@ -27,7 +27,7 @@ public class ValidationExceptionMessageResolver {
         .stream()
         .flatMap(parameterValidationResult -> parameterValidationResult.getResolvableErrors().stream())
         .map(error -> {
-          Object argument = Objects.requireNonnull(error.getArguments())[0];
+          Object argument = Objects.requireNonNull(error.getArguments())[0];
           return ((DefaultMessageSourceResolvable) argument).getDefaultMessage() + ": " + error.getDefaultMessage();
         })
         .collect(Collectors.joining(", "));
