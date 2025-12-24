@@ -1,5 +1,7 @@
 package guru.qa.niffler.config;
 
+import javax.annotation.Nonnull;
+
 public interface Config {
 
     static Config getInstance() {
@@ -8,26 +10,37 @@ public interface Config {
                 LocalConfig.INSTANCE;
     }
 
+    @Nonnull
     String frontUrl();
 
+    @Nonnull
     String authUrl();
 
+    @Nonnull
     String gatewayUrl();
 
+    @Nonnull
     String userdataUrl();
 
+    @Nonnull
     String spendUrl();
 
+    @Nonnull
     String ghUrl();
 
+    @Nonnull
     String registerUrl();
 
+    @Nonnull
     String authJdbcUrl();
 
+    @Nonnull
     String userdataJdbcUrl();
 
+    @Nonnull
     String spendJdbcUrl();
 
+    @Nonnull
     String currencyJdbcUrl();
 
 }

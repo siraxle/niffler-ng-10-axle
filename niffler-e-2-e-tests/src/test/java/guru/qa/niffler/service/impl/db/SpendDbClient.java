@@ -4,7 +4,6 @@ import guru.qa.niffler.config.Config;
 import guru.qa.niffler.data.entity.spend.CategoryEntity;
 import guru.qa.niffler.data.entity.spend.SpendEntity;
 import guru.qa.niffler.data.repository.SpendAndCategoryRepository;
-import guru.qa.niffler.data.repository.impl.SpendAndCategoryRepositoryHibernate;
 import guru.qa.niffler.data.tpl.DataSources;
 import guru.qa.niffler.data.tpl.JdbcTransactionTemplate;
 import guru.qa.niffler.data.tpl.XaTransactionTemplate;
@@ -21,11 +20,11 @@ import java.util.Objects;
 import java.util.Optional;
 
 @ParametersAreNonnullByDefault
-public class SpendDbClient implements SpendClient {
+public final class SpendDbClient implements SpendClient {
 
     private static final Config CFG = Config.getInstance();
 
-    private final SpendAndCategoryRepository spendAndCategoryRepository = new SpendAndCategoryRepositoryHibernate();
+    private final SpendAndCategoryRepository spendAndCategoryRepository = SpendAndCategoryRepository.getInstance();
 
     private final TransactionTemplate transactionTemplate = new TransactionTemplate(
             new JdbcTransactionManager(

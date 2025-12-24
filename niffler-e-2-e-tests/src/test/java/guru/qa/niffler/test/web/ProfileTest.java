@@ -11,6 +11,7 @@ import guru.qa.niffler.model.UserJson;
 import guru.qa.niffler.page.LoginPage;
 import guru.qa.niffler.service.SpendClient;
 import guru.qa.niffler.service.impl.db.SpendDbClient;
+import guru.qa.niffler.utils.RandomDataUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -120,4 +121,19 @@ public class ProfileTest {
                 .toProfilePage()
                 .verifyCategoryVisible(categoryName);
     }
+
+    @User()
+    @Test
+    void usernameShouldBeEditedInProfile(UserJson user) {
+        final String username = RandomDataUtils.randomUsername();
+
+        Selenide.open(CFG.frontUrl(), LoginPage.class)
+                .login(user.username(), user.testData().password())
+                .getHeader()
+                .toProfilePage()
+                .setName(username)
+                .saveChanges()
+                .checkSnackbarText("Profile successfully updated");
+    }
+
 }

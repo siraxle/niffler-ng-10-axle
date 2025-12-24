@@ -2,12 +2,22 @@ package guru.qa.niffler.data.repository;
 
 import guru.qa.niffler.data.entity.spend.CategoryEntity;
 import guru.qa.niffler.data.entity.spend.SpendEntity;
+import guru.qa.niffler.data.repository.impl.*;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 public interface SpendAndCategoryRepository {
+
+    static SpendAndCategoryRepository getInstance() {
+        return switch (System.getProperty("repository", "jpa")) {
+            case "jpa" -> new SpendAndCategoryRepositoryHibernate();
+            case "jdbc" -> new SpendAndCategoryRepositoryJdbc();
+            case "sjdbc" -> new SpendAndCategoryRepositorySpringJdbc();
+            default -> throw  new IllegalStateException("Unrecognized repository: " + System.getProperty("repository"));
+        };
+    }
 
     SpendEntity createSpend(SpendEntity spend);
 

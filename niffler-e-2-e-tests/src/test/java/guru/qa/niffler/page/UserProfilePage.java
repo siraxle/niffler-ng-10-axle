@@ -14,7 +14,7 @@ import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.$$;
 
 @ParametersAreNonnullByDefault
-public class UserProfilePage {
+public class UserProfilePage extends BasePage<UserProfilePage> {
 
     // Поля профиля
     private final SelenideElement usernameInput = $("#username");

@@ -13,7 +13,7 @@ import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.$$;
 
 @ParametersAreNonnullByDefault
-public class EditSpendingPage {
+public class EditSpendingPage extends BasePage<EditSpendingPage> {
 
     private final SelenideElement amountInput = $("#amount");
     private final SelenideElement currencySelect = $("#currency");

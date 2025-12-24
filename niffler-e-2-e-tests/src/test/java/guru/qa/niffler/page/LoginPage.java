@@ -10,7 +10,7 @@ import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Selenide.$;
 
 @ParametersAreNonnullByDefault
-public class LoginPage {
+public class LoginPage extends BasePage<LoginPage> {
     private final SelenideElement usernameInput = $("#username");
     private final SelenideElement passwordInput = $("#password");
     private final SelenideElement submitBtn = $("#login-button");

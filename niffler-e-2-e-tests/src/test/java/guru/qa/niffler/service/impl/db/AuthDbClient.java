@@ -26,7 +26,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @ParametersAreNonnullByDefault
-public class AuthDbClient {
+public final class AuthDbClient {
     private static final Config CFG = Config.getInstance();
 
     private final AuthUserDao authUserDao = new AuthUserDaoSpringJdbc();

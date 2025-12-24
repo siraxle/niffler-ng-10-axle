@@ -15,7 +15,7 @@ import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.$$x;
 
 @ParametersAreNonnullByDefault
-public class AllPeoplePage {
+public class AllPeoplePage extends BasePage<AllPeoplePage> {
     private final ElementsCollection allPeopleTable = $$x("//tbody[@id='all']/tr");
     private final By waitingFlag = By.xpath(".//span[text() = 'Waiting...']");
     private final By searchInput = By.xpath(".//input[@placeholder='Search']");
