@@ -9,21 +9,25 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import static guru.qa.niffler.data.jpa.EntityManagers.em;
 
+@ParametersAreNonnullByDefault
 public class FriendshipRepositoryHibernate implements FriendshipRepository {
 
     private static final Config CFG = Config.getInstance();
     private final EntityManager entityManager = em(CFG.userdataJdbcUrl());
 
     @Override
+    @Nonnull
     public FriendshipEntity create(FriendshipEntity friendship) {
         entityManager.joinTransaction();
-
-        // Используем find() вместо merge() - просто получаем ссылку на существующий объект
         UserEntity managedRequester = entityManager.find(UserEntity.class, friendship.getRequester().getId());
         UserEntity managedAddressee = entityManager.find(UserEntity.class, friendship.getAddressee().getId());
 
@@ -34,7 +38,6 @@ public class FriendshipRepositoryHibernate implements FriendshipRepository {
             throw new IllegalArgumentException("Addressee not found with id: " + friendship.getAddressee().getId());
         }
 
-        // Устанавливаем найденные managed объекты
         friendship.setRequester(managedRequester);
         friendship.setAddressee(managedAddressee);
 
@@ -44,6 +47,7 @@ public class FriendshipRepositoryHibernate implements FriendshipRepository {
     }
 
     @Override
+    @Nonnull
     public Optional<FriendshipEntity> findById(FriendShipId id) {
         String jpql = "SELECT f FROM FriendshipEntity f WHERE f.requester.id = :requesterId AND f.addressee.id = :addresseeId";
         TypedQuery<FriendshipEntity> query = entityManager.createQuery(jpql, FriendshipEntity.class);
@@ -58,24 +62,29 @@ public class FriendshipRepositoryHibernate implements FriendshipRepository {
     }
 
     @Override
+    @Nonnull
     public List<FriendshipEntity> findByRequester(String username) {
-        return entityManager.createQuery(
+        List<FriendshipEntity> result = entityManager.createQuery(
                         "SELECT f FROM FriendshipEntity f WHERE f.requester.username = :username ORDER BY f.createdDate DESC",
                         FriendshipEntity.class)
                 .setParameter("username", username)
                 .getResultList();
+        return result != null ? result : Collections.emptyList();
     }
 
     @Override
+    @Nonnull
     public List<FriendshipEntity> findByAddressee(String username) {
-        return entityManager.createQuery(
+        List<FriendshipEntity> result = entityManager.createQuery(
                         "SELECT f FROM FriendshipEntity f WHERE f.addressee.username = :username ORDER BY f.createdDate DESC",
                         FriendshipEntity.class)
                 .setParameter("username", username)
                 .getResultList();
+        return result != null ? result : Collections.emptyList();
     }
 
     @Override
+    @Nonnull
     public FriendshipEntity update(FriendshipEntity friendship) {
         entityManager.joinTransaction();
         return entityManager.merge(friendship);

@@ -1,59 +1,39 @@
 package guru.qa.niffler.page;
 
-import com.codeborne.selenide.ElementsCollection;
-import com.codeborne.selenide.SelenideElement;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
+import guru.qa.niffler.page.component.Header;
+import guru.qa.niffler.page.component.SpendingTable;
+import io.qameta.allure.Step;
+
+import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
 
 import static com.codeborne.selenide.Condition.text;
-import static com.codeborne.selenide.Condition.visible;
-import static com.codeborne.selenide.Selenide.*;
+import static com.codeborne.selenide.Selenide.$;
 
+@ParametersAreNonnullByDefault
 public class MainPage {
-    private final ElementsCollection tableRows = $$("#spendings tr");
-    private final SelenideElement labelBtn = $x("//button[@aria-label='Menu']");
-    private final SelenideElement profileBtn = $x("//a[@href='/profile']");
-    private final SelenideElement friendsBtn = $x("//a[@href='/people/friends']");
-    private final SelenideElement allPeopleBtn = $x("//a[@href='/people/all']");
-    private final By searchInput = By.xpath(".//input[@placeholder='Search']");
 
-    public EditSpendingPage editSpending(String description) {
-        tableRows.find(text(description)).$$("td").get(5).click();
-        return new EditSpendingPage();
+    private final Header header = new Header();
+    private final SpendingTable spendingTable = new SpendingTable();
+
+    @Step("Получить компонент Header")
+    @Nonnull
+    public Header getHeader() {
+        return header;
     }
 
-    public MainPage checkThatTableContains(String description) {
-        tableRows.find(text(description)).should(visible);
-        return this;
+    @Step("Получить таблицу трат")
+    @Nonnull
+    public SpendingTable getSpendingTable() {
+        return spendingTable;
     }
 
+    @Step("Проверить, что главная страница содержит текст: {expectedTexts}")
+    @Nonnull
     public MainPage checkThatMainPageContainsText(String... expectedTexts) {
         for (String text : expectedTexts) {
             $("body").shouldHave(text(text));
         }
-        return this;
-    }
-
-    public UserProfilePage goToProfile() {
-        labelBtn.click();
-        profileBtn.click();
-        return new UserProfilePage();
-    }
-
-    public FriendsPage goToFriendsPage() {
-        labelBtn.click();
-        friendsBtn.click();
-        return new FriendsPage();
-    }
-
-    public AllPeoplePage goToAllPeoplePage() {
-        labelBtn.click();
-        allPeopleBtn.click();
-        return new AllPeoplePage();
-    }
-
-    public MainPage search(String data) {
-        $(searchInput).setValue(data).sendKeys(Keys.ENTER);
         return this;
     }
 }

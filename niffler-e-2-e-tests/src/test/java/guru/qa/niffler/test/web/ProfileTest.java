@@ -29,7 +29,8 @@ public class ProfileTest {
         String categoryName = user.testData().categories().getFirst().name();
         Selenide.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
-                .goToProfile()
+                .getHeader()
+                .toProfilePage()
                 .toggleShowArchived()
                 .verifyCategoryVisible(categoryName);
     }
@@ -54,7 +55,8 @@ public class ProfileTest {
             System.out.println("Категория найдена в БД " + categoryName);
             Selenide.open(CFG.frontUrl(), LoginPage.class)
                     .login(username, user.testData().password())
-                    .goToProfile()
+                    .getHeader()
+                    .toProfilePage()
                     .toggleShowArchived()
                     .verifyCategoryVisible(categoryName);
         }
@@ -69,7 +71,8 @@ public class ProfileTest {
 
         Selenide.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
-                .goToProfile()
+                .getHeader()
+                .toProfilePage()
                 .toggleShowArchived()
                 .verifyCategoryVisible(categoryName);
     }
@@ -84,7 +87,8 @@ public class ProfileTest {
 
         Selenide.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
-                .goToProfile()
+                .getHeader()
+                .toProfilePage()
                 .verifyCategoryVisible(categoryName);
     }
 
@@ -97,7 +101,8 @@ public class ProfileTest {
 
         Selenide.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
-                .goToProfile()
+                .getHeader()
+                .toProfilePage()
                 .toggleShowArchived()
                 .verifyCategoryVisible(categoryName);
     }
@@ -111,7 +116,8 @@ public class ProfileTest {
 
         Selenide.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
-                .goToProfile()
+                .getHeader()
+                .toProfilePage()
                 .verifyCategoryVisible(categoryName);
     }
 }

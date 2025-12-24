@@ -102,7 +102,7 @@ class UserCreationTransactionInvariantsTest {
 //        UserJson user = createUserJson(username);
 //        UserJson createdUser = usersDbClient.createUser(user);
 //
-//        assertNotNull(createdUser.id(), "User should be created in userdata DB");
+//        assertNonnull(createdUser.id(), "User should be created in userdata DB");
 //        System.out.println("✓ Created in userdata DB: " + createdUser.id());
 //
 //        Optional<UserJson> foundUser = usersDbClient.findUserByUsername(username);
@@ -125,7 +125,7 @@ class UserCreationTransactionInvariantsTest {
 //        UserJson user = createUserJson(username);
 //        UserJson createdUser = usersDbClient.createUserSpringJdbc(user);
 //
-//        assertNotNull(createdUser.id(), "User should be created in distributed transaction");
+//        assertNonnull(createdUser.id(), "User should be created in distributed transaction");
 //        System.out.println("✓ Created in distributed transaction: " + createdUser.id());
 //
 //        // Проверяем доступность через find (обе БД)

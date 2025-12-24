@@ -116,7 +116,7 @@ public class JdbcTest {
 //            return new AuthUserDaoJdbc().create(user);
 //        }, CFG.authJdbcUrl());
 //
-//        assertNotNull(createdUser.getId());
+//        assertNonnull(createdUser.getId());
 //
 //        Optional<AuthUserEntity> foundUser = transaction((Connection con) ->
 //                        new AuthUserDaoJdbc().findById(createdUser.getId()),
@@ -193,7 +193,7 @@ public class JdbcTest {
 //                )
 //        );
 //
-//        assertNotNull(exception);
+//        assertNonnull(exception);
 //    }
 //
 //    @Test

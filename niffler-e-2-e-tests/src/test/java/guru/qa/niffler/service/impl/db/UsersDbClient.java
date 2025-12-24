@@ -22,11 +22,14 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.*;
 
 import static java.util.Objects.requireNonNull;
 
-
+@ParametersAreNonnullByDefault
 public class UsersDbClient implements UsersClient {
     private static final Config CFG = Config.getInstance();
     public static final String DEFAULT_PASSWORD = "123456";
@@ -55,6 +58,7 @@ public class UsersDbClient implements UsersClient {
     );
 
     @Override
+    @Nonnull
     public UserJson createUser(String username, String password) {
         return requireNonNull(xaTxTemplate.execute(() -> {
                     AuthUserEntity authUser = authUserEntity(username, password);
@@ -68,14 +72,14 @@ public class UsersDbClient implements UsersClient {
     }
 
     @Override
+    @Nonnull
     public List<UserJson> createFriends(UserJson targetUser, int count) {
-        return xaTxTemplate.execute(() -> {
+        List<UserJson> result = xaTxTemplate.execute(() -> {
             List<UserJson> friends = new ArrayList<>();
             UserEntity targetEntity = udUserRepository.findById(targetUser.id())
                     .orElseThrow(() -> new IllegalArgumentException("Target user not found with id: " + targetUser.id()));
             for (int i = 0; i < count; i++) {
                 UserEntity friendEntity = createRandomUser("friend_" + (i + 1) + "_" + targetUser.username());
-                System.out.println("DEBUG: Creating friend: " + friendEntity.getUsername());
                 UserEntity savedFriend = udUserRepository.create(friendEntity);
                 udUserRepository.addFriend(targetEntity, savedFriend);
                 udUserRepository.addFriend(savedFriend, targetEntity);
@@ -83,22 +87,25 @@ public class UsersDbClient implements UsersClient {
             }
             return friends;
         });
+        return result != null ? result : Collections.emptyList();
     }
 
     @Override
+    @Nonnull
     public Optional<UserJson> findUserByUsername(String username) {
-        return xaTxTemplate.execute(() -> {
+        return requireNonNull(xaTxTemplate.execute(() -> {
             Optional<UserEntity> user = udUserRepository.findByUsername(username);
             return user.map(u -> UserJson.fromEntity(u, null));
-        });
+        }));
     }
 
     @Override
+    @Nonnull
     public Optional<UserJson> findUserById(UUID id) {
-        return xaTxTemplate.execute(() -> {
+        return requireNonNull(xaTxTemplate.execute(() -> {
             Optional<UserEntity> user = udUserRepository.findById(id);
             return user.map(u -> UserJson.fromEntity(u, null));
-        });
+        }));
     }
 
     @Override
@@ -116,6 +123,7 @@ public class UsersDbClient implements UsersClient {
     }
 
     @Override
+    @Nonnull
     public List<UserJson> addIncomeInvitation(UserJson targetUser, int count) {
         if (count > 0) {
             UserEntity targetEntity = udUserRepository.findById(targetUser.id())
@@ -144,6 +152,7 @@ public class UsersDbClient implements UsersClient {
     }
 
     @Override
+    @Nonnull
     public List<UserJson> addOutcomeInvitation(UserJson targetUser, int count) {
         if (count > 0) {
             UserEntity targetEntity = udUserRepository.findById(targetUser.id())
@@ -171,6 +180,7 @@ public class UsersDbClient implements UsersClient {
         return Collections.emptyList();
     }
 
+    @Nonnull
     private static UserEntity userEntity(String username) {
         UserEntity entity = new UserEntity();
         entity.setUsername(username);
@@ -178,6 +188,7 @@ public class UsersDbClient implements UsersClient {
         return entity;
     }
 
+    @Nonnull
     private static AuthUserEntity authUserEntity(String username, String password) {
         AuthUserEntity authUser = new AuthUserEntity();
         authUser.setUsername(username);
@@ -200,14 +211,15 @@ public class UsersDbClient implements UsersClient {
         return authUser;
     }
 
+    @Nonnull
     private UserEntity createRandomUser(String prefix) {
         UserEntity user = new UserEntity();
-        user.setUsername(prefix + "_" + UUID.randomUUID().toString().substring(0, 8));
+        String uniqueSuffix = UUID.randomUUID().toString().substring(0, 8);
+        user.setUsername(prefix + "_" + uniqueSuffix);
         user.setCurrency(CurrencyValues.USD);
-        user.setFirstname("Test");
-        user.setSurname("User");
-        user.setFullname("Test User");
+        user.setFirstname(RandomDataUtils.randomeName()); // Используем случайное имя
+        user.setSurname(RandomDataUtils.randomeSurname()); // Используем случайную фамилию
+        user.setFullname(user.getFirstname() + " " + user.getSurname()); // Формируем полное имя
         return user;
     }
-
 }

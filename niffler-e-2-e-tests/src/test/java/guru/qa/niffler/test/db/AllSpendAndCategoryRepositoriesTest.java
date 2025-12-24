@@ -498,7 +498,7 @@ public class AllSpendAndCategoryRepositoriesTest {
     @DisplayName("Категория не должна быть null при создании траты")
     @ParameterizedTest(name = "{0}")
     @MethodSource("repositories")
-    void spendCategoryNotNullTest(String repoName, SpendAndCategoryRepository repository) {
+    void spendCategoryNonnullTest(String repoName, SpendAndCategoryRepository repository) {
         xaTxTemplate.execute(() -> {
             CategoryEntity savedCategory = repository.createCategory(createTestCategory(testUsername, testCategoryName));
 

@@ -24,7 +24,8 @@ public class FriendsWebTest {
     void friendShouldBePresentInFriendsTable(UserJson user) throws InterruptedException {
         Selenide.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
-                .goToFriendsPage()
+                .getHeader() // Используем Header вместо goToFriendsPage()
+                .toFriendsPage()
                 .isFriendNameExist(user.testData().friends().getFirst().username());
     }
 
@@ -35,7 +36,8 @@ public class FriendsWebTest {
     void friendsTableShouldBeEmptyForNewUser(UserJson user) {
         int friendsCount = Selenide.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
-                .goToFriendsPage()
+                .getHeader() // Используем Header
+                .toFriendsPage()
                 .getFriendsCount();
         Assertions.assertEquals(0, friendsCount);
     }
@@ -50,7 +52,8 @@ public class FriendsWebTest {
 
         Selenide.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
-                .goToFriendsPage()
+                .getHeader()
+                .toFriendsPage()
                 .searchFriend(inviterUsername)
                 .hasIncomeRequest(inviterUsername);
     }
@@ -69,7 +72,8 @@ public class FriendsWebTest {
 
         Selenide.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
-                .goToFriendsPage()
+                .getHeader()
+                .toFriendsPage()
                 .searchFriend(inviterUsername)
                 .hasIncomeRequest(inviterUsername);
     }
@@ -83,7 +87,8 @@ public class FriendsWebTest {
         String outcomeInvitationUsername = user.testData().outcomeInvitations().getFirst().username();
         Selenide.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
-                .goToAllPeoplePage()
+                .getHeader() // Используем Header
+                .toAllPeoplesPage()
                 .searchPeople(outcomeInvitationUsername)
                 .hasOutcomeRequest(outcomeInvitationUsername);
     }
@@ -95,9 +100,9 @@ public class FriendsWebTest {
 
         Selenide.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
-                .goToAllPeoplePage()
+                .getHeader() // Используем Header
+                .toAllPeoplesPage()
                 .searchPeople(inviteeUsername)
                 .hasOutcomeRequest(inviteeUsername);
     }
-
 }

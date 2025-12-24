@@ -19,11 +19,13 @@ import guru.qa.niffler.model.UserAuthJson;
 import org.springframework.jdbc.support.JdbcTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.*;
 import java.util.stream.Collectors;
 
+@ParametersAreNonnullByDefault
 public class AuthDbClient {
     private static final Config CFG = Config.getInstance();
 
@@ -45,6 +47,7 @@ public class AuthDbClient {
             CFG.authJdbcUrl()
     );
 
+    @Nullable
     public UserAuthJson createUser(UserAuthJson user) {
         return xaTxTemplate.execute(() -> {
             AuthUserEntity createdUser = authUserDao.create(toAuthUserEntity(user));
@@ -64,44 +67,53 @@ public class AuthDbClient {
         });
     }
 
+    @Nonnull
     public Optional<UserAuthJson> findUserByUsername(String username) {
-        return xaTxTemplate.execute(() -> {
+        return Objects.requireNonNull(xaTxTemplate.execute(() -> {
             Optional<AuthUserEntity> user = authUserDao.findByUsername(username);
             return user.map(UserAuthJson::fromEntity);
-        });
+        }));
     }
 
+    @Nonnull
     public Optional<UserAuthJson> findUserById(UUID id) {
-        return xaTxTemplate.execute(() -> {
+        return Objects.requireNonNull(xaTxTemplate.execute(() -> {
             Optional<AuthUserEntity> user = authUserDao.findById(id);
             return user.map(UserAuthJson::fromEntity);
-        });
+        }));
     }
 
+    @Nonnull
     public List<AuthorityJson> getUserAuthorities(String username) {
-        return xaTxTemplate.execute(() -> {
+        return Objects.requireNonNull(xaTxTemplate.execute(() -> {
             Optional<AuthUserEntity> user = authUserDao.findByUsername(username);
 
             if (user.isPresent()) {
                 List<AuthorityEntity> authorities = authAuthorityDao.findAuthoritiesByUserId(user.get().getId());
+                if (authorities != null) {
+                    return authorities.stream()
+                            .map(AuthorityJson::fromEntity)
+                            .collect(Collectors.toList());
+                }
+            }
+            return Collections.emptyList();
+        }));
+    }
+
+    @Nonnull
+    public List<AuthorityJson> getUserAuthoritiesById(UUID userId) {
+        return Objects.requireNonNull(xaTxTemplate.execute(() -> {
+            List<AuthorityEntity> authorities = authAuthorityDao.findAuthoritiesByUserId(userId);
+            if (authorities != null) {
                 return authorities.stream()
                         .map(AuthorityJson::fromEntity)
                         .collect(Collectors.toList());
-            } else {
-                return List.of();
             }
-        });
+            return Collections.emptyList();
+        }));
     }
 
-    public List<AuthorityJson> getUserAuthoritiesById(UUID userId) {
-        return xaTxTemplate.execute(() -> {
-            List<AuthorityEntity> authorities = authAuthorityDao.findAuthoritiesByUserId(userId);
-            return authorities.stream()
-                    .map(AuthorityJson::fromEntity)
-                    .collect(Collectors.toList());
-        });
-    }
-
+    @Nullable
     public UserAuthJson updateUser(UserAuthJson user) {
         return xaTxTemplate.execute(() -> {
             AuthUserEntity userEntity = toAuthUserEntity(user);
@@ -119,8 +131,10 @@ public class AuthDbClient {
 
             if (user.isPresent()) {
                 List<AuthorityEntity> authorities = authAuthorityDao.findAuthoritiesByUserId(user.get().getId());
-                for (AuthorityEntity authority : authorities) {
-                    authAuthorityDao.deleteAuthority(authority);
+                if (authorities != null) {
+                    for (AuthorityEntity authority : authorities) {
+                        authAuthorityDao.deleteAuthority(authority);
+                    }
                 }
                 authUserDao.delete(user.get());
             }
@@ -140,6 +154,7 @@ public class AuthDbClient {
         return findUserByUsername(username).isPresent();
     }
 
+    @Nonnull
     private AuthUserEntity toAuthUserEntity(UserAuthJson userJson) {
         AuthUserEntity entity = new AuthUserEntity();
         entity.setUsername(userJson.username());
@@ -150,5 +165,4 @@ public class AuthDbClient {
         entity.setCredentialsNonExpired(userJson.credentialsNonExpired());
         return entity;
     }
-
 }

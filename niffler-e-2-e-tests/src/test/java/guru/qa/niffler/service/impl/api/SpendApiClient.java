@@ -9,12 +9,17 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@ParametersAreNonnullByDefault
 public class SpendApiClient implements SpendClient {
 
     private static final Config CFG = Config.getInstance();
@@ -27,7 +32,7 @@ public class SpendApiClient implements SpendClient {
     private final SpendApi spendApi = retrofit.create(SpendApi.class);
 
     @Override
-    public SpendJson createSpend(SpendJson spend) {
+    public @Nullable SpendJson createSpend(SpendJson spend) {
         final Response<SpendJson> response;
         try {
             response = spendApi.createSpend(spend)
@@ -39,7 +44,7 @@ public class SpendApiClient implements SpendClient {
         return response.body();
     }
 
-    public SpendJson editSpend(SpendJson spend) {
+    public @Nullable SpendJson editSpend(SpendJson spend) {
         final Response<SpendJson> response;
         try {
             response = spendApi.editSpend(spend)
@@ -51,7 +56,7 @@ public class SpendApiClient implements SpendClient {
         return response.body();
     }
 
-    public SpendJson getSpend(Integer id, String username) {
+    public @Nullable SpendJson getSpend(Integer id, String username) {
         final Response<SpendJson> response;
         try {
             response = spendApi.getSpend(id, username)
@@ -63,7 +68,7 @@ public class SpendApiClient implements SpendClient {
         return response.body();
     }
 
-    public List<SpendJson> getAllSpends(String username) {
+    public @Nonnull List<SpendJson> allSpends(String username) {
         final Response<List<SpendJson>> response;
         try {
             response = spendApi.getAllSpends(username)
@@ -72,7 +77,7 @@ public class SpendApiClient implements SpendClient {
             throw new AssertionError(e);
         }
         assertEquals(200, response.code());
-        return response.body();
+        return response.body() != null ? response.body() : Collections.emptyList();
     }
 
     public Response<Void> deleteSpend(String username, List<String> ids) {
@@ -88,7 +93,7 @@ public class SpendApiClient implements SpendClient {
     }
 
     @Override
-    public CategoryJson createCategory(CategoryJson category) {
+    public @Nullable CategoryJson createCategory(CategoryJson category) {
         final Response<CategoryJson> response;
         try {
             response = spendApi.createCategory(category)
@@ -101,7 +106,7 @@ public class SpendApiClient implements SpendClient {
     }
 
     @Override
-    public CategoryJson updateCategory(CategoryJson category) {
+    public @Nullable CategoryJson updateCategory(CategoryJson category) {
         final Response<CategoryJson> response;
         try {
             response = spendApi.updateCategory(category)
@@ -114,7 +119,7 @@ public class SpendApiClient implements SpendClient {
     }
 
 
-    public List<CategoryJson> getAllCategories(String username) {
+    public @Nonnull List<CategoryJson> getAllCategories(String username) {
         final Response<List<CategoryJson>> response;
         try {
             response = spendApi.getAllCategories(username)
@@ -123,11 +128,11 @@ public class SpendApiClient implements SpendClient {
             throw new AssertionError(e);
         }
         assertEquals(200, response.code());
-        return response.body();
+        return response.body() != null ? response.body() : Collections.emptyList();
     }
 
     @Override
-    public Optional<CategoryJson> findCategoryByNameAndUsername(String categoryName, String username) {
+    public @Nonnull Optional<CategoryJson> findCategoryByNameAndUsername(String categoryName, String username) {
         final Response<List<CategoryJson>> response;
         try {
             response = spendApi.getAllCategories(username).execute();

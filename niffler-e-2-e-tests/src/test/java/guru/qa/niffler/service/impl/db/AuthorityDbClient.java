@@ -15,13 +15,15 @@ import guru.qa.niffler.model.AuthorityJson;
 import org.springframework.jdbc.support.JdbcTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static guru.qa.niffler.model.AuthorityJson.toAuthorityJsonArray;
 
+@ParametersAreNonnullByDefault
 public class AuthorityDbClient {
     private static final Config CFG = Config.getInstance();
 
@@ -42,6 +44,7 @@ public class AuthorityDbClient {
             CFG.authJdbcUrl()
     );
 
+    @Nullable
     public AuthorityJson createAuthority(String username, String authority) {
         return xaTxTemplate.execute(() -> {
             UUID userId = getUserIdByUsername(username);
@@ -53,10 +56,13 @@ public class AuthorityDbClient {
             authAuthority.setAuthority(Authority.valueOf(authority));
 
             AuthorityEntity[] createdAuthorities = authAuthorityDao.create(authAuthority);
-            return AuthorityJson.fromEntity(createdAuthorities[0]);
+            return createdAuthorities != null && createdAuthorities.length > 0
+                    ? AuthorityJson.fromEntity(createdAuthorities[0])
+                    : null;
         });
     }
 
+    @Nullable
     public AuthorityJson[] createAuthorities(String username, String... authorities) {
         return xaTxTemplate.execute(() -> {
             UUID userId = getUserIdByUsername(username);
@@ -64,33 +70,44 @@ public class AuthorityDbClient {
             AuthorityEntity[] authEntities = new AuthorityEntity[authorities.length];
             for (int i = 0; i < authorities.length; i++) {
                 AuthorityEntity authAuthority = new AuthorityEntity();
-                authAuthority.getUser().getId();
+//                authAuthority.getUser().getId();
+                AuthUserEntity user = new AuthUserEntity();
+                user.setId(userId);
+                authAuthority.setUser(user);
                 authAuthority.setAuthority(Authority.valueOf(authorities[i]));
                 authEntities[i] = authAuthority;
             }
 
             AuthorityEntity[] createdAuthorities = authAuthorityDao.create(authEntities);
-            return toAuthorityJsonArray(createdAuthorities);
+            return createdAuthorities != null ? toAuthorityJsonArray(createdAuthorities) : null;
         });
     }
 
+    @Nonnull
     public List<AuthorityJson> getAuthoritiesByUsername(String username) {
-        return xaTxTemplate.execute(() -> {
+        return Objects.requireNonNull(xaTxTemplate.execute(() -> {
             UUID userId = getUserIdByUsername(username);
             List<AuthorityEntity> authorities = authAuthorityDao.findAuthoritiesByUserId(userId);
-            return authorities.stream()
-                    .map(AuthorityJson::fromEntity)
-                    .collect(Collectors.toList());
-        });
+            if (authorities != null) {
+                return authorities.stream()
+                        .map(AuthorityJson::fromEntity)
+                        .collect(Collectors.toList());
+            }
+            return Collections.emptyList();
+        }));
     }
 
+    @Nonnull
     public List<AuthorityJson> getAuthoritiesByUserId(UUID userId) {
-        return xaTxTemplate.execute(() -> {
+        return Objects.requireNonNull(xaTxTemplate.execute(() -> {
             List<AuthorityEntity> authorities = authAuthorityDao.findAuthoritiesByUserId(userId);
-            return authorities.stream()
-                    .map(AuthorityJson::fromEntity)
-                    .collect(Collectors.toList());
-        });
+            if (authorities != null) {
+                return authorities.stream()
+                        .map(AuthorityJson::fromEntity)
+                        .collect(Collectors.toList());
+            }
+            return Collections.emptyList();
+        }));
     }
 
     public void deleteAuthority(String username, String authority) {
@@ -98,10 +115,12 @@ public class AuthorityDbClient {
             UUID userId = getUserIdByUsername(username);
             List<AuthorityEntity> userAuthorities = authAuthorityDao.findAuthoritiesByUserId(userId);
 
-            userAuthorities.stream()
-                    .filter(auth -> auth.getAuthority().name().equals(authority))
-                    .findFirst()
-                    .ifPresent(authAuthorityDao::deleteAuthority);
+            if (userAuthorities != null) {
+                userAuthorities.stream()
+                        .filter(auth -> auth.getAuthority().name().equals(authority))
+                        .findFirst()
+                        .ifPresent(authAuthorityDao::deleteAuthority);
+            }
 
             return null;
         });
@@ -112,21 +131,22 @@ public class AuthorityDbClient {
             UUID userId = getUserIdByUsername(username);
             List<AuthorityEntity> authorities = authAuthorityDao.findAuthoritiesByUserId(userId);
 
-            for (AuthorityEntity authority : authorities) {
-                authAuthorityDao.deleteAuthority(authority);
+            if (authorities != null) {
+                for (AuthorityEntity authority : authorities) {
+                    authAuthorityDao.deleteAuthority(authority);
+                }
             }
 
             return null;
         });
     }
 
+    @Nonnull
     private UUID getUserIdByUsername(String username) {
-        return xaTxTemplate.execute(() -> {
+        return Objects.requireNonNull(xaTxTemplate.execute(() -> {
             Optional<AuthUserEntity> user = authUserDao.findByUsername(username);
             return user.map(AuthUserEntity::getId)
                     .orElseThrow(() -> new RuntimeException("User not found: " + username));
-        });
+        }));
     }
-
-
 }

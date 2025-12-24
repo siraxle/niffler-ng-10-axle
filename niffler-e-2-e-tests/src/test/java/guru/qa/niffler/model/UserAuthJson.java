@@ -3,6 +3,7 @@ package guru.qa.niffler.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import guru.qa.niffler.data.entity.auth.AuthUserEntity;
 
+import javax.annotation.Nonnull;
 import java.util.UUID;
 
 public record UserAuthJson(
@@ -21,7 +22,7 @@ public record UserAuthJson(
         @JsonProperty("credentials_non_expired")
         Boolean credentialsNonExpired) {
 
-    public static UserAuthJson fromEntity(AuthUserEntity entity) {
+    public static @Nonnull UserAuthJson fromEntity(@Nonnull AuthUserEntity entity) {
         return new UserAuthJson(
                 entity.getId(),
                 entity.getUsername(),

@@ -11,8 +11,12 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -21,6 +25,7 @@ import static guru.qa.niffler.utils.RandomDataUtils.randomUsername;
 import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@ParametersAreNonnullByDefault
 public class UsersApiClient implements UsersClient {
 
     private static final Config CFG = Config.getInstance();
@@ -36,10 +41,11 @@ public class UsersApiClient implements UsersClient {
             .addConverterFactory(JacksonConverterFactory.create())
             .build();
 
-    private final UserApi userApi = authRetrofit.create(UserApi.class);
-    private final AuthApi authApi = userdataRetrofit.create(AuthApi.class);
+    private final AuthApi authApi = authRetrofit.create(AuthApi.class);
+    private final UserApi userApi = userdataRetrofit.create(UserApi.class);
 
     @Override
+    @Nonnull
     public Optional<UserJson> findUserByUsername(String username) {
         try {
             Response<UserJson> response = userApi.currentUser(username).execute();
@@ -56,6 +62,7 @@ public class UsersApiClient implements UsersClient {
     }
 
     @Override
+    @Nonnull
     public UserJson createUser(String username, String password) {
         try {
             authApi.requestRegisterForm().execute();
@@ -82,6 +89,7 @@ public class UsersApiClient implements UsersClient {
     }
 
     @Override
+    @Nonnull
     public List<UserJson> createFriends(UserJson targetUser, int count) {
         final List<UserJson> result = new ArrayList<>();
         if (count > 0) {
@@ -111,6 +119,7 @@ public class UsersApiClient implements UsersClient {
     }
 
     @Override
+    @Nonnull
     public Optional<UserJson> findUserById(UUID id) {
         // получаем ВСЕХ пользователей и фильтруем
         try {
@@ -137,6 +146,7 @@ public class UsersApiClient implements UsersClient {
     }
 
     @Override
+    @Nonnull
     public List<UserJson> addIncomeInvitation(UserJson targetUser, int count) {
         final List<UserJson> result = new ArrayList<>();
         if (count > 0) {
@@ -161,6 +171,7 @@ public class UsersApiClient implements UsersClient {
     }
 
     @Override
+    @Nonnull
     public List<UserJson> addOutcomeInvitation(UserJson targetUser, int count) {
         final List<UserJson> result = new ArrayList<>();
         if (count > 0) {

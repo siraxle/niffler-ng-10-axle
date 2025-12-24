@@ -13,13 +13,9 @@ import org.springframework.jdbc.support.KeyHolder;
 import javax.annotation.Nonnull;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static guru.qa.niffler.data.tpl.DataSources.dataSource;
-import static java.util.Objects.requireNonNull;
 
 public class SpendDaoSpringJdbc implements SpendDao {
 
@@ -71,7 +67,7 @@ public class SpendDaoSpringJdbc implements SpendDao {
     public List<SpendEntity> findAllByUsername(String username) {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource(CFG.spendJdbcUrl()));
         try {
-            return requireNonNull(jdbcTemplate.query(
+            return Objects.requireNonNull(jdbcTemplate.query(
                     "SELECT * FROM \"spend\" WHERE username = ?",
                     SpendEntityRowExtractor.instance,
                     username
@@ -91,7 +87,7 @@ public class SpendDaoSpringJdbc implements SpendDao {
     @Override
     public List<SpendEntity> findAll() {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource(CFG.spendJdbcUrl()));
-        return requireNonNull(jdbcTemplate.query(
+        return Objects.requireNonNull(jdbcTemplate.query(
                 "SELECT * FROM \"spend\"",
                 SpendEntityRowExtractor.instance
         ));
