@@ -16,16 +16,13 @@ import static com.codeborne.selenide.Selenide.$$;
 import static java.util.Calendar.*;
 
 @ParametersAreNonnullByDefault
-public class Calendar extends BaseComponent<Calendar> {
+public class Calendar {
 
+    private final SelenideElement calendarButton = $("button[aria-label*='Choose date']");
     private final SelenideElement previousMonthBtn = $("button[title='Previous month']");
     private final SelenideElement nextMonthBtn = $("button[title='Next month']");
     private final SelenideElement currentDateLabel = $(".MuiPickersCalendarHeader-label");
     private final ElementsCollection dateRows = $$(".MuiDayCalendar-weekContainer");
-
-    public Calendar() {
-        super($("button[aria-label*='Choose date']"));
-    }
 
     @Step("Выбрать дату: {date}")
     @Nonnull
@@ -33,7 +30,7 @@ public class Calendar extends BaseComponent<Calendar> {
         java.util.Calendar calendar = new GregorianCalendar();
         calendar.setTime(date);
 
-        self.click();
+        calendarButton.click();
         selectYear(calendar.get(YEAR));
         selectMonth(calendar.get(MONTH));
         selectDay(calendar.get(DAY_OF_MONTH));
@@ -108,7 +105,7 @@ public class Calendar extends BaseComponent<Calendar> {
     @Step("Открыть календарь")
     @Nonnull
     public Calendar open() {
-        self.click();
+        calendarButton.click();
         return this;
     }
 }

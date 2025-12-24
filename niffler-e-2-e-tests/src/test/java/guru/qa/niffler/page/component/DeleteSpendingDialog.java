@@ -7,26 +7,22 @@ import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 import static com.codeborne.selenide.Condition.text;
+import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.$;
 
 @ParametersAreNonnullByDefault
-public class DeleteSpendingDialog extends BaseComponent<DeleteSpendingDialog> {
+public class DeleteSpendingDialog {
 
-    private final SelenideElement cancelButton;
-    private final SelenideElement deleteButton;
-
-    public DeleteSpendingDialog() {
-        super($(".MuiDialog-paper"));
-        this.cancelButton = self.$x(".//button[text()='Cancel']");
-        this.deleteButton = self.$x(".//button[text()='Delete']");
-    }
+    private final SelenideElement dialog = $(".MuiDialog-paper");
+    private final SelenideElement cancelButton = dialog.$x(".//button[text()='Cancel']");
+    private final SelenideElement deleteButton = dialog.$x(".//button[text()='Delete']");
 
     @Step("Проверить, что диалог удаления траты отображается")
     @Nonnull
     public DeleteSpendingDialog shouldBeVisible() {
-        super.shouldBeVisible();
-        self.shouldHave(text("Delete spendings?"));
-        self.shouldHave(text("If you are sure, submit your action."));
+        dialog.shouldBe(visible);
+        dialog.shouldHave(text("Delete spendings?"));
+        dialog.shouldHave(text("If you are sure, submit your action."));
         return this;
     }
 
@@ -47,14 +43,14 @@ public class DeleteSpendingDialog extends BaseComponent<DeleteSpendingDialog> {
     @Step("Проверить текст заголовка диалога")
     @Nonnull
     public DeleteSpendingDialog verifyTitle(String expectedTitle) {
-        self.shouldHave(text(expectedTitle));
+        dialog.shouldHave(text(expectedTitle));
         return this;
     }
 
     @Step("Проверить текст описания диалога")
     @Nonnull
     public DeleteSpendingDialog verifyDescription(String expectedDescription) {
-        self.shouldHave(text(expectedDescription));
+        dialog.shouldHave(text(expectedDescription));
         return this;
     }
 

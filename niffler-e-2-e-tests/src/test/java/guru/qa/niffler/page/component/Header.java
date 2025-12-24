@@ -1,5 +1,7 @@
 package guru.qa.niffler.page.component;
 
+import com.codeborne.selenide.Condition;
+import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.SelenideElement;
 import guru.qa.niffler.page.*;
 import io.qameta.allure.Step;
@@ -12,24 +14,13 @@ import static com.codeborne.selenide.Selenide.$x;
 @ParametersAreNonnullByDefault
 public class Header extends BaseComponent<Header> {
 
-    private final SelenideElement menuButton;
-    private final SelenideElement profileButton;
-    private final SelenideElement friendsButton;
-    private final SelenideElement allPeopleButton;
-    private final SelenideElement signOutButton;
-    private final SelenideElement addSpendingButton;
-    private final SelenideElement logoButton;
-
-    public Header() {
-        super($x("//header"));
-        this.menuButton = self.$x(".//button[@aria-label='Menu']");
-        this.profileButton = self.$x(".//a[@href='/profile']");
-        this.friendsButton = self.$x(".//a[@href='/people/friends']");
-        this.allPeopleButton = self.$x(".//a[@href='/people/all']");
-        this.signOutButton = self.$x(".//button[contains(text(), 'Sign out')]");
-        this.addSpendingButton = self.$x(".//a[@href='/spending']");
-        this.logoButton = self.$x(".//a[@href='/main']");
-    }
+    private final SelenideElement menuButton = $x("//button[@aria-label='Menu']");
+    private final SelenideElement profileButton = $x("//a[@href='/profile']");
+    private final SelenideElement friendsButton = $x("//a[@href='/people/friends']");
+    private final SelenideElement allPeopleButton = $x("//a[@href='/people/all']");
+    private final SelenideElement signOutButton = $x("//button[contains(text(), 'Sign out')]");
+    private final SelenideElement addSpendingButton = $x("//a[@href='/spending']");
+    private final SelenideElement logoButton = $x("//a[@href='/main']");
 
     @Step("Открыть меню в хедере")
     @Nonnull
@@ -42,6 +33,8 @@ public class Header extends BaseComponent<Header> {
     @Nonnull
     public FriendsPage toFriendsPage() {
         openMenu();
+        Selenide.sleep(300);
+        friendsButton.should(Condition.visible);
         friendsButton.click();
         return new FriendsPage();
     }

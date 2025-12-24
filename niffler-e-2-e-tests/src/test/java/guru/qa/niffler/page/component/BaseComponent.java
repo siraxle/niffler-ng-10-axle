@@ -6,35 +6,22 @@ import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 import static com.codeborne.selenide.Condition.visible;
+import static com.codeborne.selenide.Selenide.$x;
 
 @ParametersAreNonnullByDefault
 public abstract class BaseComponent<T extends BaseComponent<T>> {
 
-    protected final SelenideElement self;
-
-    protected BaseComponent(SelenideElement self) {
-        this.self = self;
-    }
+    private final SelenideElement menuButton = $x("//button[@aria-label='Menu']");
 
     @Nonnull
-    public T shouldBeVisible() {
-        self.shouldBe(visible);
+    public T menuShouldBeVisible() {
+        menuButton.shouldBe(visible);
         return (T) this;
     }
 
     @Nonnull
-    public T click() {
-        self.click();
+    public T openMenu() {
+        menuButton.click();
         return (T) this;
-    }
-
-    @Nonnull
-    public String getText() {
-        return self.getText();
-    }
-
-    @Nonnull
-    public boolean isDisplayed() {
-        return self.isDisplayed();
     }
 }
