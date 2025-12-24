@@ -10,15 +10,26 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import static com.codeborne.selenide.Selenide.$x;
 
 @ParametersAreNonnullByDefault
-public class Header {
+public class Header extends BaseComponent<Header> {
 
-    private final SelenideElement menuButton = $x("//button[@aria-label='Menu']");
-    private final SelenideElement profileButton = $x("//a[@href='/profile']");
-    private final SelenideElement friendsButton = $x("//a[@href='/people/friends']");
-    private final SelenideElement allPeopleButton = $x("//a[@href='/people/all']");
-    private final SelenideElement signOutButton = $x("//button[contains(text(), 'Sign out')]");
-    private final SelenideElement addSpendingButton = $x("//a[@href='/spending']");
-    private final SelenideElement logoButton = $x("//a[@href='/main']");
+    private final SelenideElement menuButton;
+    private final SelenideElement profileButton;
+    private final SelenideElement friendsButton;
+    private final SelenideElement allPeopleButton;
+    private final SelenideElement signOutButton;
+    private final SelenideElement addSpendingButton;
+    private final SelenideElement logoButton;
+
+    public Header() {
+        super($x("//header"));
+        this.menuButton = self.$x(".//button[@aria-label='Menu']");
+        this.profileButton = self.$x(".//a[@href='/profile']");
+        this.friendsButton = self.$x(".//a[@href='/people/friends']");
+        this.allPeopleButton = self.$x(".//a[@href='/people/all']");
+        this.signOutButton = self.$x(".//button[contains(text(), 'Sign out')]");
+        this.addSpendingButton = self.$x(".//a[@href='/spending']");
+        this.logoButton = self.$x(".//a[@href='/main']");
+    }
 
     @Step("Открыть меню в хедере")
     @Nonnull

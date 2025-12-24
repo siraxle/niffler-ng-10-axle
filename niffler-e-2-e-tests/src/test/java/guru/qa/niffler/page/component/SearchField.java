@@ -10,29 +10,28 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import static com.codeborne.selenide.Selenide.$;
 
 @ParametersAreNonnullByDefault
-public class SearchField {
+public class SearchField extends BaseComponent<SearchField> {
 
-    private final SelenideElement searchInput;
     private final SelenideElement searchButton;
 
     public SearchField() {
-        this.searchInput = $("input[aria-label='search']");
+        super($("input[aria-label='search']"));
         this.searchButton = $("#input-submit");
     }
 
     public SearchField(SelenideElement searchInput, SelenideElement searchButton) {
-        this.searchInput = searchInput;
+        super(searchInput);
         this.searchButton = searchButton;
     }
 
     @Step("Выполнить поиск: {query}")
     @Nonnull
     public SearchField search(String query) {
-        searchInput.setValue(query);
+        self.setValue(query);
         if (searchButton.exists()) {
             searchButton.click();
         } else {
-            searchInput.sendKeys(Keys.ENTER);
+            self.sendKeys(Keys.ENTER);
         }
         return this;
     }
@@ -40,13 +39,13 @@ public class SearchField {
     @Step("Очистить поле поиска, если оно не пустое")
     @Nonnull
     public SearchField clearIfNotEmpty() {
-        String currentValue = searchInput.getValue();
+        String currentValue = self.getValue();
         if (currentValue != null && !currentValue.isEmpty()) {
-            searchInput.clear();
+            self.clear();
             if (searchButton.exists()) {
                 searchButton.click();
             } else {
-                searchInput.sendKeys(Keys.ENTER);
+                self.sendKeys(Keys.ENTER);
             }
         }
         return this;
@@ -55,20 +54,20 @@ public class SearchField {
     @Step("Очистить поле поиска")
     @Nonnull
     public SearchField clear() {
-        searchInput.clear();
+        self.clear();
         return this;
     }
 
     @Step("Получить значение из поля поиска")
     @Nonnull
     public String getValue() {
-        return searchInput.getValue();
+        return self.getValue();
     }
 
     @Step("Проверить, что поле поиска пустое")
     @Nonnull
     public SearchField shouldBeEmpty() {
-        searchInput.shouldHave(com.codeborne.selenide.Condition.empty);
+        self.shouldHave(com.codeborne.selenide.Condition.empty);
         return this;
     }
 }

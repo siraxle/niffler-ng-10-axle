@@ -16,13 +16,16 @@ import static com.codeborne.selenide.Selenide.$$;
 import static java.util.Calendar.*;
 
 @ParametersAreNonnullByDefault
-public class Calendar {
+public class Calendar extends BaseComponent<Calendar> {
 
-    private final SelenideElement calendarButton = $("button[aria-label*='Choose date']");
     private final SelenideElement previousMonthBtn = $("button[title='Previous month']");
     private final SelenideElement nextMonthBtn = $("button[title='Next month']");
     private final SelenideElement currentDateLabel = $(".MuiPickersCalendarHeader-label");
     private final ElementsCollection dateRows = $$(".MuiDayCalendar-weekContainer");
+
+    public Calendar() {
+        super($("button[aria-label*='Choose date']"));
+    }
 
     @Step("Выбрать дату: {date}")
     @Nonnull
@@ -30,7 +33,7 @@ public class Calendar {
         java.util.Calendar calendar = new GregorianCalendar();
         calendar.setTime(date);
 
-        calendarButton.click();
+        self.click();
         selectYear(calendar.get(YEAR));
         selectMonth(calendar.get(MONTH));
         selectDay(calendar.get(DAY_OF_MONTH));
@@ -105,25 +108,7 @@ public class Calendar {
     @Step("Открыть календарь")
     @Nonnull
     public Calendar open() {
-        calendarButton.click();
-        return this;
-    }
-
-    @Step("Получить выбранную дату")
-    @Nonnull
-    public String getSelectedDate() {
-        return calendarButton.getAttribute("value") != null
-                ? calendarButton.getAttribute("value")
-                : calendarButton.getText();
-    }
-
-    @Step("Проверить, что выбрана дата: {expectedDate}")
-    @Nonnull
-    public Calendar verifySelectedDate(Date expectedDate) {
-        java.util.Calendar calendar = new GregorianCalendar();
-        calendar.setTime(expectedDate);
-
-        String selectedDate = getSelectedDate();
+        self.click();
         return this;
     }
 }

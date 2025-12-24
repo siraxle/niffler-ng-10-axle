@@ -1,7 +1,6 @@
 package guru.qa.niffler.page.component;
 
 import com.codeborne.selenide.ElementsCollection;
-import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.SelenideElement;
 import guru.qa.niffler.page.EditSpendingPage;
 import io.qameta.allure.Step;
@@ -17,7 +16,7 @@ import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.*;
 
 @ParametersAreNonnullByDefault
-public class SpendingTable {
+public class SpendingTable extends BaseComponent<SpendingTable> {
 
     @Getter
     private final SearchField searchField = new SearchField();
@@ -25,13 +24,20 @@ public class SpendingTable {
     private static final By editButton = By.xpath(".//button[@aria-label='Edit spending']");
     private static final By checkBox = By.cssSelector("input[type='checkbox']");
 
-    private final ElementsCollection spendingRows = $$("#spendings tbody tr");
-    private final SelenideElement periodSelect = $("#period");
-    private final SelenideElement searchInput = $("input[aria-label='search']");
-    private final SelenideElement searchButton = $("#input-submit");
-    private final SelenideElement deleteButton = $("#delete");
-    private final SelenideElement previousPageButton = $("#page-prev");
-    private final SelenideElement nextPageButton = $("#page-next");
+    private final ElementsCollection spendingRows;
+    private final SelenideElement periodSelect;
+    private final SelenideElement deleteButton;
+    private final SelenideElement previousPageButton;
+    private final SelenideElement nextPageButton;
+
+    public SpendingTable() {
+        super($("#spendings"));
+        this.spendingRows = self.$$("tbody tr");
+        this.periodSelect = $("#period");
+        this.deleteButton = $("#delete");
+        this.previousPageButton = $("#page-prev");
+        this.nextPageButton = $("#page-next");
+    }
 
     @Step("Проверить, что таблица содержит трату: {description}")
     @Nonnull
@@ -44,7 +50,7 @@ public class SpendingTable {
     @Nonnull
     public SpendingTable selectPeriod(String period) {
         periodSelect.click();
-        Selenide.sleep(300);
+        sleep(300);
         $x(String.format("//li[text()='%s']", period)).click();
         return this;
     }
@@ -63,10 +69,9 @@ public class SpendingTable {
     public SpendingTable deleteSpending(String description) {
         selectSpending(description);
         deleteButton.shouldBe(visible).click();
-        DeleteSpendingDialog dialog = new DeleteSpendingDialog();
-        dialog.shouldBeVisible()
-                .clickDelete();
-
+        new DeleteSpendingDialog()
+                .shouldBeVisible()
+                .confirmDeletion();
         return this;
     }
 
@@ -75,11 +80,9 @@ public class SpendingTable {
     public SpendingTable cancelDeleteSpending(String description) {
         selectSpending(description);
         deleteButton.shouldBe(visible).click();
-
-        DeleteSpendingDialog dialog = new DeleteSpendingDialog();
-        dialog.shouldBeVisible()
-                .clickCancel();
-
+        new DeleteSpendingDialog()
+                .shouldBeVisible()
+                .cancelDeletion();
         return this;
     }
 
