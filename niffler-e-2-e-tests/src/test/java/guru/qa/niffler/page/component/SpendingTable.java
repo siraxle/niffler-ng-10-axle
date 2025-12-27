@@ -16,7 +16,7 @@ import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.*;
 
 @ParametersAreNonnullByDefault
-public class SpendingTable {
+public class SpendingTable extends BaseComponent<SpendingTable> {
 
     @Getter
     private final SearchField searchField = new SearchField();
@@ -24,11 +24,29 @@ public class SpendingTable {
     private static final By editButton = By.xpath(".//button[@aria-label='Edit spending']");
     private static final By checkBox = By.cssSelector("input[type='checkbox']");
 
-    private final ElementsCollection spendingRows = $$("#spendings tbody tr");
-    private final SelenideElement periodSelect = $("#period");
-    private final SelenideElement deleteButton = $("#delete");
-    private final SelenideElement previousPageButton = $("#page-prev");
-    private final SelenideElement nextPageButton = $("#page-next");
+    private final ElementsCollection spendingRows;
+    private final SelenideElement periodSelect;
+    private final SelenideElement deleteButton;
+    private final SelenideElement previousPageButton;
+    private final SelenideElement nextPageButton;
+
+    public SpendingTable(@Nonnull SelenideElement self) {
+        super(self);
+        this.spendingRows = self.$$("tbody tr");
+        this.periodSelect = $("#period");
+        this.deleteButton = $("#delete");
+        this.previousPageButton = $("#page-prev");
+        this.nextPageButton = $("#page-next");
+    }
+
+    public SpendingTable() {
+        super($("#spendings"));
+        this.spendingRows = self.$$("tbody tr");
+        this.periodSelect = $("#period");
+        this.deleteButton = $("#delete");
+        this.previousPageButton = $("#page-prev");
+        this.nextPageButton = $("#page-next");
+    }
 
     @Step("Проверить, что таблица содержит трату: {description}")
     @Nonnull

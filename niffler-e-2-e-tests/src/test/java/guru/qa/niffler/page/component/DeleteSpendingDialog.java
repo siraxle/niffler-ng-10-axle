@@ -11,18 +11,29 @@ import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.$;
 
 @ParametersAreNonnullByDefault
-public class DeleteSpendingDialog {
+public class DeleteSpendingDialog extends BaseComponent<DeleteSpendingDialog> {
 
-    private final SelenideElement dialog = $(".MuiDialog-paper");
-    private final SelenideElement cancelButton = dialog.$x(".//button[text()='Cancel']");
-    private final SelenideElement deleteButton = dialog.$x(".//button[text()='Delete']");
+    private final SelenideElement cancelButton;
+    private final SelenideElement deleteButton;
+
+    public DeleteSpendingDialog(@Nonnull SelenideElement self) {
+        super(self);
+        this.cancelButton = self.$x(".//button[text()='Cancel']");
+        this.deleteButton = self.$x(".//button[text()='Delete']");
+    }
+
+    public DeleteSpendingDialog() {
+        super($(".MuiDialog-paper"));
+        this.cancelButton = self.$x(".//button[text()='Cancel']");
+        this.deleteButton = self.$x(".//button[text()='Delete']");
+    }
 
     @Step("Проверить, что диалог удаления траты отображается")
     @Nonnull
     public DeleteSpendingDialog shouldBeVisible() {
-        dialog.shouldBe(visible);
-        dialog.shouldHave(text("Delete spendings?"));
-        dialog.shouldHave(text("If you are sure, submit your action."));
+        self.shouldBe(visible);
+        self.shouldHave(text("Delete spendings?"));
+        self.shouldHave(text("If you are sure, submit your action."));
         return this;
     }
 
@@ -43,14 +54,14 @@ public class DeleteSpendingDialog {
     @Step("Проверить текст заголовка диалога")
     @Nonnull
     public DeleteSpendingDialog verifyTitle(String expectedTitle) {
-        dialog.shouldHave(text(expectedTitle));
+        self.shouldHave(text(expectedTitle));
         return this;
     }
 
     @Step("Проверить текст описания диалога")
     @Nonnull
     public DeleteSpendingDialog verifyDescription(String expectedDescription) {
-        dialog.shouldHave(text(expectedDescription));
+        self.shouldHave(text(expectedDescription));
         return this;
     }
 
