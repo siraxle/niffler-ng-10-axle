@@ -9,6 +9,7 @@ import guru.qa.niffler.model.CurrencyValues;
 import guru.qa.niffler.model.SpendJson;
 import guru.qa.niffler.model.UserJson;
 import guru.qa.niffler.page.LoginPage;
+import guru.qa.niffler.utils.RandomDataUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -136,6 +137,29 @@ public class SpendingWebTest {
                 .checkTableSize(3)
                 .selectPeriod("Last week")
                 .checkTableSize(0);
+    }
+
+    @User(
+            spendings = @Spending(
+                    amount = 89900,
+                    description = "Исходное описание",
+                    category = "Обучение"
+            )
+    )
+    @Test
+    void spendingAlertShouldBeVisible(UserJson user) {
+        SpendJson originalSpending = user.testData().spendings().getFirst();
+        final String newDescription = "Обновлённое описание";
+
+        Selenide.open(CFG.frontUrl(), LoginPage.class)
+                .login(user.username(), user.testData().password())
+                .getSpendingTable()
+                .checkThatTableContains(originalSpending.description())
+                .editSpending(originalSpending.description())
+                .setNewSpendingDescription(newDescription)
+                .save()
+                .checkSnackbarText("Spending is edited successfully");
+
     }
 
 }

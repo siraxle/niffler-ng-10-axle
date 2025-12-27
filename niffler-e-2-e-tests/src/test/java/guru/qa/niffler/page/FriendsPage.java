@@ -23,8 +23,7 @@ public class FriendsPage extends BasePage<FriendsPage> {
 
     @Getter
     private final SearchField searchField = new SearchField(
-            $x("//input[@aria-label='search']"),
-            $x("//button[@type='submit']") // или по другому локатору кнопки поиска
+            $x("//input[@aria-label='search']") // передаем только self-элемент
     );
 
     private final SelenideElement friendRequestsTable = $("#requests");
@@ -162,5 +161,4 @@ public class FriendsPage extends BasePage<FriendsPage> {
         myFriendsRows.first().shouldBe(visible);
         return this;
     }
-
 }

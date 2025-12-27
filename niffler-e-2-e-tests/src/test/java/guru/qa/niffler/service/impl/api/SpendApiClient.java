@@ -5,9 +5,8 @@ import guru.qa.niffler.model.CategoryJson;
 import guru.qa.niffler.model.SpendJson;
 import guru.qa.niffler.service.RestClient;
 import guru.qa.niffler.service.SpendClient;
+import io.qameta.allure.Step;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.jackson.JacksonConverterFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -22,11 +21,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ParametersAreNonnullByDefault
 public final class SpendApiClient extends RestClient implements SpendClient {
 
-    private final Retrofit retrofit = new Retrofit.Builder()
-            .baseUrl(CFG.spendUrl())
-            .addConverterFactory(JacksonConverterFactory.create())
-            .build();
-
     private final SpendApi spendApi;
 
     public SpendApiClient() {
@@ -34,6 +28,7 @@ public final class SpendApiClient extends RestClient implements SpendClient {
         this.spendApi = create(SpendApi.class);
     }
 
+    @Step("Создать трату: {spend.description()}")
     @Override
     public @Nullable SpendJson createSpend(SpendJson spend) {
         final Response<SpendJson> response;
@@ -47,6 +42,7 @@ public final class SpendApiClient extends RestClient implements SpendClient {
         return response.body();
     }
 
+    @Step("Редактировать трату: {spend.description()}")
     public @Nullable SpendJson editSpend(SpendJson spend) {
         final Response<SpendJson> response;
         try {
@@ -59,6 +55,7 @@ public final class SpendApiClient extends RestClient implements SpendClient {
         return response.body();
     }
 
+    @Step("Получить трату по ID: {id}, пользователь: {username}")
     public @Nullable SpendJson getSpend(Integer id, String username) {
         final Response<SpendJson> response;
         try {
@@ -71,6 +68,7 @@ public final class SpendApiClient extends RestClient implements SpendClient {
         return response.body();
     }
 
+    @Step("Получить все траты пользователя: {username}")
     public @Nonnull List<SpendJson> allSpends(String username) {
         final Response<List<SpendJson>> response;
         try {
@@ -83,6 +81,7 @@ public final class SpendApiClient extends RestClient implements SpendClient {
         return response.body() != null ? response.body() : Collections.emptyList();
     }
 
+    @Step("Удалить траты пользователя: {username}, IDs: {ids}")
     public Response<Void> deleteSpend(String username, List<String> ids) {
         final Response<Void> response;
         try {
@@ -95,6 +94,7 @@ public final class SpendApiClient extends RestClient implements SpendClient {
         return response;
     }
 
+    @Step("Создать категорию: {category.name()}")
     @Override
     public @Nullable CategoryJson createCategory(CategoryJson category) {
         final Response<CategoryJson> response;
@@ -108,6 +108,7 @@ public final class SpendApiClient extends RestClient implements SpendClient {
         return response.body();
     }
 
+    @Step("Обновить категорию: {category.name()}")
     @Override
     public @Nullable CategoryJson updateCategory(CategoryJson category) {
         final Response<CategoryJson> response;
@@ -121,7 +122,7 @@ public final class SpendApiClient extends RestClient implements SpendClient {
         return response.body();
     }
 
-
+    @Step("Получить все категории пользователя: {username}")
     public @Nonnull List<CategoryJson> getAllCategories(String username) {
         final Response<List<CategoryJson>> response;
         try {
@@ -134,6 +135,7 @@ public final class SpendApiClient extends RestClient implements SpendClient {
         return response.body() != null ? response.body() : Collections.emptyList();
     }
 
+    @Step("Найти категорию по имени: {categoryName}, пользователь: {username}")
     @Override
     public @Nonnull Optional<CategoryJson> findCategoryByNameAndUsername(String categoryName, String username) {
         final Response<List<CategoryJson>> response;

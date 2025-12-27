@@ -7,6 +7,7 @@ import guru.qa.niffler.config.Config;
 import guru.qa.niffler.model.TestData;
 import guru.qa.niffler.model.UserJson;
 import guru.qa.niffler.service.UsersClient;
+import io.qameta.allure.Step;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
@@ -42,6 +43,7 @@ public final class UsersApiClient implements UsersClient {
     private final AuthApi authApi = authRetrofit.create(AuthApi.class);
     private final UserApi userApi = userdataRetrofit.create(UserApi.class);
 
+    @Step("Найти пользователя по username: {username}")
     @Override
     @Nonnull
     public Optional<UserJson> findUserByUsername(String username) {
@@ -59,6 +61,7 @@ public final class UsersApiClient implements UsersClient {
         }
     }
 
+    @Step("Создать пользователя: {username}")
     @Override
     @Nonnull
     public UserJson createUser(String username, String password) {
@@ -86,6 +89,7 @@ public final class UsersApiClient implements UsersClient {
         }
     }
 
+    @Step("Создать друзей для пользователя {targetUser.username()}: количество = {count}")
     @Override
     @Nonnull
     public List<UserJson> createFriends(UserJson targetUser, int count) {
@@ -116,6 +120,7 @@ public final class UsersApiClient implements UsersClient {
         return result;
     }
 
+    @Step("Найти пользователя по ID: {id}")
     @Override
     @Nonnull
     public Optional<UserJson> findUserById(UUID id) {
@@ -133,16 +138,19 @@ public final class UsersApiClient implements UsersClient {
         return Optional.empty();
     }
 
+    @Step("Удалить пользователя: {username}")
     @Override
     public void deleteUser(String username) {
         throw new UnsupportedOperationException("Delete user via REST API not implemented");
     }
 
+    @Step("Проверить существование пользователя: {username}")
     @Override
     public boolean userExists(String username) {
         return findUserByUsername(username).isPresent();
     }
 
+    @Step("Добавить входящие приглашения для пользователя {targetUser.username()}: количество = {count}")
     @Override
     @Nonnull
     public List<UserJson> addIncomeInvitation(UserJson targetUser, int count) {
@@ -168,6 +176,7 @@ public final class UsersApiClient implements UsersClient {
         return result;
     }
 
+    @Step("Добавить исходящие приглашения для пользователя {targetUser.username()}: количество = {count}")
     @Override
     @Nonnull
     public List<UserJson> addOutcomeInvitation(UserJson targetUser, int count) {
