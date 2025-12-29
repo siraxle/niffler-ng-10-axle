@@ -24,7 +24,7 @@ public class FriendsWebTest {
     void friendShouldBePresentInFriendsTable(UserJson user) throws InterruptedException {
         Selenide.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
-                .getHeader() // Используем Header вместо goToFriendsPage()
+                .getHeader()
                 .toFriendsPage()
                 .isFriendNameExist(user.testData().friends().getFirst().username());
     }
@@ -36,7 +36,7 @@ public class FriendsWebTest {
     void friendsTableShouldBeEmptyForNewUser(UserJson user) {
         int friendsCount = Selenide.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
-                .getHeader() // Используем Header
+                .getHeader()
                 .toFriendsPage()
                 .getFriendsCount();
         Assertions.assertEquals(0, friendsCount);
