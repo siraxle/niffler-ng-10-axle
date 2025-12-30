@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static guru.qa.niffler.utils.RandomDataUtils.randomUsername;
 import static java.util.Objects.requireNonNull;
@@ -201,4 +202,19 @@ public final class UsersApiClient implements UsersClient {
         }
         return result;
     }
+
+    @Override
+    public List<UserJson> allUsers() {
+        try {
+            Response<List<UserJson>> response = userApi.allUsers("", "").execute();
+            if (response.isSuccessful()) {
+                return requireNonNull(response.body());
+            } else {
+                throw new RuntimeException("Failed to get all users. Code: " + response.code());
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to get all users", e);
+        }
+    }
+
 }
