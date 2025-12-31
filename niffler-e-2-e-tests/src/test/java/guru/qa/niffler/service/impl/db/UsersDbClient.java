@@ -88,6 +88,12 @@ public final class UsersDbClient implements UsersClient {
     }
 
     @Override
+    public List<UserJson> allUsers() {
+        System.out.printf("allUsers не реализован в UsersDbClient");
+        return List.of();
+    }
+
+    @Override
     @Nonnull
     public Optional<UserJson> findUserByUsername(String username) {
         return requireNonNull(xaTxTemplate.execute(() -> {
