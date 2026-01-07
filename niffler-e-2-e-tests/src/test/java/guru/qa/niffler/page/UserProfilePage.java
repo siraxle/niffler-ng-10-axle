@@ -1,6 +1,7 @@
 package guru.qa.niffler.page;
 
 import com.codeborne.selenide.ElementsCollection;
+import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.SelenideElement;
 import io.qameta.allure.Step;
 
@@ -10,8 +11,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Objects;
 
 import static com.codeborne.selenide.Condition.*;
-import static com.codeborne.selenide.Selenide.$;
-import static com.codeborne.selenide.Selenide.$$;
+import static com.codeborne.selenide.Selenide.*;
 
 @ParametersAreNonnullByDefault
 public class UserProfilePage extends BasePage<UserProfilePage> {
@@ -20,6 +20,8 @@ public class UserProfilePage extends BasePage<UserProfilePage> {
     private final SelenideElement usernameInput = $("#username");
     private final SelenideElement nameInput = $("#name");
     private final SelenideElement saveChangesButton = $("button[type='submit']"); // Более стабильный локатор
+    private final SelenideElement closeButton = $x("//h2[contains(text(), 'Archive category')]/..//button[text() = 'Close']"); // Более стабильный локатор
+    private final SelenideElement archiveButton = $x("//h2[contains(text(), 'Archive category')]/..//button[text() = 'Archive']"); // Более стабильный локатор
 
     // Аватар
     private final SelenideElement avatarInput = $("#image__input");
@@ -95,10 +97,13 @@ public class UserProfilePage extends BasePage<UserProfilePage> {
     @Step("Архивировать категорию: {categoryName}")
     @Nonnull
     public UserProfilePage archiveCategory(String categoryName) {
+        Selenide.sleep(2000);
         int index = getCategoryIndex(categoryName);
         if (index >= 0) {
             archiveCategoryButtons.get(index).click();
         }
+        Selenide.sleep(2000);
+        clickArchiveInArchiveCategoryAlert();
         return this;
     }
 
@@ -206,4 +211,19 @@ public class UserProfilePage extends BasePage<UserProfilePage> {
         usernameInput.shouldBe(disabled);
         return this;
     }
+
+    @Step("Закрыть Archive category окно")
+    @Nonnull
+    public UserProfilePage clickCloseInArchiveCategoryAlert() {
+        closeButton.click();
+        return this;
+    }
+
+    @Step("Подтвердить архивацию в Archive category окне")
+    @Nonnull
+    public UserProfilePage clickArchiveInArchiveCategoryAlert() {
+        archiveButton.click();
+        return this;
+    }
+
 }

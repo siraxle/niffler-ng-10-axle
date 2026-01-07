@@ -3,6 +3,8 @@ package guru.qa.niffler.test.web;
 import com.codeborne.selenide.Selenide;
 import guru.qa.niffler.config.Config;
 import guru.qa.niffler.jupiter.annotation.Category;
+import guru.qa.niffler.jupiter.annotation.ScreenShotTest;
+import guru.qa.niffler.jupiter.annotation.Spending;
 import guru.qa.niffler.jupiter.annotation.User;
 import guru.qa.niffler.jupiter.extension.BrowserExtension;
 import guru.qa.niffler.jupiter.extension.CategoryExtension;
@@ -12,10 +14,17 @@ import guru.qa.niffler.page.LoginPage;
 import guru.qa.niffler.service.SpendClient;
 import guru.qa.niffler.service.impl.db.SpendDbClient;
 import guru.qa.niffler.utils.RandomDataUtils;
+import guru.qa.niffler.utils.ScreenDiffResult;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.Optional;
+
+import static com.codeborne.selenide.Selenide.$x;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @ExtendWith({BrowserExtension.class})
 public class ProfileTest {
@@ -134,6 +143,20 @@ public class ProfileTest {
                 .setName(username)
                 .saveChanges()
                 .checkSnackbarText("Profile successfully updated");
+    }
+
+    @User()
+    @Test
+    @ScreenShotTest("img/expected-avatar.png")
+    void checkAvatarComponentTest(UserJson user, BufferedImage expected) throws IOException {
+        Selenide.open(CFG.frontUrl(), LoginPage.class)
+                .login(user.username(), user.testData().password())
+                .getHeader()
+                .toProfilePage();
+        Selenide.sleep(1000);
+        BufferedImage actual = ImageIO.read($x("(//div[contains(@class, 'MuiAvatar-root')])[2]").screenshot());
+
+        assertFalse(new ScreenDiffResult(expected, actual));
     }
 
 }
