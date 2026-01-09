@@ -18,7 +18,7 @@ public class LoginWebTest {
 
     private static final Config CFG = Config.getInstance();
 
-    @User()
+    @User(username = "")
     @Test
     void mainPageShouldBeDisplayedAfterSuccessLogin(UserJson user) {
         MainPage mainPage = open(CFG.frontUrl(), LoginPage.class)

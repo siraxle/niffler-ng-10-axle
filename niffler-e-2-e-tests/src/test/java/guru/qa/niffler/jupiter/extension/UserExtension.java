@@ -1,34 +1,27 @@
 package guru.qa.niffler.jupiter.extension;
 
-import guru.qa.niffler.config.Config;
-import guru.qa.niffler.data.tpl.XaTransactionTemplate;
-import guru.qa.niffler.jupiter.annotation.Spending;
 import guru.qa.niffler.jupiter.annotation.User;
 import guru.qa.niffler.model.CategoryJson;
 import guru.qa.niffler.model.SpendJson;
 import guru.qa.niffler.model.TestData;
 import guru.qa.niffler.model.UserJson;
-import guru.qa.niffler.service.SpendClient;
 import guru.qa.niffler.service.UsersClient;
-import guru.qa.niffler.service.impl.db.SpendDbClient;
+import guru.qa.niffler.service.impl.api.UsersApiClient;
 import guru.qa.niffler.service.impl.db.UsersDbClient;
 import guru.qa.niffler.utils.RandomDataUtils;
 import org.junit.jupiter.api.extension.*;
 import org.junit.platform.commons.support.AnnotationSupport;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
 public class UserExtension implements BeforeEachCallback, ParameterResolver {
-    private static final Config CFG = Config.getInstance();
-
     public static final ExtensionContext.Namespace NAMESPACE = ExtensionContext.Namespace.create(UserExtension.class);
     public static final String DEFAULT_PASSWORD = "123456";
 
-    private final UsersClient usersClient = new UsersDbClient();
-    private final SpendClient spendClient = new SpendDbClient();
+//    private final UsersClient usersClient = new UsersDbClient();
+    private final UsersClient usersClient = new UsersApiClient();
 
     @Override
     public void beforeEach(ExtensionContext context) throws Exception {

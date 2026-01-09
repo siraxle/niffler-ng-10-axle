@@ -12,7 +12,7 @@ import java.util.UUID;
 public interface AuthUserRepository {
 
     static AuthUserRepository getInstance() {
-        return switch (System.getProperty("repository", "jpa")) {
+        return switch (System.getProperty("repository", "sjdbc")) {
             case "jpa" -> new AuthUserRepositoryHibernate();
             case "jdbc" -> new AuthUserRepositoryJdbc();
             case "sjdbc" -> new  AuthUserRepositorySpringJdbc();
