@@ -1,6 +1,9 @@
 package guru.qa.niffler.test.web;
 
 import com.codeborne.selenide.Selenide;
+import guru.qa.niffler.condition.Bubble;
+import guru.qa.niffler.condition.Color;
+import guru.qa.niffler.condition.StatConditions;
 import guru.qa.niffler.config.Config;
 import guru.qa.niffler.jupiter.annotation.ScreenShotTest;
 import guru.qa.niffler.jupiter.annotation.Spending;
@@ -10,15 +13,15 @@ import guru.qa.niffler.model.CurrencyValues;
 import guru.qa.niffler.model.SpendJson;
 import guru.qa.niffler.model.UserJson;
 import guru.qa.niffler.page.LoginPage;
+import guru.qa.niffler.page.component.StatComponent;
 import guru.qa.niffler.utils.ScreenDiffResult;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.List;
 
-import static com.codeborne.selenide.Selenide.$;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @ExtendWith({BrowserExtension.class})
@@ -171,21 +174,137 @@ public class SpendingWebTest {
     }
 
     @User(
-            spendings = @Spending(
+            spendings = {@Spending(
                     amount = 89900,
                     description = "Исходное описание",
                     category = "Обучение"
+            ),
+                    @Spending(
+                            amount = 1000,
+                            description = "Рыбалка",
+                            category = "Рыбалка на Неве"
+                    )
+            }
+    )
+    @Test
+    @ScreenShotTest("img/expected-stat-with-2-categories.png")
+    void checkStatComponentTest(UserJson user, BufferedImage expected) throws IOException, InterruptedException {
+        StatComponent statComponent = Selenide.open(CFG.frontUrl(), LoginPage.class)
+                .login(user.username(), user.testData().password())
+                .getStatComponent();
+
+        Thread.sleep(3000);
+
+        statComponent.checkBubbles(
+                new Bubble(Color.yellow, "Обучение 89900 ₽"),
+                new Bubble(Color.green, "Рыбалка на Неве 1000 ₽")
+        );
+        statComponent.checkBubblesInAnyOrder(
+                new Bubble(Color.green, "Рыбалка на Неве 1000 ₽"),
+                new Bubble(Color.yellow, "Обучение 89900 ₽")  // Порок изменён
+        );
+
+        statComponent.checkBubblesContains(
+                new Bubble(Color.yellow, "Обучение 89900 ₽")
+        );
+
+        assertFalse(new ScreenDiffResult(
+                        expected,
+                        statComponent.chartScreenshot()),
+                "Screen comparison failure");
+
+    }
+
+    @User(
+            spendings = {
+                    @Spending(
+                            category = "Обучение",
+                            amount = 50000,
+                            currency = CurrencyValues.RUB,
+                            description = "Курс по Java"
+                    ),
+                    @Spending(
+                            category = "Еда",
+                            amount = 1500.50,
+                            currency = CurrencyValues.RUB,
+                            description = "Обед в кафе"
+                    )
+            }
+    )
+    @Test
+    void shouldCheckSpendsInTable(UserJson user) {
+        SpendJson spend1 = user.testData().spendings().get(0);
+        SpendJson spend2 = user.testData().spendings().get(1);
+
+        Selenide.open(CFG.frontUrl(), LoginPage.class)
+                .login(user.username(), user.testData().password())
+                .getSpendingTable()
+                .checkThatTableContains(spend1.description())
+                .getTableRows()
+                .should(StatConditions.spends(spend1, spend2));
+    }
+
+    @User(
+            spendings = @Spending(
+                    category = "Путешествия",
+                    amount = 100000,
+                    currency = CurrencyValues.RUB,
+                    description = "Поездка в Сочи"
             )
     )
     @Test
-    @ScreenShotTest("img/expected-stat.png")
-    void checkStatComponentTest(UserJson user, BufferedImage expected) throws IOException {
+    void shouldCheckSingleSpendInTable(UserJson user) {
+        SpendJson expectedSpend = user.testData().spendings().getFirst();
+
         Selenide.open(CFG.frontUrl(), LoginPage.class)
-                .login(user.username(), user.testData().password());
+                .login(user.username(), user.testData().password())
+                .getSpendingTable()
+                .getTableRows()
+                .should(StatConditions.spends(expectedSpend));
+    }
 
-        BufferedImage actual = ImageIO.read($("canvas[role='img']").screenshot());
+    @User(
+            spendings = {
+                    @Spending(
+                            category = "Обучение",
+                            amount = 50000,
+                            currency = CurrencyValues.RUB,
+                            description = "Курс по Java"
+                    ),
+                    @Spending(
+                            category = "Еда",
+                            amount = 1500.50,
+                            currency = CurrencyValues.EUR,
+                            description = "Обед в кафе"
+                    ),
+                    @Spending(
+                            category = "Кино",
+                            amount = 1600.51,
+                            currency = CurrencyValues.KZT,
+                            description = "Первому игроку приготовиться"
+                    ),
+                    @Spending(
+                            category = "ЖКХ",
+                            amount = 1700.52,
+                            currency = CurrencyValues.USD,
+                            description = "Холодная вода"
+                    )
+            }
+    )
+    @Test
+    void shouldCheckAllSpendsInTable(UserJson user) {
+        List<SpendJson> allSpends = user.testData().spendings();
 
-        assertFalse(new ScreenDiffResult(expected, actual));
+        Selenide.open(CFG.frontUrl(), LoginPage.class)
+                .login(user.username(), user.testData().password())
+                .getSpendingTable()
+                .getTableRows()
+                .should(StatConditions.spends(
+                        allSpends.get(0),
+                        allSpends.get(1),
+                        allSpends.get(2),
+                        allSpends.get(3)
+                ));
     }
 
 }

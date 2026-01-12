@@ -31,20 +31,21 @@ public class ScreenShotTestExtension implements ParameterResolver, TestExecution
     @SneakyThrows
     @Override
     public BufferedImage resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
-        return ImageIO.read(new ClassPathResource("img/expected-stat.png").getInputStream());
+        return ImageIO.read(new ClassPathResource("img/expected-stat-with-2-categories.png").getInputStream());
     }
 
     @Override
     public void handleTestExecutionException(ExtensionContext context, Throwable throwable) throws Throwable {
-        ScreenDif screenDif = new ScreenDif(
-                "data:image/png;base64," + Base64.getEncoder().encodeToString(imageToBytes(getExcepted())),
-                "data:image/png;base64," + Base64.getEncoder().encodeToString(imageToBytes(getActual())),
-                "data:image/png;base64," + Base64.getEncoder().encodeToString(imageToBytes(getDiff()))
-        );
-        String jsonString = OBJECT_MAPPER.writeValueAsString(screenDif);
+        if (throwable.getMessage().contains("Screen comparison failure")) {
+            ScreenDif screenDif = new ScreenDif(
+                    "data:image/png;base64," + Base64.getEncoder().encodeToString(imageToBytes(getExcepted())),
+                    "data:image/png;base64," + Base64.getEncoder().encodeToString(imageToBytes(getActual())),
+                    "data:image/png;base64," + Base64.getEncoder().encodeToString(imageToBytes(getDiff()))
+            );
+            String jsonString = OBJECT_MAPPER.writeValueAsString(screenDif);
 
-        Allure.addAttachment("Screenshot diff", "application/vnd.allure.image.diff", jsonString);
-
+            Allure.addAttachment("Screenshot diff", "application/vnd.allure.image.diff", jsonString);
+        }
         throw throwable;
     }
 

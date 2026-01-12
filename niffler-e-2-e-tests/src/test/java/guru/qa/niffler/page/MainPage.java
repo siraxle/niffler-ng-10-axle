@@ -2,6 +2,7 @@ package guru.qa.niffler.page;
 
 import guru.qa.niffler.page.component.Header;
 import guru.qa.niffler.page.component.SpendingTable;
+import guru.qa.niffler.page.component.StatComponent;
 import io.qameta.allure.Step;
 
 import javax.annotation.Nonnull;
@@ -15,11 +16,18 @@ public class MainPage extends BasePage<MainPage> {
 
     private final Header header = new Header();
     private final SpendingTable spendingTable = new SpendingTable();
+    private final StatComponent statComponent = new StatComponent();
 
     @Step("Получить компонент Header")
     @Nonnull
     public Header getHeader() {
         return header;
+    }
+
+    @Nonnull
+    public StatComponent getStatComponent() {
+        statComponent.getSelf().scrollIntoView(true);
+        return  statComponent;
     }
 
     @Step("Получить таблицу трат")
