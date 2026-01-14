@@ -7,7 +7,10 @@ import io.qameta.allure.Step;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
+import javax.imageio.ImageIO;
 
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.Objects;
 
 import static com.codeborne.selenide.Condition.*;
@@ -35,6 +38,7 @@ public class UserProfilePage extends BasePage<UserProfilePage> {
     private final ElementsCollection editCategoryButtons = $$("button[aria-label='Edit category']");
     private final ElementsCollection archiveCategoryButtons = $$("button[aria-label='Archive category']");
     private final ElementsCollection categoryCommon = $$(".MuiChip-filled.MuiChip-colorPrimary");
+    private final SelenideElement avatarImage = $x("(//div[contains(@class, 'MuiAvatar-root')])[2]");
 
     @Step("Установить имя: {name}")
     @Nonnull
@@ -224,6 +228,12 @@ public class UserProfilePage extends BasePage<UserProfilePage> {
     public UserProfilePage clickArchiveInArchiveCategoryAlert() {
         archiveButton.click();
         return this;
+    }
+
+    @Step("Получить скриншот аватара")
+    @Nonnull
+    public BufferedImage getAvatarImage() throws IOException {
+        return ImageIO.read(avatarImage.screenshot());
     }
 
 }

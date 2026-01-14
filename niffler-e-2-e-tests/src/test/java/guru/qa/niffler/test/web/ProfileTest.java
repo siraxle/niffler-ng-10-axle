@@ -149,12 +149,11 @@ public class ProfileTest {
     @Test
     @ScreenShotTest("img/expected-avatar.png")
     void checkAvatarComponentTest(UserJson user, BufferedImage expected) throws IOException {
-        Selenide.open(CFG.frontUrl(), LoginPage.class)
+        BufferedImage actual = Selenide.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
                 .getHeader()
-                .toProfilePage();
-        Selenide.sleep(1000);
-        BufferedImage actual = ImageIO.read($x("(//div[contains(@class, 'MuiAvatar-root')])[2]").screenshot());
+                .toProfilePage()
+                .getAvatarImage();
 
         assertFalse(new ScreenDiffResult(expected, actual));
     }
