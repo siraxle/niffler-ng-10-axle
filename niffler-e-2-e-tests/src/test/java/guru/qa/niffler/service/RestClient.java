@@ -51,8 +51,10 @@ public abstract class RestClient {
             }
         }
 
+        builder.addNetworkInterceptor(new AllureOkHttp3()
+                .setRequestTemplate("http-request-attachment.ftl")
+                .setResponseTemplate("http-response-attachment.ftl"));
         builder.addNetworkInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC));
-        builder.addNetworkInterceptor(new AllureOkHttp3());
         this.okHttpClient = builder.build();
         this.retrofit = new Retrofit.Builder()
                 .baseUrl(baseUrl)

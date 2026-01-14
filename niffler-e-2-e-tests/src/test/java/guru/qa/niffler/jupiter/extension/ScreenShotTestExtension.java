@@ -12,15 +12,14 @@ import org.springframework.core.io.ClassPathResource;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.util.Base64;
 
 public class ScreenShotTestExtension implements ParameterResolver, TestExecutionExceptionHandler {
 
     public static final ExtensionContext.Namespace NAMESPACE = ExtensionContext.Namespace.create(ScreenShotTestExtension.class);
-
-
-    public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    public static ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
@@ -31,21 +30,41 @@ public class ScreenShotTestExtension implements ParameterResolver, TestExecution
     @SneakyThrows
     @Override
     public BufferedImage resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
-        return ImageIO.read(new ClassPathResource("img/expected-stat-with-2-categories.png").getInputStream());
+        return ImageIO.read(new ClassPathResource(extensionContext.getRequiredTestMethod()
+                .getAnnotation(ScreenShotTest.class)
+                .value()).getInputStream());
     }
 
     @Override
     public void handleTestExecutionException(ExtensionContext context, Throwable throwable) throws Throwable {
-        if (throwable.getMessage().contains("Screen comparison failure")) {
-            ScreenDif screenDif = new ScreenDif(
-                    "data:image/png;base64," + Base64.getEncoder().encodeToString(imageToBytes(getExcepted())),
-                    "data:image/png;base64," + Base64.getEncoder().encodeToString(imageToBytes(getActual())),
-                    "data:image/png;base64," + Base64.getEncoder().encodeToString(imageToBytes(getDiff()))
-            );
-            String jsonString = OBJECT_MAPPER.writeValueAsString(screenDif);
+        ScreenShotTest annotation = context.getRequiredTestMethod().getAnnotation(ScreenShotTest.class);
 
-            Allure.addAttachment("Screenshot diff", "application/vnd.allure.image.diff", jsonString);
+        ScreenDif screenDiff = new ScreenDif(
+                "data:image/png;base64," + Base64.getEncoder().encodeToString(imageToBytes(getExpected())),
+                "data:image/png;base64," + Base64.getEncoder().encodeToString(imageToBytes(getActual())),
+                "data:image/png;base64," + Base64.getEncoder().encodeToString(imageToBytes(getDiff()))
+        );
+
+        Allure.addAttachment(
+                "Screenshot diff",
+                "application/vnd.allure.image.diff",
+                objectMapper.writeValueAsString(screenDiff)
+        );
+
+        if (annotation != null && annotation.rewriteExpected()) {
+            if (getActual() != null) {
+                File output = new File("src/test/resources/" + annotation.value());
+                ImageIO.write(getActual(), "png", output);
+                System.out.println("Expected screenshot was rewritten: " + output.getAbsolutePath());
+
+                throw new AssertionError(
+                        "Expected screenshot was rewritten. Please re-run the test to verify the new baseline."
+                );
+            } else {
+                System.out.println("Cannot rewrite expected screenshot: actual image is null");
+            }
         }
+
         throw throwable;
     }
 
@@ -53,7 +72,7 @@ public class ScreenShotTestExtension implements ParameterResolver, TestExecution
         TestMethodContextExtension.context().getStore(NAMESPACE).put("excepted", excepted);
     }
 
-    public static BufferedImage getExcepted() {
+    public static BufferedImage getExpected() {
         return TestMethodContextExtension.context().getStore(NAMESPACE).get("excepted", BufferedImage.class);
     }
 
