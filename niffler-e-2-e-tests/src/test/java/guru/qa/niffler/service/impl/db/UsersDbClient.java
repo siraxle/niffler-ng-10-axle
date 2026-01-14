@@ -15,6 +15,7 @@ import guru.qa.niffler.model.CurrencyValues;
 import guru.qa.niffler.model.UserJson;
 import guru.qa.niffler.service.UsersClient;
 import guru.qa.niffler.utils.RandomDataUtils;
+import io.qameta.allure.Step;
 import org.springframework.jdbc.support.JdbcTransactionManager;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -56,6 +57,7 @@ public final class UsersDbClient implements UsersClient {
 
     @Override
     @Nonnull
+    @Step("Создать пользователя: {username} используя SQL")
     public UserJson createUser(String username, String password) {
         return requireNonNull(xaTxTemplate.execute(() -> {
                     AuthUserEntity authUser = authUserEntity(username, password);

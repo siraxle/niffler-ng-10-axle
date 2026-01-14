@@ -62,7 +62,7 @@ public final class UsersApiClient implements UsersClient {
         }
     }
 
-    @Step("Создать пользователя: {username}")
+    @Step("Создать пользователя: {username} используя API")
     @Override
     @Nonnull
     public UserJson createUser(String username, String password) {
