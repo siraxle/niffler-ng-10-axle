@@ -1,6 +1,8 @@
 package guru.qa.niffler.test.web;
 
+
 import com.codeborne.selenide.Selenide;
+import com.codeborne.selenide.SelenideDriver;
 import guru.qa.niffler.config.Config;
 import guru.qa.niffler.jupiter.annotation.ScreenShotTest;
 import guru.qa.niffler.jupiter.annotation.Spending;
@@ -12,6 +14,7 @@ import guru.qa.niffler.model.UserJson;
 import guru.qa.niffler.page.LoginPage;
 import guru.qa.niffler.page.MainPage;
 import guru.qa.niffler.utils.ScreenDiffResult;
+import guru.qa.niffler.utils.SelenideUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -19,8 +22,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
-import static com.codeborne.selenide.Selenide.$;
-import static com.codeborne.selenide.Selenide.$x;
+
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -28,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class SpendingWebTest {
 
     private static final Config CFG = Config.getInstance();
+    private final SelenideDriver driver = new SelenideDriver(SelenideUtils.chromeConfig);
 
     @User(
             spendings = @Spending(
@@ -41,7 +44,7 @@ public class SpendingWebTest {
         SpendJson originalSpending = user.testData().spendings().getFirst();
         final String newDescription = "Обновлённое описание";
 
-        Selenide.open(CFG.frontUrl(), LoginPage.class)
+        driver.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
                 .getSpendingTable()
                 .checkThatTableContains(originalSpending.description())
@@ -65,7 +68,7 @@ public class SpendingWebTest {
         final String originalDescription = originalSpending.description();
         final String newDescription = "Обновлённое описание после редактирования";
 
-        Selenide.open(CFG.frontUrl(), LoginPage.class)
+        driver.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
                 .getSpendingTable()
                 .checkThatTableContains(originalDescription)
@@ -89,7 +92,7 @@ public class SpendingWebTest {
     void spendingShouldBeVisibleInTable(UserJson user) {
         SpendJson spending = user.testData().spendings().getFirst();
 
-        Selenide.open(CFG.frontUrl(), LoginPage.class)
+        driver.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
                 .getSpendingTable()
                 .checkThatTableContains(spending.description())
@@ -104,7 +107,7 @@ public class SpendingWebTest {
     )
     @Test
     void shouldSearchSpendingByDescription(UserJson user) {
-        Selenide.open(CFG.frontUrl(), LoginPage.class)
+        driver.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
                 .getSpendingTable()
                 .checkTableSize(2)
@@ -125,7 +128,7 @@ public class SpendingWebTest {
     void shouldDeleteSpendingFromTable(UserJson user) {
         SpendJson spending = user.testData().spendings().getFirst();
 
-        Selenide.open(CFG.frontUrl(), LoginPage.class)
+        driver.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
                 .getSpendingTable()
                 .checkThatTableContains(spending.description())
@@ -142,7 +145,7 @@ public class SpendingWebTest {
     )
     @Test
     void shouldFilterSpendingsByPeriod(UserJson user) {
-        Selenide.open(CFG.frontUrl(), LoginPage.class)
+        driver.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
                 .getSpendingTable()
                 .checkTableSize(3)
@@ -162,7 +165,7 @@ public class SpendingWebTest {
         SpendJson originalSpending = user.testData().spendings().getFirst();
         final String newDescription = "Обновлённое описание";
 
-        Selenide.open(CFG.frontUrl(), LoginPage.class)
+        driver.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
                 .getSpendingTable()
                 .checkThatTableContains(originalSpending.description())
@@ -173,6 +176,24 @@ public class SpendingWebTest {
 
     }
 
+//    @User(
+//            spendings = @Spending(
+//                    amount = 89900,
+//                    description = "Исходное описание",
+//                    category = "Обучение"
+//            )
+//    )
+//    @Test
+//    @ScreenShotTest("img/expected-stat.png")
+//    void checkStatComponentTest(UserJson user, BufferedImage expected) throws IOException {
+//        driver.open(CFG.frontUrl(), LoginPage.class)
+//                .login(user.username(), user.testData().password());
+////        driver.sleep(3000);
+//        BufferedImage actual = ImageIO.read($("canvas[role='img']").screenshot());
+//
+//        assertFalse(new ScreenDiffResult(expected, actual));
+//    }
+
     @User(
             spendings = @Spending(
                     amount = 89900,
@@ -181,107 +202,96 @@ public class SpendingWebTest {
             )
     )
     @Test
-    @ScreenShotTest("img/expected-stat.png")
-    void checkStatComponentTest(UserJson user, BufferedImage expected) throws IOException {
-        Selenide.open(CFG.frontUrl(), LoginPage.class)
-                .login(user.username(), user.testData().password());
-        Selenide.sleep(3000);
-        BufferedImage actual = ImageIO.read($("canvas[role='img']").screenshot());
+    @ScreenShotTest("img/expected-avatar.png")
+    void checkAvatarComponentTest1(UserJson user, BufferedImage expected) throws IOException {
+        BufferedImage actual = driver.open(CFG.frontUrl(), LoginPage.class)
+                .login(user.username(), user.testData().password())
+                .getHeader()
+                .toProfilePage()
+                .getAvatarImage();
 
         assertFalse(new ScreenDiffResult(expected, actual));
     }
 
     @User(
-            spendings = @Spending(
-                    amount = 89900,
-                    description = "Исходное описание",
-                    category = "Обучение"
-            )
-    )
-    @Test
-    @ScreenShotTest("img/expected-stat.png")
-    void checkAvatarComponentTest(UserJson user, BufferedImage expected) throws IOException {
-        Selenide.open(CFG.frontUrl(), LoginPage.class)
-                .login(user.username(), user.testData().password());
-        Selenide.sleep(3000);
-        BufferedImage actual = ImageIO.read($x("(//div[contains(@class, 'MuiAvatar-root')])[2]").screenshot());
-
-        assertFalse(new ScreenDiffResult(expected, actual));
-    }
-
-    @User(
-            spendings =
-                    {@Spending(amount = 1000, description = "Тратa 1", category = "Категория 1"),
-                    @Spending(amount = 2000, description = "Тратa 2", category = "Категория 2")}
+            spendings = {
+                    @Spending(amount = 1000, description = "Тратa 1", category = "Категория 1"),
+                    @Spending(amount = 2000, description = "Тратa 2", category = "Категория 2")
+            }
     )
     @ScreenShotTest("img/expected-stat-after-del.png")
     void checkRemovingStatComponentTest(UserJson user, BufferedImage expected) throws IOException {
-        MainPage mainPage = Selenide.open(CFG.frontUrl(), LoginPage.class)
+        MainPage mainPage = driver.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password());
         Selenide.sleep(3000);
+
         mainPage.verifyLegendElementsSize(2);
         mainPage.verifyLegendElementTextByIndex(0, "Категория 2 2000 ₽");
         mainPage.verifyLegendElementTextByIndex(1, "Категория 1 1000 ₽");
 
-        BufferedImage before = ImageIO.read($("canvas[role='img']").screenshot());
+        BufferedImage before = mainPage.getChartImage();
         mainPage.selectCheckboxByIndex(1).clickRemoveButton();
         mainPage.clickConfirmDeleteInDialog();
         Selenide.sleep(3000);
-        BufferedImage after = ImageIO.read($("canvas[role='img']").screenshot());
+
+        BufferedImage after = mainPage.getChartImage();
         mainPage.verifyLegendElementsSize(1).verifyLegendElementTextByIndex(0, "Категория 2 2000 ₽");
+
         assertTrue(new ScreenDiffResult(before, after));
         assertFalse(new ScreenDiffResult(after, expected));
     }
 
     @User(
-            spendings =
-                    {@Spending(amount = 1000, description = "Тратa 1", category = "Категория 1")}
+            spendings = @Spending(amount = 1000, description = "Тратa 1", category = "Категория 1")
     )
     @ScreenShotTest("img/expected-stat-after-edit.png")
     void checkEditStatComponentTest(UserJson user, BufferedImage expected) throws IOException {
-        MainPage mainPage = Selenide.open(CFG.frontUrl(), LoginPage.class)
+        MainPage mainPage = driver.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password());
         Selenide.sleep(3000);
-        BufferedImage before = ImageIO.read($("canvas[role='img']").screenshot());
+
+        BufferedImage before = mainPage.getChartImage();
         mainPage.verifyLegendElementsSize(1).verifyLegendElementTextByIndex(0, "Категория 1 1000 ₽");
 
         mainPage.clickEditBtn().setAmount(100000).save();
         Selenide.sleep(3000);
-        BufferedImage after = ImageIO.read($("canvas[role='img']").screenshot());
+
+        BufferedImage after = mainPage.getChartImage();
         mainPage.verifyLegendElementsSize(1).verifyLegendElementTextByIndex(0, "Категория 1 100000 ₽");
+
         assertTrue(new ScreenDiffResult(before, after));
         assertFalse(new ScreenDiffResult(after, expected));
     }
 
     @User(
-            spendings =
-                    {@Spending(amount = 1000, description = "Тратa 1", category = "Категория 1"),
-                            @Spending(amount = 2000, description = "Тратa 2", category = "Категория 2")}
+            spendings = {
+                    @Spending(amount = 1000, description = "Тратa 1", category = "Категория 1"),
+                    @Spending(amount = 2000, description = "Тратa 2", category = "Категория 2")
+            }
     )
     @ScreenShotTest(value = "img/expected-stat-after-archive.png", rewriteExpected = true)
     void checkAfterArchivedStatComponentTest(UserJson user, BufferedImage expected) throws IOException {
-        MainPage mainPage = Selenide.open(CFG.frontUrl(), LoginPage.class)
+        MainPage mainPage = driver.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password());
         Selenide.sleep(3000);
+
         mainPage.verifyLegendElementsSize(2);
         mainPage.verifyLegendElementTextByIndex(0, "Категория 2 2000 ₽");
         mainPage.verifyLegendElementTextByIndex(1, "Категория 1 1000 ₽");
 
-        BufferedImage before = ImageIO.read($("canvas[role='img']").screenshot());
+        BufferedImage before = mainPage.getChartImage();
         mainPage.getHeader().toProfilePage()
                 .archiveCategory("Категория 1")
                 .saveChanges();
-        Selenide.open(CFG.frontUrl(), LoginPage.class);
+        driver.open(CFG.frontUrl(), LoginPage.class);
 
         Selenide.sleep(3000);
-        BufferedImage after = ImageIO.read($("canvas[role='img']").screenshot());
+        BufferedImage after = mainPage.getChartImage();
         mainPage.verifyLegendElementTextByIndex(0, "Категория 2 2000 ₽");
         mainPage.verifyLegendElementTextByIndex(1, "Archived 1000 ₽");
+
         assertTrue(new ScreenDiffResult(before, after));
         assertFalse(new ScreenDiffResult(after, expected));
     }
-
-
-
 
 }

@@ -1,6 +1,7 @@
 package guru.qa.niffler.page;
 
 import com.codeborne.selenide.ElementsCollection;
+import com.codeborne.selenide.SelenideDriver;
 import com.codeborne.selenide.SelenideElement;
 import io.qameta.allure.Step;
 import org.openqa.selenium.By;
@@ -19,6 +20,13 @@ public class AllPeoplePage extends BasePage<AllPeoplePage> {
     private final ElementsCollection allPeopleTable = $$x("//tbody[@id='all']/tr");
     private final By waitingFlag = By.xpath(".//span[text() = 'Waiting...']");
     private final By searchInput = By.xpath(".//input[@placeholder='Search']");
+
+    public AllPeoplePage(SelenideDriver driver) {
+        super(driver);
+    }
+
+    public AllPeoplePage() {
+    }
 
     @Step("Проверить наличие исходящего запроса к пользователю: {targetUserName}")
     @Nonnull
