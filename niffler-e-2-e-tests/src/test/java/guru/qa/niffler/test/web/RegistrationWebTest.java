@@ -1,11 +1,12 @@
 package guru.qa.niffler.test.web;
 
-import com.codeborne.selenide.Selenide;
+import com.codeborne.selenide.SelenideDriver;
 import guru.qa.niffler.config.Config;
 import guru.qa.niffler.jupiter.extension.BrowserExtension;
 import guru.qa.niffler.page.RegisterPage;
 import guru.qa.niffler.service.impl.api.AuthApiClient;
 import guru.qa.niffler.utils.RandomDataUtils;
+import guru.qa.niffler.utils.SelenideUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,19 +19,20 @@ public class RegistrationWebTest {
 
     private static final Config CFG = Config.getInstance();
     private final AuthApiClient authApiClient = new AuthApiClient();
+    private final SelenideDriver driver = new SelenideDriver(SelenideUtils.chromeConfig);
 
     @Test
     void shouldRegisterNewUser() {
         final String randomUsername = RandomDataUtils.randomUsername();
 
-        Selenide.open(CFG.registerUrl(), RegisterPage.class)
+        driver.open(CFG.registerUrl(), RegisterPage.class)
                 .register(randomUsername, "123456")
                 .checkThatRegisterPageContainsText("Congratulations! You've registered!");
     }
 
     @Test
     void shouldNotRegisterUserWithExistingUserName() {
-        RegisterPage registerPage = Selenide.open(CFG.registerUrl(), RegisterPage.class);
+        RegisterPage registerPage = driver.open(CFG.registerUrl(), RegisterPage.class);
         registerPage
                 .setUsername("cat")
                 .setPassword("123456")
@@ -42,7 +44,7 @@ public class RegistrationWebTest {
 
     @Test
     void shouldShowErrorIfPasswordAndConfirmPasswordAreNotEqual() {
-        RegisterPage registerPage = Selenide.open(CFG.registerUrl(), RegisterPage.class);
+        RegisterPage registerPage = driver.open(CFG.registerUrl(), RegisterPage.class);
         registerPage
                 .setUsername("user_" + System.currentTimeMillis())
                 .setPassword("12345")

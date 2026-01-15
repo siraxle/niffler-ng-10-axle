@@ -1,6 +1,6 @@
 package guru.qa.niffler.test.web;
 
-import com.codeborne.selenide.Selenide;
+import com.codeborne.selenide.SelenideDriver;
 import guru.qa.niffler.config.Config;
 import guru.qa.niffler.jupiter.annotation.User;
 import guru.qa.niffler.jupiter.extension.BrowserExtension;
@@ -9,6 +9,7 @@ import guru.qa.niffler.model.UserJson;
 import guru.qa.niffler.page.LoginPage;
 import guru.qa.niffler.service.UsersClient;
 import guru.qa.niffler.service.impl.db.UsersDbClient;
+import guru.qa.niffler.utils.SelenideUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,13 +17,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith({BrowserExtension.class, UsersQueueExtension.class})
 public class FriendsWebTest {
     private static final Config CFG = Config.getInstance();
+    private final SelenideDriver driver = new SelenideDriver(SelenideUtils.chromeConfig);
 
     @User(
             friends = 1
     )
     @Test
     void friendShouldBePresentInFriendsTable(UserJson user) throws InterruptedException {
-        Selenide.open(CFG.frontUrl(), LoginPage.class)
+        driver.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
                 .getHeader()
                 .toFriendsPage()
@@ -34,7 +36,7 @@ public class FriendsWebTest {
     )
     @Test
     void friendsTableShouldBeEmptyForNewUser(UserJson user) {
-        int friendsCount = Selenide.open(CFG.frontUrl(), LoginPage.class)
+        int friendsCount = driver.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
                 .getHeader()
                 .toFriendsPage()
@@ -50,7 +52,7 @@ public class FriendsWebTest {
     void incomeInvitationBePresentInFriendsTable(UserJson user) {
         String inviterUsername = user.testData().incomeInvitations().getFirst().username();
 
-        Selenide.open(CFG.frontUrl(), LoginPage.class)
+        driver.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
                 .getHeader()
                 .toFriendsPage()
@@ -70,7 +72,7 @@ public class FriendsWebTest {
         System.out.println("Пользователь " + inviterUsername + " существует в БД: " + exists);
         Assertions.assertTrue(exists);
 
-        Selenide.open(CFG.frontUrl(), LoginPage.class)
+        driver.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
                 .getHeader()
                 .toFriendsPage()
@@ -85,7 +87,7 @@ public class FriendsWebTest {
     @Test
     void outcomeInvitationBePresentInAllPeoplesTable(UserJson user) {
         String outcomeInvitationUsername = user.testData().outcomeInvitations().getFirst().username();
-        Selenide.open(CFG.frontUrl(), LoginPage.class)
+        driver.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
                 .getHeader() // Используем Header
                 .toAllPeoplesPage()
@@ -98,7 +100,7 @@ public class FriendsWebTest {
     void outcomeInvitationBePresentInAllPeopleTable(UserJson user) {
         String inviteeUsername = user.testData().outcomeInvitations().getFirst().username();
 
-        Selenide.open(CFG.frontUrl(), LoginPage.class)
+        driver.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
                 .getHeader() // Используем Header
                 .toAllPeoplesPage()

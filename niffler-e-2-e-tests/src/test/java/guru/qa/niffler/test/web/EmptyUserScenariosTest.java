@@ -1,5 +1,6 @@
 package guru.qa.niffler.test.web;
 
+import com.codeborne.selenide.SelenideDriver;
 import guru.qa.niffler.config.Config;
 import guru.qa.niffler.jupiter.annotation.User;
 import guru.qa.niffler.jupiter.extension.BrowserExtension;
@@ -7,17 +8,18 @@ import guru.qa.niffler.model.UserJson;
 import guru.qa.niffler.page.LoginPage;
 import guru.qa.niffler.page.MainPage;
 import guru.qa.niffler.utils.RandomDataUtils;
+import guru.qa.niffler.utils.SelenideUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-
-import static com.codeborne.selenide.Selenide.open;
 
 
 @ExtendWith({BrowserExtension.class})
 public class EmptyUserScenariosTest {
 
     private static final Config CFG = Config.getInstance();
+    private final SelenideDriver driver = new SelenideDriver(SelenideUtils.chromeConfig);
+
 
     @User(
             username = "empty_user",
@@ -27,7 +29,7 @@ public class EmptyUserScenariosTest {
     void shouldHaveFriendRequest(UserJson user) {
         String requesterName = user.testData().incomeInvitations().getFirst().username();
 
-        open(CFG.frontUrl(), LoginPage.class)
+        driver.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
                 .getHeader()
                 .toFriendsPage()
@@ -43,7 +45,7 @@ public class EmptyUserScenariosTest {
     void shouldFindFriendRequestInTable(UserJson user) throws InterruptedException {
         String requesterName = user.testData().incomeInvitations().getFirst().username();
 
-        open(CFG.frontUrl(), LoginPage.class)
+        driver.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
                 .getHeader()
                 .toFriendsPage()
@@ -59,7 +61,7 @@ public class EmptyUserScenariosTest {
     void shouldHaveOutcomeRequest(UserJson user) {
         String inviteeUsername = user.testData().outcomeInvitations().getFirst().username();
 
-        open(CFG.frontUrl(), LoginPage.class)
+        driver.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
                 .getHeader()
                 .toAllPeoplesPage()
@@ -76,14 +78,14 @@ public class EmptyUserScenariosTest {
         String description = "Обед в ресторане";
         double amount = 1500.00;
 
-        open(CFG.frontUrl(), LoginPage.class)
+        driver.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
                 .getHeader()
                 .toProfilePage()
                 .addCategory(categoryName)
                 .verifyCategoryVisible(categoryName);
 
-        open(CFG.frontUrl(), MainPage.class)
+        driver.open(CFG.frontUrl(), MainPage.class)
                 .getHeader()
                 .toAddSpendingPage()
                 .setCategory(categoryName)
@@ -100,7 +102,7 @@ public class EmptyUserScenariosTest {
     @User(incomeInvitations = 1)
     public void acceptIncomeInvitation(UserJson user) {
         var incomeInvUsername = user.testData().incomeInvitations().getFirst().username();
-        open(CFG.frontUrl(), LoginPage.class)
+        driver.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
                 .getHeader()
                 .toFriendsPage()
@@ -113,7 +115,7 @@ public class EmptyUserScenariosTest {
     @User(incomeInvitations = 1)
     public void declineIncomeInvitation(UserJson user) {
         var incomeInvUsername = user.testData().incomeInvitations().getFirst().username();
-        open(CFG.frontUrl(), LoginPage.class)
+        driver.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
                 .getHeader()
                 .toFriendsPage()
@@ -126,7 +128,7 @@ public class EmptyUserScenariosTest {
     @User
     public void addNewSpending(UserJson user) {
         var spending = RandomDataUtils.randomSpend(user.username());
-        open(CFG.frontUrl(), LoginPage.class)
+        driver.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
                 .getHeader()
                 .toAddSpendingPage()
@@ -144,7 +146,7 @@ public class EmptyUserScenariosTest {
     public void editProfile(UserJson user) {
         var newUsername = RandomDataUtils.randomUsername();
         var newCategoryName = RandomDataUtils.randomeCategoryName();
-        open(CFG.frontUrl(), LoginPage.class)
+        driver.open(CFG.frontUrl(), LoginPage.class)
                 .login(user.username(), user.testData().password())
                 .getHeader()
                 .toProfilePage()

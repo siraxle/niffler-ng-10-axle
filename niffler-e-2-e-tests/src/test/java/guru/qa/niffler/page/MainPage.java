@@ -10,6 +10,10 @@ import io.qameta.allure.Step;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
+import javax.imageio.ImageIO;
+
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 
 import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Selenide.*;
@@ -25,6 +29,8 @@ public class MainPage extends BasePage<MainPage> {
     private final SelenideElement confirmDeleteButton = $x("//div[@aria-describedby='alert-dialog-slide-description']//button[contains(text(), 'Delete')]");
     private final SelenideElement cancelButton = $x("//div[@aria-describedby='alert-dialog-slide-description']//button[contains(text(), 'Cancel')]");
     private final ElementsCollection legendElements = $$x("//div[@id='legend-container']//li");
+    private final SelenideElement chart = $("canvas[role='img']");
+
 
 
     @Step("Получить компонент Header")
@@ -99,6 +105,10 @@ public class MainPage extends BasePage<MainPage> {
         return new EditSpendingPage();
     }
 
-
+    @Step("Получить скриншот графика статистики")
+    @Nonnull
+    public BufferedImage getChartImage() throws IOException {
+        return ImageIO.read(chart.screenshot());
+    }
 
 }

@@ -1,5 +1,6 @@
 package guru.qa.niffler.test.web;
 
+import com.codeborne.selenide.SelenideDriver;
 import guru.qa.niffler.config.Config;
 import guru.qa.niffler.data.dao.AuthAuthorityDao;
 import guru.qa.niffler.data.dao.AuthUserDao;
@@ -8,6 +9,7 @@ import guru.qa.niffler.data.dao.impl.*;
 import guru.qa.niffler.model.*;
 import guru.qa.niffler.service.impl.db.SpendDbClient;
 import guru.qa.niffler.service.impl.db.UsersDbClient;
+import guru.qa.niffler.utils.SelenideUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -29,6 +31,7 @@ public class JdbcTest {
     private final AuthUserDao authUserDao = new AuthUserDaoSpringJdbc();
     private final AuthAuthorityDao authAuthorityDao = new AuthAuthorityDaoSpringJdbc();
     private final UdUserDao userDao = new UdUserDaoSpringJdbc();
+    private final SelenideDriver driver = new SelenideDriver(SelenideUtils.chromeConfig);
 
 
 //    @Test
