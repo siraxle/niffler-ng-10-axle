@@ -6,6 +6,7 @@ import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.SelenideElement;
 import guru.qa.niffler.page.component.Header;
 import guru.qa.niffler.page.component.SpendingTable;
+import guru.qa.niffler.page.component.StatComponent;
 import io.qameta.allure.Step;
 
 import javax.annotation.Nonnull;
@@ -19,6 +20,7 @@ public class MainPage extends BasePage<MainPage> {
 
     private final Header header = new Header();
     private final SpendingTable spendingTable = new SpendingTable();
+    private final StatComponent statComponent = new StatComponent();
     private final SelenideElement removeBtn = $x("//button[@id='delete']");
     private final SelenideElement editBtn = $x("//button[@aria-label='Edit spending']");
     private final ElementsCollection checkBoxes = $$("input[type='checkbox'][class*='PrivateSwitchBase-input']");
@@ -31,6 +33,12 @@ public class MainPage extends BasePage<MainPage> {
     @Nonnull
     public Header getHeader() {
         return header;
+    }
+
+    @Nonnull
+    public StatComponent getStatComponent() {
+        statComponent.getSelf().scrollIntoView(true);
+        return  statComponent;
     }
 
     @Step("Получить таблицу трат")

@@ -2,6 +2,8 @@ package guru.qa.niffler.page.component;
 
 import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.SelenideElement;
+import guru.qa.niffler.condition.StatConditions;
+import guru.qa.niffler.model.SpendJson;
 import guru.qa.niffler.page.EditSpendingPage;
 import io.qameta.allure.Step;
 import lombok.Getter;
@@ -162,4 +164,16 @@ public class SpendingTable extends BaseComponent<SpendingTable> {
         row.find(checkBox).click();
         deleteButton.shouldBe(visible);
     }
+
+    public ElementsCollection getTableRows() {
+        return self.$$("tbody tr");
+    }
+
+    @Step("Check that table contains spends {expectedSpends}")
+    @Nonnull
+    public SpendingTable checkSpends(SpendJson... expectedSpends) {
+        getTableRows().should(StatConditions.spends(expectedSpends));
+        return this;
+    }
+
 }

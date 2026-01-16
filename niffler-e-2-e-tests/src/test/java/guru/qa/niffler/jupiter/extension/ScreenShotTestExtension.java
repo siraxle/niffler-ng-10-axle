@@ -34,6 +34,7 @@ public class ScreenShotTestExtension implements ParameterResolver, TestExecution
                 .getAnnotation(ScreenShotTest.class)
                 .value()).getInputStream());
     }
+
     @Override
     public void handleTestExecutionException(ExtensionContext context, Throwable throwable) throws Throwable {
         ScreenShotTest annotation = context.getRequiredTestMethod().getAnnotation(ScreenShotTest.class);
