@@ -19,8 +19,11 @@ enum LocalConfig implements Config {
     }
 
     @Override
+//    public String authUrl() {
+//        return "http://localhost:9000/login/";
+//    }
     public String authUrl() {
-        return "http://localhost:9000/login/";
+        return "http://localhost:9000/";
     }
 
     @Override
