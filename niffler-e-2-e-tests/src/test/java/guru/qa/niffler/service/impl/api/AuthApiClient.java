@@ -6,6 +6,7 @@ import guru.qa.niffler.api.core.ThreadSafeCookieStore;
 import guru.qa.niffler.model.UserJson;
 import guru.qa.niffler.service.RestClient;
 import io.qameta.allure.Step;
+import org.apache.commons.lang3.StringUtils;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
@@ -21,13 +22,21 @@ public final class AuthApiClient extends RestClient {
 
     private final AuthApi authApi;
     private final UserApi userApi;
+    private static final String RESPONSE_TYPE = "code";
+    private static final String CLIENT_ID = "client";
+    private static final String SCOPE = "openid";
+    private static final String CODE_CHALLENGE_METHOD = "S256";
+    private static final String GRANT_TYPE = "authorization_code";
+    private static final String REDIRECT_URL = CFG.frontUrl() + "authorized";
+
+    private String currentCodeChallenge;
 
     public AuthApiClient() {
-        super("https://auth.niffler-stage.qa.guru/", true);
+        super(CFG.authUrl(), true);
         this.authApi = create(AuthApi.class);
 
         Retrofit userdataRetrofit = new Retrofit.Builder()
-                .baseUrl("https://userdata.niffler-stage.qa.guru/")
+                .baseUrl(CFG.userdataUrl())
                 .addConverterFactory(JacksonConverterFactory.create())
                 .build();
         this.userApi = userdataRetrofit.create(UserApi.class);
@@ -76,7 +85,7 @@ public final class AuthApiClient extends RestClient {
         throw new RuntimeException("User " + username + " was not created within " + timeout);
     }
 
-    @Step("Простая регистрация (только запрос)")
+    @Step("Регистрация пользователя: {username}")
     @Nonnull
     public Response<Void> register(String username, String password) throws IOException {
         authApi.requestRegisterForm().execute();
@@ -86,5 +95,38 @@ public final class AuthApiClient extends RestClient {
                 password,
                 ThreadSafeCookieStore.INSTANCE.xsrfCookie()
         ).execute();
+    }
+
+    public void authorize(String codeChallenge) throws IOException {
+        authApi.authorize(
+                RESPONSE_TYPE,
+                CLIENT_ID,
+                SCOPE,
+                REDIRECT_URL,
+                codeChallenge,
+                CODE_CHALLENGE_METHOD
+        ).execute();
+    }
+
+    public String login(String username, String password) throws IOException {
+        var response = authApi.login(username,
+                        password,
+                        ThreadSafeCookieStore.INSTANCE.xsrfCookie())
+                .execute();
+        return StringUtils.substringAfter(response.raw().request().url().toString(), "code=");
+    }
+
+    public String token(String code, String codeVerifier) throws IOException {
+        var response = authApi.token(
+                code,
+                REDIRECT_URL,
+                CLIENT_ID,
+                codeVerifier,
+                GRANT_TYPE
+        ).execute();
+        if (response.body() != null) {
+            return response.body().path("id_token").asText();
+        }
+        return "";
     }
 }
