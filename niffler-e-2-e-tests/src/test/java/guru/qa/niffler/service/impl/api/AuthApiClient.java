@@ -29,8 +29,6 @@ public final class AuthApiClient extends RestClient {
     private static final String GRANT_TYPE = "authorization_code";
     private static final String REDIRECT_URL = CFG.frontUrl() + "authorized";
 
-    private String currentCodeChallenge;
-
     public AuthApiClient() {
         super(CFG.authUrl(), true);
         this.authApi = create(AuthApi.class);
@@ -45,19 +43,34 @@ public final class AuthApiClient extends RestClient {
     @Step("Регистрация пользователя: username={username}")
     @Nonnull
     public UserJson registerUser(String username, String password) throws IOException, InterruptedException {
-        authApi.requestRegisterForm().execute();
+        try {
+            authApi.requestRegisterForm().execute();
+        } catch (IOException e) {
+            throw new IOException("Failed to get registration form", e);
+        }
 
-        Response<Void> registerResponse = authApi.register(
-                username,
-                password,
-                password,
-                ThreadSafeCookieStore.INSTANCE.xsrfCookie()
-        ).execute();
+        Response<Void> registerResponse;
+        try {
+            registerResponse = authApi.register(
+                    username,
+                    password,
+                    password,
+                    ThreadSafeCookieStore.INSTANCE.xsrfCookie()
+            ).execute();
+        } catch (IOException e) {
+            throw new IOException("Registration request failed", e);
+        }
 
         if (!registerResponse.isSuccessful()) {
-            throw new RuntimeException("Registration failed with code: " + registerResponse.code());
+            throw new IOException("Registration failed with code: " + registerResponse.code());
         }
-        return waitForUserCreation(username, Duration.ofSeconds(10));
+
+        try {
+            return waitForUserCreation(username, Duration.ofSeconds(10));
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new InterruptedException("Registration wait interrupted");
+        }
     }
 
     @Step("Ожидание создания пользователя: {username}")
@@ -82,51 +95,86 @@ public final class AuthApiClient extends RestClient {
             TimeUnit.MILLISECONDS.sleep(100);
         }
 
-        throw new RuntimeException("User " + username + " was not created within " + timeout);
+        throw new IOException("User " + username + " was not created within " + timeout);
     }
 
-    @Step("Регистрация пользователя: {username}")
+    @Step("Простая регистрация (только запрос)")
     @Nonnull
     public Response<Void> register(String username, String password) throws IOException {
-        authApi.requestRegisterForm().execute();
-        return authApi.register(
-                username,
-                password,
-                password,
-                ThreadSafeCookieStore.INSTANCE.xsrfCookie()
-        ).execute();
+        try {
+            authApi.requestRegisterForm().execute();
+        } catch (IOException e) {
+            throw new IOException("Failed to get registration form", e);
+        }
+
+        try {
+            return authApi.register(
+                    username,
+                    password,
+                    password,
+                    ThreadSafeCookieStore.INSTANCE.xsrfCookie()
+            ).execute();
+        } catch (IOException e) {
+            throw new IOException("Registration request failed", e);
+        }
     }
 
     public void authorize(String codeChallenge) throws IOException {
-        authApi.authorize(
-                RESPONSE_TYPE,
-                CLIENT_ID,
-                SCOPE,
-                REDIRECT_URL,
-                codeChallenge,
-                CODE_CHALLENGE_METHOD
-        ).execute();
+        try {
+            authApi.authorize(
+                    RESPONSE_TYPE,
+                    CLIENT_ID,
+                    SCOPE,
+                    REDIRECT_URL,
+                    codeChallenge,
+                    CODE_CHALLENGE_METHOD
+            ).execute();
+        } catch (IOException e) {
+            throw new IOException("Authorize request failed", e);
+        }
     }
 
     public String login(String username, String password) throws IOException {
-        var response = authApi.login(username,
-                        password,
-                        ThreadSafeCookieStore.INSTANCE.xsrfCookie())
-                .execute();
-        return StringUtils.substringAfter(response.raw().request().url().toString(), "code=");
+        Response<Void> response;
+        try {
+            response = authApi.login(
+                    username,
+                    password,
+                    ThreadSafeCookieStore.INSTANCE.xsrfCookie()
+            ).execute();
+        } catch (IOException e) {
+            throw new IOException("Login request failed", e);
+        }
+
+        try {
+            return StringUtils.substringAfter(response.raw().request().url().toString(), "code=");
+        } catch (Exception e) {
+            throw new IOException("Failed to extract code from response", e);
+        }
     }
 
     public String token(String code, String codeVerifier) throws IOException {
-        var response = authApi.token(
-                code,
-                REDIRECT_URL,
-                CLIENT_ID,
-                codeVerifier,
-                GRANT_TYPE
-        ).execute();
-        if (response.body() != null) {
-            return response.body().path("id_token").asText();
+        Response<com.fasterxml.jackson.databind.JsonNode> response;
+        try {
+            response = authApi.token(
+                    code,
+                    REDIRECT_URL,
+                    CLIENT_ID,
+                    codeVerifier,
+                    GRANT_TYPE
+            ).execute();
+        } catch (IOException e) {
+            throw new IOException("Token request failed", e);
         }
-        return "";
+
+        if (response.body() != null) {
+            try {
+                return response.body().path("id_token").asText();
+            } catch (Exception e) {
+                throw new IOException("Failed to extract id_token from response", e);
+            }
+        }
+
+        throw new IOException("Token response body is null");
     }
 }

@@ -1,6 +1,5 @@
 package guru.qa.niffler.test.rest;
 
-import guru.qa.niffler.api.core.ThreadSafeCookieStore;
 import guru.qa.niffler.jupiter.annotation.User;
 import guru.qa.niffler.model.UserJson;
 import guru.qa.niffler.service.impl.api.AuthApiClient;
