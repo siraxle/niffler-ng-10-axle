@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static guru.qa.niffler.utils.RandomDataUtils.randomUsername;
 import static java.util.Objects.requireNonNull;
@@ -125,7 +124,6 @@ public final class UsersApiClient implements UsersClient {
     @Override
     @Nonnull
     public Optional<UserJson> findUserById(UUID id) {
-        // получаем ВСЕХ пользователей и фильтруем
         try {
             List<UserJson> allUsers = userApi.allUsers("", "").execute().body();
             if (allUsers != null) {
@@ -216,5 +214,23 @@ public final class UsersApiClient implements UsersClient {
             throw new RuntimeException("Failed to get all users", e);
         }
     }
+
+
+    @Step("Получить друзей пользователя: {username}")
+    @Nonnull
+    @Override
+    public List<UserJson> getFriends(String username) {
+        try {
+            Response<List<UserJson>> response = userApi.friends(username, "").execute();
+            if (response.isSuccessful()) {
+                return requireNonNull(response.body());
+            } else {
+                throw new RuntimeException("Failed to get friends. Code: " + response.code());
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to get friends", e);
+        }
+    }
+
 
 }

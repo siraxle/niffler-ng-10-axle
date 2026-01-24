@@ -18,6 +18,8 @@ import static com.codeborne.selenide.Selenide.*;
 @ParametersAreNonnullByDefault
 public class MainPage extends BasePage<MainPage> {
 
+    public static final String URL = CFG.frontUrl() + "main";
+
     private final Header header = new Header();
     private final SpendingTable spendingTable = new SpendingTable();
     private final StatComponent statComponent = new StatComponent();

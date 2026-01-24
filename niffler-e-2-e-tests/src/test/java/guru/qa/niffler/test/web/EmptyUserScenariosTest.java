@@ -1,11 +1,11 @@
 package guru.qa.niffler.test.web;
 
 import guru.qa.niffler.config.Config;
+import guru.qa.niffler.jupiter.annotation.ApiLogin;
 import guru.qa.niffler.jupiter.annotation.User;
 import guru.qa.niffler.jupiter.extension.BrowserExtension;
 import guru.qa.niffler.model.UserJson;
-import guru.qa.niffler.page.LoginPage;
-import guru.qa.niffler.page.MainPage;
+import guru.qa.niffler.page.*;
 import guru.qa.niffler.utils.RandomDataUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,73 +19,52 @@ public class EmptyUserScenariosTest {
 
     private static final Config CFG = Config.getInstance();
 
-    @User(
-            username = "empty_user",
-            incomeInvitations = 1
-    )
+    @User(username = "empty_user", incomeInvitations = 1)
+    @ApiLogin
     @Test
     void shouldHaveFriendRequest(UserJson user) {
         String requesterName = user.testData().incomeInvitations().getFirst().username();
 
-        open(CFG.frontUrl(), LoginPage.class)
-                .login(user.username(), user.testData().password())
-                .getHeader()
-                .toFriendsPage()
+        open(FriendsPage.URL, FriendsPage.class)
                 .searchFriend(requesterName)
                 .isRequestExist(requesterName);
     }
 
-    @User(
-            username = "empty_user",
-            incomeInvitations = 1
-    )
+    @User(username = "empty_user", incomeInvitations = 1)
+    @ApiLogin(username = "empty_user")
     @Test
     void shouldFindFriendRequestInTable(UserJson user) throws InterruptedException {
         String requesterName = user.testData().incomeInvitations().getFirst().username();
 
-        open(CFG.frontUrl(), LoginPage.class)
-                .login(user.username(), user.testData().password())
-                .getHeader()
-                .toFriendsPage()
+        open(FriendsPage.URL, FriendsPage.class)
                 .searchFriend(requesterName)
-                .isFriendNameExist(requesterName); // Проверяем наличие в таблице
+                .isFriendNameExist(requesterName);
     }
 
-    @User(
-            username = "empty_user",
-            outcomeInvitations = 1
-    )
+    @User(username = "empty_user", outcomeInvitations = 1)
+    @ApiLogin(username = "empty_user")
     @Test
     void shouldHaveOutcomeRequest(UserJson user) {
         String inviteeUsername = user.testData().outcomeInvitations().getFirst().username();
 
-        open(CFG.frontUrl(), LoginPage.class)
-                .login(user.username(), user.testData().password())
-                .getHeader()
-                .toAllPeoplesPage()
+        open(AllPeoplePage.URL, AllPeoplePage.class)
                 .searchPeople(inviteeUsername)
                 .hasOutcomeRequest(inviteeUsername);
     }
 
-    @User(
-            username = "empty_user"
-    )
+    @User(username = "empty_user")
+    @ApiLogin(username = "empty_user")
     @Test
     void shouldAddNewSpending(UserJson user) {
         String categoryName = "Еда";
         String description = "Обед в ресторане";
         double amount = 1500.00;
 
-        open(CFG.frontUrl(), LoginPage.class)
-                .login(user.username(), user.testData().password())
-                .getHeader()
-                .toProfilePage()
+        open(UserProfilePage.URL, UserProfilePage.class)
                 .addCategory(categoryName)
                 .verifyCategoryVisible(categoryName);
 
-        open(CFG.frontUrl(), MainPage.class)
-                .getHeader()
-                .toAddSpendingPage()
+        open(EditSpendingPage.URL, EditSpendingPage.class)
                 .setCategory(categoryName)
                 .setAmount(amount)
                 .setDescription(description)
@@ -98,12 +77,10 @@ public class EmptyUserScenariosTest {
     @Test
     @DisplayName("Принятие заявки в друзья")
     @User(incomeInvitations = 1)
+    @ApiLogin
     public void acceptIncomeInvitation(UserJson user) {
         var incomeInvUsername = user.testData().incomeInvitations().getFirst().username();
-        open(CFG.frontUrl(), LoginPage.class)
-                .login(user.username(), user.testData().password())
-                .getHeader()
-                .toFriendsPage()
+        open(FriendsPage.URL, FriendsPage.class)
                 .acceptIncomeInvitation(incomeInvUsername)
                 .checkFriendsListIsNotEmpty();
     }
@@ -111,12 +88,10 @@ public class EmptyUserScenariosTest {
     @Test
     @DisplayName("Отклонение заявки в друзья")
     @User(incomeInvitations = 1)
+    @ApiLogin
     public void declineIncomeInvitation(UserJson user) {
         var incomeInvUsername = user.testData().incomeInvitations().getFirst().username();
-        open(CFG.frontUrl(), LoginPage.class)
-                .login(user.username(), user.testData().password())
-                .getHeader()
-                .toFriendsPage()
+        open(FriendsPage.URL, FriendsPage.class)
                 .declineIncomeInvitation(incomeInvUsername)
                 .checkIncomeInvitationListIsEmpty();
     }
@@ -124,12 +99,10 @@ public class EmptyUserScenariosTest {
     @Test
     @DisplayName("Добавление новой траты")
     @User
+    @ApiLogin
     public void addNewSpending(UserJson user) {
         var spending = RandomDataUtils.randomSpend(user.username());
-        open(CFG.frontUrl(), LoginPage.class)
-                .login(user.username(), user.testData().password())
-                .getHeader()
-                .toAddSpendingPage()
+        open(EditSpendingPage.URL, EditSpendingPage.class)
                 .setAmount(spending.amount())
                 .setCategory(spending.category().name())
                 .setNewSpendingDescription(spending.description())
@@ -141,13 +114,11 @@ public class EmptyUserScenariosTest {
     @Test
     @DisplayName("Редактирование профиля")
     @User
+    @ApiLogin
     public void editProfile(UserJson user) {
         var newUsername = RandomDataUtils.randomUsername();
         var newCategoryName = RandomDataUtils.randomeCategoryName();
-        open(CFG.frontUrl(), LoginPage.class)
-                .login(user.username(), user.testData().password())
-                .getHeader()
-                .toProfilePage()
+        open(UserProfilePage.URL, UserProfilePage.class)
                 .checkUsernameDisabled()
                 .setName(newUsername)
                 .saveChanges()

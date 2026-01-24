@@ -16,12 +16,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static guru.qa.niffler.jupiter.extension.TestMethodContextExtension.context;
+
 public class UserExtension implements BeforeEachCallback, ParameterResolver {
     public static final ExtensionContext.Namespace NAMESPACE = ExtensionContext.Namespace.create(UserExtension.class);
     public static final String DEFAULT_PASSWORD = "123456";
 
-//    private final UsersClient usersClient = new UsersDbClient();
-    private final UsersClient usersClient = new UsersApiClient();
+//        private final UsersClient usersClient = new UsersDbClient();
+        private final UsersClient usersClient = new UsersApiClient();
 
     @Override
     public void beforeEach(ExtensionContext context) throws Exception {
@@ -67,11 +69,16 @@ public class UserExtension implements BeforeEachCallback, ParameterResolver {
                     categories, // категории
                     spendings  // спендинги
             );
-            context.getStore(NAMESPACE).put(
-                    context.getUniqueId(),
-                    user.addTestData(testData)
-            );
+            setUser(user, testData);
         });
+    }
+
+    static void setUser(UserJson user, TestData testData) {
+        final ExtensionContext methodContext = context();
+        methodContext.getStore(NAMESPACE).put(
+                methodContext.getUniqueId(),
+                user.addTestData(testData)
+        );
     }
 
     @Override
@@ -81,11 +88,11 @@ public class UserExtension implements BeforeEachCallback, ParameterResolver {
 
     @Override
     public UserJson resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
-        return createdUser().orElseThrow();
+        return getUserJson().orElseThrow();
     }
 
-    public static Optional<UserJson> createdUser() {
-        final ExtensionContext methodContext = TestMethodContextExtension.context();
+    public static Optional<UserJson> getUserJson() {
+        final ExtensionContext methodContext = context();
         return Optional.ofNullable(methodContext.getStore(NAMESPACE)
                 .get(methodContext.getUniqueId(), UserJson.class));
     }

@@ -141,6 +141,7 @@ public class UserdataRepositorySpringJdbc implements UserDataUserRepository {
         return jdbcTemplate.query(sql, UdUserEntityRowMapper.instance,
                 user.getId(), FriendshipStatus.PENDING.name());
     }
+
     private void createFriendship(UserEntity user, UserEntity friend, FriendshipStatus status) {
         jdbcTemplate.update(
                 "INSERT INTO friendship (requester_id, addressee_id, created_date, status) VALUES (?, ?, ?, ?)",
@@ -172,7 +173,7 @@ public class UserdataRepositorySpringJdbc implements UserDataUserRepository {
                     "INSERT INTO friendship (requester_id, addressee_id, created_date, status) VALUES (?, ?, ?, ?)",
                     acceptingUser.getId(),
                     invitingUser.getId(),
-                    new java.sql.Date(System.currentTimeMillis()),
+                    new Timestamp(System.currentTimeMillis()),
                     FriendshipStatus.ACCEPTED.name()
             );
         }

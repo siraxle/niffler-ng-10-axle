@@ -16,6 +16,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -75,6 +76,16 @@ public final class SpendDbClient implements SpendClient {
             CategoryEntity updatedCategory = spendAndCategoryRepository.updateCategory(categoryEntity);
             return CategoryJson.fromEntity(updatedCategory);
         });
+    }
+
+    @Override
+    public List<CategoryJson> getAllCategories(String username) {
+        return List.of();
+    }
+
+    @Override
+    public List<SpendJson> allSpends(String username) {
+        return List.of();
     }
 
     @Override

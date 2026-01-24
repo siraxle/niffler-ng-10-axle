@@ -43,4 +43,5 @@ public interface UserDataUserRepository {
 
     void acceptFriend(UserEntity user, UserEntity friend);
 
+
 }
