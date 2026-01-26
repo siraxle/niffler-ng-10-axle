@@ -80,12 +80,12 @@ public final class SpendDbClient implements SpendClient {
 
     @Override
     public List<CategoryJson> getAllCategories(String username) {
-        return List.of();
+        throw new UnsupportedOperationException("Метод не реализован");
     }
 
     @Override
     public List<SpendJson> allSpends(String username) {
-        return List.of();
+        throw new UnsupportedOperationException("Метод не реализован");
     }
 
     @Override

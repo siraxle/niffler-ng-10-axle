@@ -29,7 +29,7 @@ public class FriendsPage extends BasePage<FriendsPage> {
     );
 
     private final SelenideElement friendRequestsTable = $("#requests");
-    private final ElementsCollection friendsCollection = $$x("//tbody[@id='requests']/tr");
+    private final ElementsCollection friendsCollection = $$x("//tbody[@id='friends']/tr");
     private final By unfriendBtn = By.xpath(".//button[text()='Unfriend']");
     private final By acceptBtn = By.xpath(".//button[text()='Accept']");
     private final By declineBtn = By.xpath(".//button[text()='Decline']");
@@ -102,6 +102,7 @@ public class FriendsPage extends BasePage<FriendsPage> {
     @Step("Проверить количество друзей: ожидается {expectedCount}")
     @Nonnull
     public FriendsPage checkFriendsCount(int expectedCount) {
+        Selenide.sleep(5000);
         friendsCollection.shouldHave(size(expectedCount));
         return this;
     }

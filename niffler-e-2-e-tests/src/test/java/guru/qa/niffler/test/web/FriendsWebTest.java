@@ -38,7 +38,7 @@ public class FriendsWebTest {
     }
 
     @User(username = "diana", incomeInvitations = 1)
-    @ApiLogin(username = "diana")
+    @ApiLogin
     @Test
     void incomeInvitationBePresentInFriendsTable(UserJson user) {
         String inviterUsername = user.testData().incomeInvitations().getFirst().username();
@@ -64,7 +64,7 @@ public class FriendsWebTest {
                 .hasIncomeRequest(inviterUsername);
     }
 
-    @User(username = "charlie", outcomeInvitations = 1)
+    @User(outcomeInvitations = 1)
     @ApiLogin(username = "charlie")
     @Test
     void outcomeInvitationBePresentInAllPeoplesTable(UserJson user) {

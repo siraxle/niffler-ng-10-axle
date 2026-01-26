@@ -1,16 +1,13 @@
 package guru.qa.niffler.service.impl.api;
 
-import guru.qa.niffler.api.AuthApi;
 import guru.qa.niffler.api.UserApi;
-import guru.qa.niffler.api.core.ThreadSafeCookieStore;
 import guru.qa.niffler.config.Config;
 import guru.qa.niffler.model.TestData;
 import guru.qa.niffler.model.UserJson;
+import guru.qa.niffler.service.RestClient;
 import guru.qa.niffler.service.UsersClient;
 import io.qameta.allure.Step;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.jackson.JacksonConverterFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -25,23 +22,19 @@ import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ParametersAreNonnullByDefault
-public final class UsersApiClient implements UsersClient {
+public final class UsersApiClient extends RestClient implements UsersClient {
 
     private static final Config CFG = Config.getInstance();
     public static final String DEFAULT_PASSWORD = "123456";
 
-    private final Retrofit authRetrofit = new Retrofit.Builder()
-            .baseUrl(CFG.authUrl())
-            .addConverterFactory(JacksonConverterFactory.create())
-            .build();
+    private final UserApi userApi;
+    private final AuthApiClient authApiClient;
 
-    private final Retrofit userdataRetrofit = new Retrofit.Builder()
-            .baseUrl(CFG.userdataUrl())
-            .addConverterFactory(JacksonConverterFactory.create())
-            .build();
-
-    private final AuthApi authApi = authRetrofit.create(AuthApi.class);
-    private final UserApi userApi = userdataRetrofit.create(UserApi.class);
+    public UsersApiClient() {
+        super(CFG.userdataUrl());
+        this.userApi = create(UserApi.class);
+        this.authApiClient = new AuthApiClient();
+    }
 
     @Step("Найти пользователя по username: {username}")
     @Override
@@ -66,14 +59,8 @@ public final class UsersApiClient implements UsersClient {
     @Nonnull
     public UserJson createUser(String username, String password) {
         try {
-            authApi.requestRegisterForm().execute();
-            authApi.register(
-                    username,
-                    password,
-                    password,
-                    ThreadSafeCookieStore.INSTANCE.cookieValue("XSRF-TOKEN")
-            ).execute();
-            UserJson createdUser = requireNonNull(userApi.currentUser(username).execute().body());
+            authApiClient.register(username, password);
+            UserJson createdUser = waitForUserCreation(username);
             return createdUser.addTestData(
                     new TestData(
                             password,
@@ -84,12 +71,12 @@ public final class UsersApiClient implements UsersClient {
                             new ArrayList<>()  // spendings
                     )
             );
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException("Failed to create user", e);
         }
     }
 
-    @Step("Создать друзей для пользователя {targetUser.username()}: количество = {count}")
+    @Step("Создать друзей для пользователя {targetUser.username}: количество = {count}")
     @Override
     @Nonnull
     public List<UserJson> createFriends(UserJson targetUser, int count) {
@@ -120,7 +107,6 @@ public final class UsersApiClient implements UsersClient {
         return result;
     }
 
-    @Step("Найти пользователя по ID: {id}")
     @Override
     @Nonnull
     public Optional<UserJson> findUserById(UUID id) {
@@ -149,7 +135,7 @@ public final class UsersApiClient implements UsersClient {
         return findUserByUsername(username).isPresent();
     }
 
-    @Step("Добавить входящие приглашения для пользователя {targetUser.username()}: количество = {count}")
+    @Step("Добавить входящие приглашения для пользователя {targetUser.username}: количество = {count}")
     @Override
     @Nonnull
     public List<UserJson> addIncomeInvitation(UserJson targetUser, int count) {
@@ -175,7 +161,7 @@ public final class UsersApiClient implements UsersClient {
         return result;
     }
 
-    @Step("Добавить исходящие приглашения для пользователя {targetUser.username()}: количество = {count}")
+    @Step("Добавить исходящие приглашения для пользователя {targetUser.username}: количество = {count}")
     @Override
     @Nonnull
     public List<UserJson> addOutcomeInvitation(UserJson targetUser, int count) {
@@ -202,9 +188,9 @@ public final class UsersApiClient implements UsersClient {
     }
 
     @Override
-    public List<UserJson> allUsers() {
+    public List<UserJson> allUsers(String excludeUsername) {
         try {
-            Response<List<UserJson>> response = userApi.allUsers("", "").execute();
+            Response<List<UserJson>> response = userApi.allUsers(excludeUsername, "").execute();
             if (response.isSuccessful()) {
                 return requireNonNull(response.body());
             } else {
@@ -214,7 +200,6 @@ public final class UsersApiClient implements UsersClient {
             throw new RuntimeException("Failed to get all users", e);
         }
     }
-
 
     @Step("Получить друзей пользователя: {username}")
     @Nonnull
@@ -232,5 +217,17 @@ public final class UsersApiClient implements UsersClient {
         }
     }
 
+    private UserJson waitForUserCreation(String username) throws IOException, InterruptedException {
+        long startTime = System.currentTimeMillis();
+        long timeout = 10000; // 10 seconds
 
+        while (System.currentTimeMillis() - startTime < timeout) {
+            Response<UserJson> response = userApi.currentUser(username).execute();
+            if (response.isSuccessful() && response.body() != null && response.body().id() != null) {
+                return response.body();
+            }
+            Thread.sleep(100);
+        }
+        throw new RuntimeException("User " + username + " was not created within timeout");
+    }
 }

@@ -10,7 +10,7 @@ import static com.codeborne.selenide.Selenide.$;
 public abstract class BasePage<T extends  BasePage<?>> {
 
     protected final SelenideElement snackBar = $(".MuiAlert-message");
-    public static final Config CFG = Config.getInstance();
+    protected static final Config CFG = Config.getInstance();
 
     @SuppressWarnings("unchecked")
     public T checkSnackbarText(String text) {

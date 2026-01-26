@@ -94,7 +94,6 @@ public final class AuthApiClient extends RestClient {
                     }
                 }
             } catch (IOException e) {
-                // Игнорируем временные ошибки, продолжаем попытки
             }
             TimeUnit.MILLISECONDS.sleep(100);
         }
@@ -167,17 +166,6 @@ public final class AuthApiClient extends RestClient {
         ).execute();
         return tokenResponse.body().get("id_token").asText();
     }
-
-
-//    public Response<Void> register(String username, String password) throws IOException {
-//        authApi.requestRegisterForm().execute();
-//        return authApi.register(
-//                username,
-//                password,
-//                password,
-//                ThreadSafeCookieStore.INSTANCE.cookieValue("XSRF-TOKEN")
-//        ).execute();
-//    }
 
     @SneakyThrows
     public String token(String code, String codeVerifier) {

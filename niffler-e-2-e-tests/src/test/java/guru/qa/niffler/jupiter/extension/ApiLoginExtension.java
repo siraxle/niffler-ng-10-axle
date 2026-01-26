@@ -56,11 +56,16 @@ public class ApiLoginExtension implements BeforeEachCallback, ParameterResolver 
                         userToLogin = userFromUserExtension.get();
                     } else {
                         String username = apiLogin.username();
-                        String password = apiLogin.password().isEmpty() ? "123456" : apiLogin.password();
+                        String password = apiLogin.password();
+
+                        if (password.isEmpty()) {
+                            throw new IllegalStateException("Password must be provided when using @ApiLogin with username!");
+                        }
+
                         List<CategoryJson> categories = spendClient.getAllCategories(username);
                         List<SpendJson> spends = spendClient.allSpends(username);
-                        List<UserJson> allUsers = usersClient.allUsers();
                         List<UserJson> friendsList = usersClient.getFriends(username);
+
                         List<UserJson> friends = friendsList.stream()
                                 .filter(f -> f.friendshipStatus() != null &&
                                         f.friendshipStatus().equals(FriendshipStatus.FRIEND))
@@ -71,15 +76,9 @@ public class ApiLoginExtension implements BeforeEachCallback, ParameterResolver 
                                         f.friendshipStatus().equals(FriendshipStatus.INVITE_RECEIVED))
                                 .toList();
 
-                        List<UserJson> outcomeInvitations = allUsers.stream()
-                                .filter(u -> !u.username().equals(username))
-                                .filter(u -> {
-                                    List<UserJson> userFriends = usersClient.getFriends(u.username());
-                                    return userFriends.stream()
-                                            .anyMatch(f -> f.username().equals(username) &&
-                                                    f.friendshipStatus() != null &&
-                                                    f.friendshipStatus().equals(FriendshipStatus.INVITE_SENT));
-                                })
+                        List<UserJson> outcomeInvitations = friendsList.stream()
+                                .filter(f -> f.friendshipStatus() != null &&
+                                        f.friendshipStatus().equals(FriendshipStatus.INVITE_SENT))
                                 .toList();
 
                         TestData testData = new TestData(
@@ -100,7 +99,7 @@ public class ApiLoginExtension implements BeforeEachCallback, ParameterResolver 
                             throw new IllegalStateException("@User must not be present in case that @ApiLogin contains username or password!");
                         }
 
-                        UserExtension.setUser(fakeUser, testData);
+                        UserExtension.setUser(fakeUser);
                         userToLogin = fakeUser;
                     }
 

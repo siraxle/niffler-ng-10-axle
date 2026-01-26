@@ -91,11 +91,12 @@ public final class UsersDbClient implements UsersClient {
 
     @Override
     @Nonnull
-    @Step("Получить всех пользователей")
-    public List<UserJson> allUsers() {
+    @Step("Получить всех пользователей, исключая: {excludeUsername}")
+    public List<UserJson> allUsers(String excludeUsername) {
         return requireNonNull(xaTxTemplate.execute(() -> {
             List<UserEntity> allUserEntities = udUserRepository.findAll();
             return allUserEntities.stream()
+                    .filter(entity -> !entity.getUsername().equals(excludeUsername))
                     .map(entity -> UserJson.fromEntity(entity, null))
                     .toList();
         }));
