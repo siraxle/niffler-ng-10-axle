@@ -16,6 +16,7 @@ import guru.qa.niffler.data.tpl.XaTransactionTemplate;
 import guru.qa.niffler.model.Authority;
 import guru.qa.niffler.model.AuthorityJson;
 import guru.qa.niffler.model.UserAuthJson;
+import io.qameta.allure.Step;
 import org.springframework.jdbc.support.JdbcTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -48,6 +49,7 @@ public final class AuthDbClient {
     );
 
     @Nullable
+    @Step("Создать пользователя: {user.username}")
     public UserAuthJson createUser(UserAuthJson user) {
         return xaTxTemplate.execute(() -> {
             AuthUserEntity createdUser = authUserDao.create(toAuthUserEntity(user));
@@ -68,6 +70,7 @@ public final class AuthDbClient {
     }
 
     @Nonnull
+    @Step("Найти пользователя по username: {username}")
     public Optional<UserAuthJson> findUserByUsername(String username) {
         return Objects.requireNonNull(xaTxTemplate.execute(() -> {
             Optional<AuthUserEntity> user = authUserDao.findByUsername(username);
@@ -76,6 +79,7 @@ public final class AuthDbClient {
     }
 
     @Nonnull
+    @Step("Найти пользователя по ID: {id}")
     public Optional<UserAuthJson> findUserById(UUID id) {
         return Objects.requireNonNull(xaTxTemplate.execute(() -> {
             Optional<AuthUserEntity> user = authUserDao.findById(id);
@@ -84,6 +88,7 @@ public final class AuthDbClient {
     }
 
     @Nonnull
+    @Step("Получить authorities пользователя: {username}")
     public List<AuthorityJson> getUserAuthorities(String username) {
         return Objects.requireNonNull(xaTxTemplate.execute(() -> {
             Optional<AuthUserEntity> user = authUserDao.findByUsername(username);
@@ -101,6 +106,7 @@ public final class AuthDbClient {
     }
 
     @Nonnull
+    @Step("Получить authorities пользователя по ID: {userId}")
     public List<AuthorityJson> getUserAuthoritiesById(UUID userId) {
         return Objects.requireNonNull(xaTxTemplate.execute(() -> {
             List<AuthorityEntity> authorities = authAuthorityDao.findAuthoritiesByUserId(userId);
@@ -114,6 +120,7 @@ public final class AuthDbClient {
     }
 
     @Nullable
+    @Step("Обновить пользователя: {user.username}")
     public UserAuthJson updateUser(UserAuthJson user) {
         return xaTxTemplate.execute(() -> {
             AuthUserEntity userEntity = toAuthUserEntity(user);
@@ -124,6 +131,7 @@ public final class AuthDbClient {
         });
     }
 
+    @Step("Удалить пользователя: {username}")
     public void deleteUser(String username) {
         // Удаляем из auth БД
         xaTxTemplate.execute(() -> {
@@ -150,6 +158,7 @@ public final class AuthDbClient {
         });
     }
 
+    @Step("Проверить существование пользователя: {username}")
     public boolean userExists(String username) {
         return findUserByUsername(username).isPresent();
     }

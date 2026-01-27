@@ -3,10 +3,7 @@ package guru.qa.niffler.test.rest;
 
 import com.codeborne.selenide.Selenide;
 import guru.qa.niffler.config.Config;
-import guru.qa.niffler.jupiter.annotation.ApiLogin;
-import guru.qa.niffler.jupiter.annotation.Spending;
-import guru.qa.niffler.jupiter.annotation.Token;
-import guru.qa.niffler.jupiter.annotation.User;
+import guru.qa.niffler.jupiter.annotation.*;
 import guru.qa.niffler.model.UserJson;
 import guru.qa.niffler.page.FriendsPage;
 import guru.qa.niffler.service.impl.api.AuthApiClient;
@@ -71,14 +68,12 @@ public class OAuthTest {
         Assertions.assertNotNull(token);
     }
 
-//    все данные у юзера читаются нормально, кроме того, что не считываются категории categories().size() = 0
     @Test
     @User(spendings = {
             @Spending(amount = 1000, description = "Тратa 1", category = "Категория 1"),
             @Spending(amount = 2000, description = "Тратa 2", category = "Категория 2")
             },
             friends = 1, incomeInvitations = 2, outcomeInvitations = 3)
-//    @ApiLogin(username = "cat", password = "123456")
     @ApiLogin()
     void testWithExistingUserAndFriends1(UserJson user) {
         System.out.println("User: " + user.username());
@@ -94,10 +89,22 @@ public class OAuthTest {
     }
 
 
-    // здесь категория считывается
     @Test
     @ApiLogin(username = "cat", password = "123456")
     void testWithExistingUserAndFriends2(UserJson user) {
+        Selenide.open(FriendsPage.URL, FriendsPage.class)
+                .checkFriendsCount(1);
+        System.out.println();
+    }
+
+    @Test
+    @User(categories = {@Category(name = "Категория 1")},
+            spendings = {
+                    @Spending(amount = 1000, description = "Тратa 1", category = "Категория 1"),
+            },
+            friends = 1, incomeInvitations = 2, outcomeInvitations = 3)
+    @ApiLogin()
+    void testWithExistingUserAndFriends3(UserJson user) {
         System.out.println("User: " + user.username());
         System.out.println("Categories: " + user.testData().categories().size());
         System.out.println("Spendings: " + user.testData().spendings().size());
