@@ -30,19 +30,19 @@ public class EmptyUserScenariosTest {
                 .isRequestExist(requesterName);
     }
 
-    @User(username = "empty_user", incomeInvitations = 1)
-    @ApiLogin(username = "empty_user")
+    @User(username = "empty_user", friends = 1)
+    @ApiLogin
     @Test
-    void shouldFindFriendRequestInTable(UserJson user) throws InterruptedException {
-        String requesterName = user.testData().incomeInvitations().getFirst().username();
+    void shouldFindFriend(UserJson user){
+        String requesterName = user.testData().friends().getFirst().username();
 
         open(FriendsPage.URL, FriendsPage.class)
                 .searchFriend(requesterName)
-                .isFriendNameExist(requesterName);
+                .checkFriendsCount(1);
     }
 
     @User(username = "empty_user", outcomeInvitations = 1)
-    @ApiLogin(username = "empty_user")
+    @ApiLogin
     @Test
     void shouldHaveOutcomeRequest(UserJson user) {
         String inviteeUsername = user.testData().outcomeInvitations().getFirst().username();
@@ -52,8 +52,8 @@ public class EmptyUserScenariosTest {
                 .hasOutcomeRequest(inviteeUsername);
     }
 
-    @User(username = "empty_user")
-    @ApiLogin(username = "empty_user")
+    @User
+    @ApiLogin(username = "empty_user", password = "123456")
     @Test
     void shouldAddNewSpending(UserJson user) {
         String categoryName = "Еда";

@@ -49,18 +49,9 @@ public class ApiLoginExtension implements BeforeEachCallback, ParameterResolver 
                     final UserJson userToLogin;
                     final Optional<UserJson> userFromUserExtension = UserExtension.getUserJson();
 
-                    if ("".equals(apiLogin.username()) || "".equals(apiLogin.password())) {
-                        if (userFromUserExtension.isEmpty()) {
-                            throw new IllegalStateException("@User must be present in case that @ApiLogin is empty!");
-                        }
-                        userToLogin = userFromUserExtension.get();
-                    } else {
+                    if (!apiLogin.username().isEmpty() && !apiLogin.password().isEmpty()) {
                         String username = apiLogin.username();
                         String password = apiLogin.password();
-
-                        if (password.isEmpty()) {
-                            throw new IllegalStateException("Password must be provided when using @ApiLogin with username!");
-                        }
 
                         List<CategoryJson> categories = spendClient.getAllCategories(username);
                         List<SpendJson> spends = spendClient.allSpends(username);
@@ -76,7 +67,7 @@ public class ApiLoginExtension implements BeforeEachCallback, ParameterResolver 
                                         f.friendshipStatus().equals(FriendshipStatus.INVITE_RECEIVED))
                                 .toList();
 
-                        List<UserJson> outcomeInvitations = friendsList.stream()
+                        List<UserJson> outcomeInvitations = usersClient.allUsers(username).stream()
                                 .filter(f -> f.friendshipStatus() != null &&
                                         f.friendshipStatus().equals(FriendshipStatus.INVITE_SENT))
                                 .toList();
@@ -90,17 +81,20 @@ public class ApiLoginExtension implements BeforeEachCallback, ParameterResolver 
                                 spends
                         );
 
-                        UserJson fakeUser = new UserJson(
+                        UserJson existingUser = new UserJson(
                                 username,
                                 testData
                         );
 
-                        if (userFromUserExtension.isPresent()) {
-                            throw new IllegalStateException("@User must not be present in case that @ApiLogin contains username or password!");
-                        }
+                        userToLogin = existingUser;
 
-                        UserExtension.setUser(fakeUser);
-                        userToLogin = fakeUser;
+                    } else if (apiLogin.username().isEmpty() && apiLogin.password().isEmpty()) {
+                        if (userFromUserExtension.isEmpty()) {
+                            throw new IllegalStateException("@User must be present in case that @ApiLogin is empty!");
+                        }
+                        userToLogin = userFromUserExtension.get();
+                    } else {
+                        throw new IllegalStateException("Both username and password must be provided in @ApiLogin or both must be empty!");
                     }
 
                     final String token = authApiClient.login(

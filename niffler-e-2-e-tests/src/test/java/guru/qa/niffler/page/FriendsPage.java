@@ -30,6 +30,7 @@ public class FriendsPage extends BasePage<FriendsPage> {
 
     private final SelenideElement friendRequestsTable = $("#requests");
     private final ElementsCollection friendsCollection = $$x("//tbody[@id='friends']/tr");
+    private final ElementsCollection requestsCollection = $$x("//tbody[@id='requests']/tr");
     private final By unfriendBtn = By.xpath(".//button[text()='Unfriend']");
     private final By acceptBtn = By.xpath(".//button[text()='Accept']");
     private final By declineBtn = By.xpath(".//button[text()='Decline']");
@@ -39,7 +40,7 @@ public class FriendsPage extends BasePage<FriendsPage> {
     private final SelenideElement myFriendsTable = $("#friends");
 
     private final SelenideElement requestsTable = $x("//tbody[@id='requests']");
-    private final ElementsCollection requestsCollection = requestsTable.$$("tr");
+//    private final ElementsCollection requestsCollection = requestsTable.$$("tr");
     private final ElementsCollection myFriendsRows = myFriendsTable.$$("tbody tr");
 
 
@@ -60,8 +61,8 @@ public class FriendsPage extends BasePage<FriendsPage> {
     }
 
     @Step("Проверить существование друга {friendName}")
-    public void isFriendNameExist(String friendName) throws InterruptedException {
-        Thread.sleep(2000);
+    public void isFriendNameExist(String friendName){
+        Selenide.sleep(2000);
         boolean result = friendsCollection
                 .findBy(text(friendName))
                 .is(visible);
@@ -86,8 +87,8 @@ public class FriendsPage extends BasePage<FriendsPage> {
 
     @Step("Проверить существование запроса от {friendName}")
     public void isRequestExist(String friendName) {
-        Selenide.sleep(300);
-        SelenideElement row = friendsCollection.findBy(text(friendName));
+        Selenide.sleep(3000);
+        SelenideElement row = requestsCollection.findBy(text(friendName));
         boolean result = row.find(acceptBtn).is(visible) &&
                 row.find(declineBtn).is(visible);
         Assertions.assertTrue(result);
@@ -117,12 +118,13 @@ public class FriendsPage extends BasePage<FriendsPage> {
     @Step("Очистить поиск")
     @Nonnull
     public FriendsPage clearSearch() {
-        searchField.clearIfNotEmpty();
+        searchField.clear();
         return this;
     }
 
     @Step("Проверить наличие входящего запроса от {username}")
     public void hasIncomeRequest(String username) {
+        Selenide.sleep(3000);
         requestsCollection
                 .findBy(text(username))
                 .find(acceptBtn)
@@ -158,7 +160,7 @@ public class FriendsPage extends BasePage<FriendsPage> {
         return this;
     }
 
-    @Step("Провер|ить, что список друзей не пуст")
+    @Step("Проверить, что список друзей не пуст")
     @Nonnull
     public FriendsPage checkFriendsListIsNotEmpty() {
         myFriendsRows.first().shouldBe(visible);

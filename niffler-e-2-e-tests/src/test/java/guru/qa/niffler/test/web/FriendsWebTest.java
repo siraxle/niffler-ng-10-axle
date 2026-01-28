@@ -9,9 +9,6 @@ import guru.qa.niffler.jupiter.extension.UsersQueueExtension;
 import guru.qa.niffler.model.UserJson;
 import guru.qa.niffler.page.AllPeoplePage;
 import guru.qa.niffler.page.FriendsPage;
-import guru.qa.niffler.page.LoginPage;
-import guru.qa.niffler.service.UsersClient;
-import guru.qa.niffler.service.impl.db.UsersDbClient;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,24 +25,12 @@ public class FriendsWebTest {
                 .isFriendNameExist(user.testData().friends().getFirst().username());
     }
 
-    @User(username = "empty_user")
-    @ApiLogin(username = "empty_user")
+    @ApiLogin(username = "diana", password = "123456")
     @Test
-    void friendsTableShouldBeEmptyForNewUser(UserJson user) {
+    void friendsTableShouldBeEmptyForNewUser() {
         int friendsCount = Selenide.open(FriendsPage.URL, FriendsPage.class)
                 .getFriendsCount();
         Assertions.assertEquals(0, friendsCount);
-    }
-
-    @User(username = "diana", incomeInvitations = 1)
-    @ApiLogin
-    @Test
-    void incomeInvitationBePresentInFriendsTable(UserJson user) {
-        String inviterUsername = user.testData().incomeInvitations().getFirst().username();
-
-        Selenide.open(FriendsPage.URL, FriendsPage.class)
-                .searchFriend(inviterUsername)
-                .hasIncomeRequest(inviterUsername);
     }
 
     @User(incomeInvitations = 1)
@@ -54,18 +39,13 @@ public class FriendsWebTest {
     void incomeInvitationBePresentInFriendsTable1(UserJson user) {
         String inviterUsername = user.testData().incomeInvitations().getFirst().username();
 
-        UsersClient usersClient = new UsersDbClient();
-        boolean exists = usersClient.findUserByUsername("charlie").isPresent();
-        System.out.println("Пользователь " + inviterUsername + " существует в БД: " + exists);
-        Assertions.assertTrue(exists);
-
         Selenide.open(FriendsPage.URL, FriendsPage.class)
                 .searchFriend(inviterUsername)
                 .hasIncomeRequest(inviterUsername);
     }
 
     @User(outcomeInvitations = 1)
-    @ApiLogin(username = "charlie")
+    @ApiLogin
     @Test
     void outcomeInvitationBePresentInAllPeoplesTable(UserJson user) {
         String outcomeInvitationUsername = user.testData().outcomeInvitations().getFirst().username();
@@ -74,14 +54,25 @@ public class FriendsWebTest {
                 .hasOutcomeRequest(outcomeInvitationUsername);
     }
 
-    @User(outcomeInvitations = 1)
+    @User(incomeInvitations = 1)
     @ApiLogin
     @Test
-    void outcomeInvitationBePresentInAllPeopleTable(UserJson user) {
-        String inviteeUsername = user.testData().outcomeInvitations().getFirst().username();
-
-        Selenide.open(AllPeoplePage.URL, AllPeoplePage.class)
-                .searchPeople(inviteeUsername)
-                .hasOutcomeRequest(inviteeUsername);
+    void acceptIncomeInvitation(UserJson user) {
+        String inviterUsername = user.testData().incomeInvitations().getFirst().username();
+        Selenide.open(FriendsPage.URL, FriendsPage.class)
+                .acceptIncomeInvitation(inviterUsername)
+                .isFriendNameExist(inviterUsername);
     }
+
+    @User(incomeInvitations = 1)
+    @ApiLogin
+    @Test
+    void declineIncomeInvitation(UserJson user) {
+        String inviterUsername = user.testData().incomeInvitations().getFirst().username();
+        Selenide.open(FriendsPage.URL, FriendsPage.class)
+                .declineIncomeInvitation(inviterUsername)
+                .checkIncomeInvitationListIsEmpty();
+    }
+
+
 }

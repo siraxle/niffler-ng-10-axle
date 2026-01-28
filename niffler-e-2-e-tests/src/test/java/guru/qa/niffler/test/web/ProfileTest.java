@@ -27,7 +27,7 @@ public class ProfileTest {
     private static final Config CFG = Config.getInstance();
 
     @User(username = "dog", categories = @Category(archived = true))
-    @ApiLogin(username = "dog")
+    @ApiLogin
     @Test
     void archivedCategoryShouldPresentInCategoriesList(UserJson user) {
         String categoryName = user.testData().categories().getFirst().name();
@@ -70,8 +70,9 @@ public class ProfileTest {
                 .verifyCategoryVisible(categoryName);
     }
 
+    // падает тест expected: <200> but was: <406>
     @User(username = "cat", categories = @Category())
-    @ApiLogin(username = "cat")
+    @ApiLogin
     @Test
     void activeCategoryShouldPresentInCategoriesList(UserJson user) {
         String categoryName = user.testData().categories().getFirst().name();
