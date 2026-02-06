@@ -2,10 +2,12 @@ package guru.qa.niffler.test.web;
 
 import com.codeborne.selenide.Selenide;
 import guru.qa.niffler.config.Config;
+import guru.qa.niffler.jupiter.annotation.ApiLogin;
 import guru.qa.niffler.jupiter.annotation.User;
 import guru.qa.niffler.jupiter.extension.BrowserExtension;
 import guru.qa.niffler.jupiter.extension.UserExtension;
 import guru.qa.niffler.model.UserJson;
+import guru.qa.niffler.page.FriendsPage;
 import guru.qa.niffler.page.LoginPage;
 import guru.qa.niffler.page.MainPage;
 import org.junit.jupiter.api.Test;
@@ -18,7 +20,7 @@ public class LoginWebTest {
 
     private static final Config CFG = Config.getInstance();
 
-    @User()
+    @User
     @Test
     void mainPageShouldBeDisplayedAfterSuccessLogin(UserJson user) {
         MainPage mainPage = open(CFG.frontUrl(), LoginPage.class)
@@ -28,16 +30,12 @@ public class LoginWebTest {
         mainPage.checkThatMainPageContainsText("Statistics");
     }
 
-    @User(
-            username = "cat"
-    )
+    @ApiLogin(username = "cat", password = "123456")
     @Test
-    void mainPageShouldBeDisplayedAfterSuccessLogin1(UserJson user) {
-        MainPage mainPage = open(CFG.frontUrl(), LoginPage.class)
-                .login(user.username(), user.testData().password());
-
-        mainPage.checkThatMainPageContainsText("History of Spendings");
-        mainPage.checkThatMainPageContainsText("Statistics");
+    void mainPageShouldBeDisplayedAfterSuccessLogin1() {
+        open(MainPage.URL, MainPage.class)
+                .checkThatMainPageContainsText("History of Spendings")
+                .checkThatMainPageContainsText("Statistics");
     }
 
     @Test

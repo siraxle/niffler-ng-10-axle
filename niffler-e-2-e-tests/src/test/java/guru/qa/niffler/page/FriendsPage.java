@@ -138,6 +138,7 @@ public class FriendsPage extends BasePage<FriendsPage> {
         requestsRow.get(0)
                 .find(byText("Accept"))
                 .click();
+        Selenide.refresh();
         return this;
     }
 
@@ -150,6 +151,7 @@ public class FriendsPage extends BasePage<FriendsPage> {
                 .get(1)
                 .click();
         popup.find(byText("Decline")).click();
+        Selenide.refresh();
         return this;
     }
 

@@ -4,6 +4,7 @@ import guru.qa.niffler.config.Config;
 import guru.qa.niffler.jupiter.annotation.ApiLogin;
 import guru.qa.niffler.jupiter.annotation.User;
 import guru.qa.niffler.jupiter.extension.BrowserExtension;
+import guru.qa.niffler.model.SpendJson;
 import guru.qa.niffler.model.UserJson;
 import guru.qa.niffler.page.*;
 import guru.qa.niffler.utils.RandomDataUtils;
@@ -19,7 +20,7 @@ public class EmptyUserScenariosTest {
 
     private static final Config CFG = Config.getInstance();
 
-    @User(username = "empty_user", incomeInvitations = 1)
+    @User(incomeInvitations = 1)
     @ApiLogin
     @Test
     void shouldHaveFriendRequest(UserJson user) {
@@ -30,7 +31,7 @@ public class EmptyUserScenariosTest {
                 .isRequestExist(requesterName);
     }
 
-    @User(username = "empty_user", friends = 1)
+    @User(friends = 1)
     @ApiLogin
     @Test
     void shouldFindFriend(UserJson user){
@@ -41,7 +42,7 @@ public class EmptyUserScenariosTest {
                 .checkFriendsCount(1);
     }
 
-    @User(username = "empty_user", outcomeInvitations = 1)
+    @User(outcomeInvitations = 1)
     @ApiLogin
     @Test
     void shouldHaveOutcomeRequest(UserJson user) {
@@ -53,9 +54,9 @@ public class EmptyUserScenariosTest {
     }
 
     @User
-    @ApiLogin(username = "empty_user", password = "123456")
+    @ApiLogin
     @Test
-    void shouldAddNewSpending(UserJson user) {
+    void shouldAddNewSpending() {
         String categoryName = "Еда";
         String description = "Обед в ресторане";
         double amount = 1500.00;
@@ -90,7 +91,7 @@ public class EmptyUserScenariosTest {
     @User(incomeInvitations = 1)
     @ApiLogin
     public void declineIncomeInvitation(UserJson user) {
-        var incomeInvUsername = user.testData().incomeInvitations().getFirst().username();
+        String incomeInvUsername = user.testData().incomeInvitations().getFirst().username();
         open(FriendsPage.URL, FriendsPage.class)
                 .declineIncomeInvitation(incomeInvUsername)
                 .checkIncomeInvitationListIsEmpty();
@@ -101,7 +102,7 @@ public class EmptyUserScenariosTest {
     @User
     @ApiLogin
     public void addNewSpending(UserJson user) {
-        var spending = RandomDataUtils.randomSpend(user.username());
+        SpendJson spending = RandomDataUtils.randomSpend(user.username());
         open(EditSpendingPage.URL, EditSpendingPage.class)
                 .setAmount(spending.amount())
                 .setCategory(spending.category().name())
@@ -126,5 +127,6 @@ public class EmptyUserScenariosTest {
                 .addCategory(newCategoryName)
                 .checkCategoryExists(newCategoryName);
     }
+
 
 }

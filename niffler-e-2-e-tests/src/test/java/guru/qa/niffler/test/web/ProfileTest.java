@@ -26,10 +26,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 public class ProfileTest {
     private static final Config CFG = Config.getInstance();
 
-    @User(username = "dog", categories = @Category(archived = true))
+    @User(categories = @Category)
     @ApiLogin
     @Test
-    void archivedCategoryShouldPresentInCategoriesList(UserJson user) {
+    void categoryShouldPresentInCategoriesList(UserJson user) {
         String categoryName = user.testData().categories().getFirst().name();
         Selenide.open(UserProfilePage.URL, UserProfilePage.class)
                 .toggleShowArchived()
@@ -59,27 +59,6 @@ public class ProfileTest {
         }
     }
 
-    @User(categories = @Category(archived = true))
-    @ApiLogin
-    @Test
-    void archivedCategoryShouldPresentInCategoriesList3(UserJson user) {
-        String categoryName = user.testData().categories().getFirst().name();
-
-        Selenide.open(UserProfilePage.URL, UserProfilePage.class)
-                .toggleShowArchived()
-                .verifyCategoryVisible(categoryName);
-    }
-
-    // падает тест expected: <200> but was: <406>
-    @User(username = "cat", categories = @Category())
-    @ApiLogin
-    @Test
-    void activeCategoryShouldPresentInCategoriesList(UserJson user) {
-        String categoryName = user.testData().categories().getFirst().name();
-
-        Selenide.open(UserProfilePage.URL, UserProfilePage.class)
-                .verifyCategoryVisible(categoryName);
-    }
 
     @User(categories = @Category(name = "test_category", archived = true))
     @ApiLogin

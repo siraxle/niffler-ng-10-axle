@@ -21,7 +21,7 @@ public class OAuthTest {
     private static final Config CFG = Config.getInstance();
 
     @Test
-    @User(username = "test1")
+    @User
     public void oauthTest(UserJson user) throws IOException {
         String codeVerifier = OauthUtils.generateCodeVerifier();
         String codeChallenge = OauthUtils.generateCodeChallenge(codeVerifier);
@@ -60,8 +60,8 @@ public class OAuthTest {
     }
 
     @Test
-    @User(username = "cat")
-    @ApiLogin()
+    @User
+    @ApiLogin(username = "cat")
     public void testAuth4(@Token String token, UserJson user){
         System.out.println(user);
         System.out.println(token);
