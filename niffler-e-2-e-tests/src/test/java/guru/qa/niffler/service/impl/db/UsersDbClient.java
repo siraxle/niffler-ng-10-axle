@@ -90,9 +90,33 @@ public final class UsersDbClient implements UsersClient {
     }
 
     @Override
-    public List<UserJson> allUsers() {
-        System.out.printf("allUsers не реализован в UsersDbClient");
-        return List.of();
+    @Nonnull
+    @Step("Получить всех пользователей, исключая: {excludeUsername}")
+    public List<UserJson> allUsers(String excludeUsername) {
+        return requireNonNull(xaTxTemplate.execute(() -> {
+            List<UserEntity> allUserEntities = udUserRepository.findAll();
+            return allUserEntities.stream()
+                    .filter(entity -> !entity.getUsername().equals(excludeUsername))
+                    .map(entity -> UserJson.fromEntity(entity, null))
+                    .toList();
+        }));
+    }
+
+    @Override
+    @Nonnull
+    @Step("Получить друзей пользователя: {username}")
+    public List<UserJson> getFriends(String username) {
+        return requireNonNull(xaTxTemplate.execute(() -> {
+            Optional<UserEntity> user = udUserRepository.findByUsername(username);
+            if (user.isEmpty()) {
+                return Collections.emptyList();
+            }
+
+            List<UserEntity> friendEntities = udUserRepository.findFriends(user.get());
+            return friendEntities.stream()
+                    .map(entity -> UserJson.fromEntity(entity, FriendshipStatus.FRIEND))
+                    .toList();
+        }));
     }
 
     @Override

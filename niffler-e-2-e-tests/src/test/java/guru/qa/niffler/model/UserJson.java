@@ -31,6 +31,14 @@ public record UserJson(
         @JsonIgnore
         TestData testData) {
 
+    public UserJson(@Nonnull String username) {
+        this(username, null);
+    }
+
+    public UserJson(@Nonnull String username, @Nullable TestData testData) {
+        this(null, username, null, null, null, null, null, null, null, testData);
+    }
+
     public static @Nonnull UserJson fromEntity(@Nonnull UserEntity entity, @Nullable FriendshipStatus friendshipStatus) {
         return new UserJson(
                 entity.getId(),

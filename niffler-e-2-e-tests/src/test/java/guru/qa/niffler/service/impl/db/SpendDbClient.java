@@ -10,12 +10,14 @@ import guru.qa.niffler.data.tpl.XaTransactionTemplate;
 import guru.qa.niffler.model.CategoryJson;
 import guru.qa.niffler.model.SpendJson;
 import guru.qa.niffler.service.SpendClient;
+import io.qameta.allure.Step;
 import org.springframework.jdbc.support.JdbcTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -42,15 +44,33 @@ public final class SpendDbClient implements SpendClient {
 
     @Override
     @Nullable
+    @Step("Создать трату: {spend.description}")
     public SpendJson createSpend(SpendJson spend) {
         return xaTxTemplate.execute(() -> {
             SpendEntity spendEntity = SpendEntity.fromJson(spend);
-            if (spendEntity.getCategory().getId() == null) {
-                spendAndCategoryRepository.createCategory(spendEntity.getCategory());
+
+            CategoryEntity categoryEntity = spendEntity.getCategory();
+
+            if (categoryEntity.getId() == null) {
+                if (categoryEntity.getName() != null && !categoryEntity.getName().isEmpty()) {
+                    Optional<CategoryEntity> existingCategory = spendAndCategoryRepository
+                            .findCategoryByUsernameAndName(
+                                    categoryEntity.getUsername(),
+                                    categoryEntity.getName()
+                            );
+
+                    if (existingCategory.isPresent()) {
+                        spendEntity.setCategory(existingCategory.get());
+                    } else {
+                        spendAndCategoryRepository.createCategory(categoryEntity);
+                    }
+                } else {
+                    spendAndCategoryRepository.createCategory(categoryEntity);
+                }
             } else {
                 CategoryEntity managedCategory = spendAndCategoryRepository
-                        .findCategoryById(spendEntity.getCategory().getId())
-                        .orElseThrow(() -> new IllegalArgumentException("Category not found"));
+                        .findCategoryById(categoryEntity.getId())
+                        .orElseThrow(() -> new IllegalArgumentException("Category not found with id: " + categoryEntity.getId()));
                 spendEntity.setCategory(managedCategory);
             }
             return SpendJson.fromEntity(
@@ -60,6 +80,7 @@ public final class SpendDbClient implements SpendClient {
     }
 
     @Nullable
+    @Step("Создать категорию: {category.name}")
     public CategoryJson createCategory(CategoryJson category) {
         return xaTxTemplate.execute(() -> {
             CategoryEntity categoryEntity = CategoryEntity.fromJson(category);
@@ -69,6 +90,7 @@ public final class SpendDbClient implements SpendClient {
     }
 
     @Nullable
+    @Step("Обновить категорию: {category.name}")
     public CategoryJson updateCategory(CategoryJson category) {
         return xaTxTemplate.execute(() -> {
             CategoryEntity categoryEntity = CategoryEntity.fromJson(category);
@@ -78,7 +100,18 @@ public final class SpendDbClient implements SpendClient {
     }
 
     @Override
+    public List<CategoryJson> getAllCategories(String username) {
+        throw new UnsupportedOperationException("Метод не реализован");
+    }
+
+    @Override
+    public List<SpendJson> allSpends(String username) {
+        throw new UnsupportedOperationException("Метод не реализован");
+    }
+
+    @Override
     @Nonnull
+    @Step("Найти категорию по имени: {categoryName} для пользователя: {username}")
     public Optional<CategoryJson> findCategoryByNameAndUsername(String categoryName, String username) {
         return Objects.requireNonNull(xaTxTemplate.execute(() -> {
             Optional<CategoryEntity> category = spendAndCategoryRepository.findCategoryByUsernameAndName(username, categoryName);

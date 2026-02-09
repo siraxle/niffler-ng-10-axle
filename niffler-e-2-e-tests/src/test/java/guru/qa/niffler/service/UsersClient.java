@@ -24,5 +24,8 @@ public interface UsersClient {
 
     List<UserJson> createFriends(UserJson targetUser, int count);
 
-    List<UserJson> allUsers();
+    List<UserJson> allUsers(String username); // ТОЛЬКО с параметром
+
+    List<UserJson> getFriends(String username);
+
 }

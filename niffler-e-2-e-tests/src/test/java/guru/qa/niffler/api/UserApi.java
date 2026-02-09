@@ -1,6 +1,5 @@
 package guru.qa.niffler.api;
 
-import guru.qa.niffler.data.tpl.JdbcTransactionTemplate;
 import guru.qa.niffler.model.UserJson;
 import retrofit2.Call;
 import retrofit2.http.*;

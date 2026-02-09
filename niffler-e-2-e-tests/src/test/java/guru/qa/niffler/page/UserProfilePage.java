@@ -19,6 +19,8 @@ import static com.codeborne.selenide.Selenide.*;
 @ParametersAreNonnullByDefault
 public class UserProfilePage extends BasePage<UserProfilePage> {
 
+    public static final String URL = CFG.frontUrl() + "profile";
+
     // Поля профиля
     private final SelenideElement usernameInput = $("#username");
     private final SelenideElement nameInput = $("#name");

@@ -28,7 +28,7 @@ public final class SpendApiClient extends RestClient implements SpendClient {
         this.spendApi = create(SpendApi.class);
     }
 
-    @Step("Создать трату: {spend.description()}")
+    @Step("Создать трату: {spend.description}")
     @Override
     public @Nullable SpendJson createSpend(SpendJson spend) {
         final Response<SpendJson> response;
@@ -42,7 +42,7 @@ public final class SpendApiClient extends RestClient implements SpendClient {
         return response.body();
     }
 
-    @Step("Редактировать трату: {spend.description()}")
+    @Step("Редактировать трату: {spend.description}")
     public @Nullable SpendJson editSpend(SpendJson spend) {
         final Response<SpendJson> response;
         try {
@@ -94,7 +94,7 @@ public final class SpendApiClient extends RestClient implements SpendClient {
         return response;
     }
 
-    @Step("Создать категорию: {category.name()}")
+    @Step("Создать категорию: {category.name}")
     @Override
     public @Nullable CategoryJson createCategory(CategoryJson category) {
         final Response<CategoryJson> response;
@@ -108,7 +108,7 @@ public final class SpendApiClient extends RestClient implements SpendClient {
         return response.body();
     }
 
-    @Step("Обновить категорию: {category.name()}")
+    @Step("Обновить категорию: {category.name}")
     @Override
     public @Nullable CategoryJson updateCategory(CategoryJson category) {
         final Response<CategoryJson> response;

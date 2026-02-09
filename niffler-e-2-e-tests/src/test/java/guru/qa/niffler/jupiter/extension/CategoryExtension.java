@@ -4,9 +4,9 @@ import com.github.jknack.handlebars.internal.lang3.ArrayUtils;
 import guru.qa.niffler.jupiter.annotation.Category;
 import guru.qa.niffler.jupiter.annotation.User;
 import guru.qa.niffler.model.CategoryJson;
-import guru.qa.niffler.model.TestData;
 import guru.qa.niffler.model.UserJson;
 import guru.qa.niffler.service.SpendClient;
+import guru.qa.niffler.service.impl.api.SpendApiClient;
 import guru.qa.niffler.service.impl.db.SpendDbClient;
 import org.junit.jupiter.api.extension.*;
 import org.junit.platform.commons.support.AnnotationSupport;
@@ -21,8 +21,8 @@ import static guru.qa.niffler.utils.RandomDataUtils.randomeCategoryName;
 public class CategoryExtension implements BeforeEachCallback, ParameterResolver, AfterTestExecutionCallback {
 
     public static final ExtensionContext.Namespace NAMESPACE = ExtensionContext.Namespace.create(CategoryExtension.class);
-    //    private final SpendClient spendClient = new SpendApiClient();
-    private final SpendClient spendClient = new SpendDbClient();
+        private final SpendClient spendClient = new SpendApiClient();
+//    private final SpendClient spendClient = new SpendDbClient();
 
     @Override
     public void beforeEach(ExtensionContext context) throws Exception {
@@ -32,7 +32,7 @@ public class CategoryExtension implements BeforeEachCallback, ParameterResolver,
         ).ifPresent(userAnnotation -> {
             if (ArrayUtils.isNotEmpty(userAnnotation.categories())) {
 
-                Optional<UserJson> testUser = UserExtension.createdUser();
+                Optional<UserJson> testUser = UserExtension.getUserJson();
                 final String username = testUser.isPresent() ? testUser.get().username() : userAnnotation.username();
 
                 List<CategoryJson> result = new ArrayList<>();

@@ -9,13 +9,8 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static guru.qa.niffler.data.jpa.EntityManagers.em;
 
@@ -174,4 +169,5 @@ public class UserdataUserRepositoryHibernate implements UserDataUserRepository {
 
         entityManager.flush();
     }
+
 }
