@@ -26,7 +26,7 @@ public class StatGraphQlTest extends BaseGraphQlTest{
                         .filterCurrency(null)
                         .statCurrency(null)
                         .filterPeriod(null).build())
-                .addHttpHeader("Authorization", "Bearer " + token);
+                .addHttpHeader("Authorization", token);
         ApolloResponse<StatQuery.Data> response = Rx2Apollo.single(currenciesCall).blockingGet();
         final StatQuery.Data data = response.dataOrThrow();
         StatQuery.Stat result = data.stat;

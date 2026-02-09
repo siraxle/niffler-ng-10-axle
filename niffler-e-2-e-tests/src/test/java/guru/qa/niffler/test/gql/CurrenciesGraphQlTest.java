@@ -22,7 +22,7 @@ public class CurrenciesGraphQlTest extends BaseGraphQlTest{
     public void allCurrenciesShouldBeReturnedFromGateway(@Token String token) {
         System.out.println(token);
         ApolloCall<CurrenciesQuery.Data> currenciesCall = apolloClient.query(new CurrenciesQuery())
-                .addHttpHeader("Authorization", "Bearer " + token);
+                .addHttpHeader("Authorization", token);
         ApolloResponse<CurrenciesQuery.Data> response = Rx2Apollo.single(currenciesCall).blockingGet();
         final CurrenciesQuery.Data data = response.dataOrThrow();
         List<CurrenciesQuery.Currency> all = data.currencies;
