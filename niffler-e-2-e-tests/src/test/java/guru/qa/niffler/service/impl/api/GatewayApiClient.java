@@ -10,6 +10,7 @@ import retrofit2.Response;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -27,7 +28,7 @@ public final class GatewayApiClient extends RestClient {
     }
 
     @Step("Get all friends and income invitations from gateway using endpoint /api/friends/all")
-    public @Nullable List<UserJson> allFriends(String bearerToken, @Nullable String searchQuery) {
+    public List<UserJson> allFriends(String bearerToken, @Nullable String searchQuery) {
         final Response<List<UserJson>> response;
         try {
             response = gatewayApi.allFriends(bearerToken, searchQuery)
@@ -36,7 +37,7 @@ public final class GatewayApiClient extends RestClient {
             throw new AssertionError(e);
         }
         assertEquals(200, response.code());
-        return response.body();
+        return response.body() != null ? response.body() : Collections.emptyList();
     }
 
 }
