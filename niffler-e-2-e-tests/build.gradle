@@ -33,6 +33,7 @@ plugins {
     id 'io.qameta.allure' version '3.0.0'
     id 'io.qameta.allure-adapter' version '3.0.0'
     id 'com.github.edeandrea.xjc-generation' version '1.6'
+    id 'com.apollographql.apollo' version '4.4.1'
 }
 
 group = 'guru.qa'
@@ -57,11 +58,28 @@ xjcGeneration {
     }
 }
 
+apollo {
+    service("niffler") {
+        generateKotlinModels.set(false)
+        packageName.set("guru.qa")
+        srcDir("src/test/graphql")
+        mapScalar("Date", "java.util.Date")
+        introspection {
+            endpointUrl.set("$gatewayGraphqlUrl")
+            schemaFile.set(file("src/test/graphql/schema.graphqls"))
+        }
+        outputDirConnection {
+            connectToJavaSourceSet("test")
+        }
+    }
+}
+
 sourceSets {
     test {
         java {
             srcDir('src/test/java')
             srcDir("$buildDir/generated-sources/test/xjc")
+            srcDir("$buildDir/generated/sources/apollo/niffler")
         }
     }
 }
@@ -86,6 +104,10 @@ dependencies {
         exclude group: "com.squareup.okhttp3"
     }
     testImplementation "org.springframework.data:spring-data-commons:${springDataCommonsVersion}"
+    //GraphQl
+    testImplementation 'com.apollographql.java:client:0.0.2'
+    testImplementation 'com.apollographql.java:rx2:0.0.2'
+    testImplementation 'com.apollographql.adapters:apollo-adapters-core:0.0.4'
     // DB
     testImplementation "org.springframework:spring-jdbc:${springJdbcVersion}"
     testImplementation "org.postgresql:postgresql:${project.ext.postgresDriverVersion}"
@@ -143,12 +165,16 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
+
 tasks.register('printVersion') {
     doLast {
         println project.version
     }
 }
 
+tasks.named('generateNifflerApolloSources') {
+    dependsOn('downloadNifflerApolloSchemaFromIntrospection')
+}
 
 test {
     options {

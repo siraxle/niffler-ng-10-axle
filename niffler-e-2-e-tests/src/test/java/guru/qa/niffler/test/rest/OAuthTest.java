@@ -4,17 +4,21 @@ package guru.qa.niffler.test.rest;
 import com.codeborne.selenide.Selenide;
 import guru.qa.niffler.config.Config;
 import guru.qa.niffler.jupiter.annotation.*;
+import guru.qa.niffler.jupiter.annotation.meta.WebTest;
 import guru.qa.niffler.model.UserJson;
 import guru.qa.niffler.page.FriendsPage;
 import guru.qa.niffler.service.impl.api.AuthApiClient;
+import guru.qa.niffler.service.impl.api.GatewayApiClient;
 import guru.qa.niffler.utils.OauthUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@WebTest
 public class OAuthTest {
 
     private final AuthApiClient authApiClient = new AuthApiClient();
@@ -115,6 +119,20 @@ public class OAuthTest {
         Selenide.open(FriendsPage.URL, FriendsPage.class)
                 .checkFriendsCount(user.testData().friends().size());
         System.out.println();
+    }
+
+    private final GatewayApiClient gatewayApiClient = new GatewayApiClient();
+    @User(
+            incomeInvitations = 1,
+            friends = 2
+    )
+    @ApiLogin
+    @Test
+    void allFriendsAndIncomeInvitationsShouldBeReturned(@Token String token, UserJson user) {
+        Selenide.open(FriendsPage.URL, FriendsPage.class)
+                .checkFriendsCount(user.testData().friends().size());
+        final List<UserJson> result = gatewayApiClient.allFriends(token, null);
+        Assertions.assertEquals(3, result.size());
     }
 
 }

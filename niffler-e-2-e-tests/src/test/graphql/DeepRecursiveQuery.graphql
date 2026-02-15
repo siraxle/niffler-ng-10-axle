@@ -1,0 +1,25 @@
+query DeepRecursiveQuery {
+    user {
+        friends(page: 0, size: 1) {
+            edges {
+                node {
+                    username
+                    friends(page: 0, size: 1) {
+                        edges {
+                            node {
+                                username
+                                friends(page: 0, size: 1) {
+                                    edges {
+                                        node {
+                                            username
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
