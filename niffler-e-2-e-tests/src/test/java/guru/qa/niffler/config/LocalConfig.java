@@ -1,5 +1,7 @@
 package guru.qa.niffler.config;
 
+import org.jetbrains.annotations.NotNull;
+
 enum LocalConfig implements Config {
     INSTANCE;
 
@@ -56,6 +58,12 @@ enum LocalConfig implements Config {
     @Override
     public String currencyJdbcUrl() {
         return "jdbc:postgresql://localhost:5432/niffler-currency";
+    }
+
+    @NotNull
+    @Override
+    public String currencyGrpcAddress() {
+        return "localhost";
     }
 
 }

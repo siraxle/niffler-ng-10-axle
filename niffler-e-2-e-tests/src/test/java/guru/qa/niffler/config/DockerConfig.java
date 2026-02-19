@@ -1,6 +1,8 @@
 package guru.qa.niffler.config;
 
 
+import org.jetbrains.annotations.NotNull;
+
 import javax.annotation.Nonnull;
 
 enum DockerConfig implements Config {
@@ -70,6 +72,17 @@ enum DockerConfig implements Config {
     @Nonnull
     public String currencyJdbcUrl() {
         return "";
+    }
+
+    @NotNull
+    @Override
+    public String currencyGrpcAddress() {
+        return "";
+    }
+
+    @Override
+    public int currencyGrpcPort() {
+        return Config.super.currencyGrpcPort();
     }
 
 }
