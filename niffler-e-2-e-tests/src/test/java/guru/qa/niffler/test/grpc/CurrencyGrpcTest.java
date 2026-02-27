@@ -117,7 +117,7 @@ public class CurrencyGrpcTest extends BaseGgrpcTest {
     public void shouldThrowExceptionForInvalidCurrency() {
         CalculateRequest request = CalculateRequest.newBuilder()
                 .setAmount(100.0)
-                .setSpendCurrency(CurrencyValues.UNSPECIFIED)
+                .setSpendCurrency(CurrencyValues.CURRENCY_UNSPECIFIED)
                 .setDesiredCurrency(CurrencyValues.USD)
                 .build();
 

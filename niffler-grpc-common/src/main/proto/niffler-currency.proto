@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 import "google/protobuf/empty.proto";
+import "niffler-common.proto";
 
 package guru.qa.grpc.niffler;
 
@@ -30,12 +31,4 @@ message CalculateRequest {
 
 message CalculateResponse {
   double calculatedAmount = 1;
-}
-
-enum CurrencyValues {
-  UNSPECIFIED = 0;
-  RUB = 1;
-  USD = 2;
-  EUR = 3;
-  KZT = 4;
 }

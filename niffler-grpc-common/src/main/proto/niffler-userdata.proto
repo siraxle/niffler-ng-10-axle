@@ -1,0 +1,152 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+import "niffler-common.proto";
+
+package guru.qa.grpc.niffler;
+
+option java_multiple_files = true;
+option java_package = "guru.qa.niffler.grpc";
+option java_outer_classname = "NifflerUserdataProto";
+
+service NifflerUserdataService {
+  // Текущий пользователь
+  rpc GetCurrentUser (GetCurrentUserRequest) returns (UserResponse) {}
+
+  // Обновление пользователя
+  rpc UpdateUser (UpdateUserRequest) returns (UserResponse) {}
+
+  // Все пользователи (с пагинацией)
+  rpc GetAllUsers (GetAllUsersRequest) returns (UserPageResponse) {}
+
+  // Все пользователи (без пагинации)
+  rpc GetAllUsersList (GetAllUsersListRequest) returns (UserListResponse) {}
+
+  // Друзья пользователя (с пагинацией)
+  rpc GetFriends (GetFriendsRequest) returns (UserPageResponse) {}
+
+  // Друзья пользователя (без пагинации)
+  rpc GetFriendsList (GetFriendsListRequest) returns (UserListResponse) {}
+
+  // Удалить друга
+  rpc RemoveFriend (RemoveFriendRequest) returns (google.protobuf.Empty) {}
+
+  // Входящие приглашения
+  rpc GetIncomeInvitations (GetIncomeInvitationsRequest) returns (UserListResponse) {}
+
+  // Исходящие приглашения
+  rpc GetOutcomeInvitations (GetOutcomeInvitationsRequest) returns (UserListResponse) {}
+
+  // Отправить приглашение в друзья
+  rpc SendFriendshipRequest (SendFriendshipRequestRequest) returns (UserResponse) {}
+
+  // Принять приглашение
+  rpc AcceptFriendshipRequest (AcceptFriendshipRequestRequest) returns (UserResponse) {}
+
+  // Отклонить приглашение
+  rpc DeclineFriendshipRequest (DeclineFriendshipRequestRequest) returns (UserResponse) {}
+}
+
+// Enum для статуса дружбы
+enum FriendshipStatus {
+  FRIENDSHIP_STATUS_UNSPECIFIED = 0;
+  INVITE_SENT = 1;
+  INVITE_RECEIVED = 2;
+  FRIEND = 3;
+}
+
+// Запросы
+message GetCurrentUserRequest {
+  string username = 1;
+}
+
+message UpdateUserRequest {
+  string username = 1;
+  optional string firstname = 2;
+  optional string surname = 3;
+  optional string fullname = 4;
+  optional CurrencyValues currency = 5;
+  optional string photo = 6;
+}
+
+message GetAllUsersRequest {
+  string username = 1;
+  optional string searchQuery = 2;
+  int32 page = 3;
+  int32 size = 4;
+  repeated string sort = 5;
+}
+
+message GetAllUsersListRequest {
+  string username = 1;
+  optional string searchQuery = 2;
+}
+
+message GetFriendsRequest {
+  string username = 1;
+  optional string searchQuery = 2;
+  int32 page = 3;
+  int32 size = 4;
+  repeated string sort = 5;
+}
+
+message GetFriendsListRequest {
+  string username = 1;
+  optional string searchQuery = 2;
+}
+
+message RemoveFriendRequest {
+  string username = 1;
+  string targetUsername = 2;
+}
+
+message GetIncomeInvitationsRequest {
+  string username = 1;
+  optional string searchQuery = 2;
+}
+
+message GetOutcomeInvitationsRequest {
+  string username = 1;
+  optional string searchQuery = 2;
+}
+
+message SendFriendshipRequestRequest {
+  string username = 1;
+  string targetUsername = 2;
+}
+
+message AcceptFriendshipRequestRequest {
+  string username = 1;
+  string targetUsername = 2;
+}
+
+message DeclineFriendshipRequestRequest {
+  string username = 1;
+  string targetUsername = 2;
+}
+
+// Ответы
+message UserResponse {
+  string id = 1;
+  string username = 2;
+  optional string firstname = 3;
+  optional string surname = 4;
+  optional string fullname = 5;
+  CurrencyValues currency = 6;
+  optional bytes photo = 7;
+  optional bytes photoSmall = 8;
+  optional FriendshipStatus friendshipStatus = 9;
+}
+
+message UserPageResponse {
+  int32 totalElements = 1;
+  int32 totalPages = 2;
+  bool first = 3;
+  bool last = 4;
+  int32 size = 5;
+  repeated UserResponse edges = 6;
+}
+
+message UserListResponse {
+  repeated UserResponse users = 1;
+}

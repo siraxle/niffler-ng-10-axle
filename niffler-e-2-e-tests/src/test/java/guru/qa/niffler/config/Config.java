@@ -50,4 +50,12 @@ public interface Config {
         return 8092;
     }
 
+    @Nonnull
+    default String userdataGrpcAddress() {
+        return "localhost";
+    }
+
+    default int userdataGrpcPort() {
+        return 9090;
+    }
 }

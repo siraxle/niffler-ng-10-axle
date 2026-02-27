@@ -12,6 +12,10 @@ spring:
       idle-timeout: 10000
       max-lifetime: 1000
       auto-commit: true
+  grpc:
+    server:
+      port: 9090
+      max-inbound-message-size: 1MB
   flyway:
     enabled: true
     baseline-on-migrate: true
