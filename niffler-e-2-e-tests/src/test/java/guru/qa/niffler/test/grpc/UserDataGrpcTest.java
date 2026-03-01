@@ -4,8 +4,11 @@ import guru.qa.niffler.grpc.*;
 import guru.qa.niffler.jupiter.annotation.User;
 import guru.qa.niffler.jupiter.annotation.meta.GrpcTest;
 import guru.qa.niffler.model.UserJson;
+import guru.qa.niffler.utils.RandomDataUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -164,22 +167,39 @@ public class UserDataGrpcTest extends BaseGgrpcTest {
                 .noneMatch(u -> u.getUsername().equals(senderUsername)));
     }
 
-    @User(outcomeInvitations = 1)
+    @User
     @Test
-    @DisplayName("Отправка приглашения дружить")
-    void shouldSendFriendshipRequest(UserJson user) {
+    @DisplayName("Отправка приглашения дружить через gRPC")
+    void shouldSendFriendshipRequestViaGrpc(UserJson user) {
         String username = user.username();
-        String targetUsername = user.testData().outcomeInvitations().get(0).username();
+        String targetUsername = RandomDataUtils.randomUsername();
 
-        GetFriendsListRequest checkBeforeRequest = GetFriendsListRequest.newBuilder()
+        userdataStub.updateUser(UpdateUserRequest.newBuilder()
+                .setUsername(targetUsername)
+                .setCurrency(CurrencyValues.RUB)
+                .build());
+
+        SendFriendshipRequestRequest sendRequest = SendFriendshipRequestRequest.newBuilder()
                 .setUsername(username)
+                .setTargetUsername(targetUsername)
                 .build();
 
-        UserListResponse beforeResponse = userdataStub.getFriendsList(checkBeforeRequest);
-        assertTrue(beforeResponse.getUsersList().stream()
-                .noneMatch(u -> u.getUsername().equals(targetUsername)));
+        UserResponse sendResponse = userdataStub.sendFriendshipRequest(sendRequest);
 
-        assertNotNull(user.testData().outcomeInvitations());
-        assertEquals(1, user.testData().outcomeInvitations().size());
+        assertNotNull(sendResponse);
+        assertEquals(targetUsername, sendResponse.getUsername());
+        assertEquals(FriendshipStatus.INVITE_SENT, sendResponse.getFriendshipStatus());
+
+        GetFriendsListRequest checkTargetRequest = GetFriendsListRequest.newBuilder()
+                .setUsername(targetUsername)
+                .build();
+        UserListResponse targetResponse = userdataStub.getFriendsList(checkTargetRequest);
+
+        boolean incomeInvitationFound = targetResponse.getUsersList().stream()
+                .anyMatch(u -> u.getUsername().equals(username) &&
+                        u.getFriendshipStatus() == FriendshipStatus.INVITE_RECEIVED);
+
+        assertTrue(incomeInvitationFound,
+                "У целевого пользователя должно появиться входящее приглашение");
     }
 }

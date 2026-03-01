@@ -48,7 +48,7 @@ public class CurrencyGrpcTest extends BaseGgrpcTest {
     }
 
     @Test
-    public void shouldReturnEmptyWhenNoCurrencies() {
+    public void shouldNotReturnEmptyCurrencies() {
         CurrencyResponse response = blockingStub.getAllCurrencies(Empty.getDefaultInstance());
         assertNotNull(response);
     }
