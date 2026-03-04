@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package guru.qa.grpc.niffler;
+
+option java_multiple_files = true;
+option java_package = "guru.qa.niffler.grpc";
+option java_outer_classname = "NifflerCommonProto";
+
+enum CurrencyValues {
+  CURRENCY_UNSPECIFIED = 0;
+  RUB = 1;
+  USD = 2;
+  EUR = 3;
+  KZT = 4;
+}

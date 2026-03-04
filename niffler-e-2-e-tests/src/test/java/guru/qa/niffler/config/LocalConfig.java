@@ -66,4 +66,9 @@ enum LocalConfig implements Config {
         return "localhost";
     }
 
+    @Override
+    public String userdataGrpcAddress() {
+        return "localhost";
+    }
+
 }
