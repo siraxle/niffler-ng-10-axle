@@ -27,11 +27,13 @@ public final class UsersApiClient extends RestClient implements UsersClient {
     private static final Config CFG = Config.getInstance();
     public static final String DEFAULT_PASSWORD = "123456";
 
-    private final UserApi userApi = new EmtyRestClient(CFG.userdataUrl()).create(UserApi.class);
-    private final AuthApiClient authApiClient = new EmtyRestClient(CFG.authUrl()).create(AuthApiClient.class);
+    private final UserApi userApi;
+    private final AuthApiClient authApiClient;
 
     public UsersApiClient() {
         super(CFG.userdataUrl());
+        this.userApi = create(UserApi.class);
+        this.authApiClient = new AuthApiClient();
     }
 
     @Step("Найти пользователя по username: {username}")
