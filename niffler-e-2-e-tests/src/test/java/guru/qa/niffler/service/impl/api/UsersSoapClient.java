@@ -5,7 +5,7 @@ import guru.qa.niffler.api.core.converter.SoapConverterFactory;
 import guru.qa.niffler.config.Config;
 import guru.qa.niffler.service.RestClient;
 import io.qameta.allure.Step;
-import jaxb.userdata.*;
+import guru.qa.jaxb.userdata.*;
 import okhttp3.logging.HttpLoggingInterceptor;
 
 import javax.annotation.Nonnull;

@@ -5,7 +5,7 @@ import guru.qa.niffler.jupiter.annotation.meta.SoapTest;
 import guru.qa.niffler.model.UserJson;
 import guru.qa.niffler.service.impl.api.UsersApiClient;
 import guru.qa.niffler.service.impl.api.UsersSoapClient;
-import jaxb.userdata.*;
+import guru.qa.jaxb.userdata.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
