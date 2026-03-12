@@ -23,8 +23,7 @@ import retrofit2.Converter;
 
 import static guru.qa.niffler.api.core.converter.SoapConverterFactory.XML;
 
-final class SoapRequestConverter<T> implements Converter<T, RequestBody> {
-    final XMLOutputFactory xmlOutputFactory = XMLOutputFactory.newInstance();
+final class SoapRequestConverter<T> implements Converter<T, RequestBody> { 
     final JAXBContext context;
     final String namespace;
 
