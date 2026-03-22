@@ -10,35 +10,26 @@ import okhttp3.ResponseBody;
 import org.w3c.dom.Document;
 import retrofit2.Converter;
 
-import javax.xml.stream.XMLInputFactory;
 import java.io.IOException;
 import java.io.InputStream;
 
 final class SoapResponseConverter<T> implements Converter<ResponseBody, T> {
-    final XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
     final JAXBContext context;
     final Class<T> type;
 
     SoapResponseConverter(JAXBContext context, Class<T> type) {
         this.context = context;
         this.type = type;
-
-        // Prevent XML External Entity attacks (XXE).
-        xmlInputFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
-        xmlInputFactory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
     }
 
     @Override
     public T convert(ResponseBody value) throws IOException {
-        try (value; InputStream is = value.byteStream()){
+        try (value; InputStream is = value.byteStream()) {
             MimeHeaders header = new MimeHeaders();
             if (value.contentType() != null) {
                 header.addHeader("Content-Type", value.contentType().toString());
             }
-            SOAPMessage response = MessageFactory.newInstance().createMessage(
-                    header,
-                    is
-            );
+            SOAPMessage response = MessageFactory.newInstance().createMessage(header, is);
             Document document = response.getSOAPBody().extractContentAsDocument();
             return context.createUnmarshaller().unmarshal(document, type).getValue();
         } catch (SOAPException | JAXBException e) {
