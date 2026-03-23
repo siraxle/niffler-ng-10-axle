@@ -261,6 +261,36 @@ class CategoryServiceAdditionalTest {
         verify(categoryRepository, never()).save(any());
     }
 
+    @Test
+    void addCategoryShouldIgnoreArchivedFlag(@Mock CategoryRepository categoryRepository) {
+        String categoryName = "New Category";
+        CategoryJson categoryJson = new CategoryJson(
+                null,
+                categoryName,
+                USERNAME,
+                true
+        );
+
+        when(categoryRepository.countByUsernameAndArchived(eq(USERNAME), eq(false)))
+                .thenReturn(5L);
+
+        CategoryEntity savedEntity = new CategoryEntity();
+        savedEntity.setId(UUID.randomUUID());
+        savedEntity.setName(categoryName);
+        savedEntity.setUsername(USERNAME);
+        savedEntity.setArchived(false);
+        when(categoryRepository.save(any(CategoryEntity.class))).thenReturn(savedEntity);
+
+        CategoryService categoryService = new CategoryService(categoryRepository);
+
+        CategoryJson result = categoryService.addCategory(categoryJson);
+
+        assertFalse(result.archived());
+        verify(categoryRepository).save(any(CategoryEntity.class));
+    }
+
+
+
     private CategoryEntity createCategoryEntity(String name, boolean archived) {
         CategoryEntity entity = new CategoryEntity();
         entity.setId(UUID.randomUUID());

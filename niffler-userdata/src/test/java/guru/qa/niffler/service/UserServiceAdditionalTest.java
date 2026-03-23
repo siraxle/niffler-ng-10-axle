@@ -469,6 +469,111 @@ class UserServiceAdditionalTest {
         assertEquals(expected, result);
     }
 
+    @Test
+    void createFriendshipRequestShouldNotCreateDuplicateRequest() {
+        FriendshipEntity existingRequest = new FriendshipEntity();
+        existingRequest.setRequester(friendUser);
+        existingRequest.setAddressee(mainUser);
+        existingRequest.setStatus(FriendshipStatus.PENDING);
+        mainUser.getFriendshipAddressees().add(existingRequest);
+
+        when(userRepository.findByUsername(eq(mainUsername))).thenReturn(Optional.of(mainUser));
+        when(userRepository.findByUsername(eq(friendUsername))).thenReturn(Optional.of(friendUser));
+        when(userRepository.save(any(UserEntity.class))).thenAnswer(i -> i.getArgument(0));
+
+        userService = new UserService(userRepository, messagingService);
+
+        UserJson result = userService.createFriendshipRequest(mainUsername, friendUsername);
+
+        assertEquals(FRIEND, result.friendshipStatus());
+
+        ArgumentCaptor<UserEntity> captor = ArgumentCaptor.forClass(UserEntity.class);
+        verify(userRepository).save(captor.capture());
+
+        UserEntity savedUser = captor.getValue();
+        assertEquals(1, savedUser.getFriendshipRequests().size());
+    }
+
+    @Test
+    void removeFriendShouldDoNothingWhenNoFriendship() {
+        when(userRepository.findByUsername(eq(mainUsername))).thenReturn(Optional.of(mainUser));
+        when(userRepository.findByUsername(eq(friendUsername))).thenReturn(Optional.of(friendUser));
+        when(userRepository.save(any(UserEntity.class))).thenAnswer(i -> i.getArgument(0));
+
+        userService = new UserService(userRepository, messagingService);
+        userService.removeFriend(mainUsername, friendUsername);
+
+        verify(userRepository, times(2)).save(any(UserEntity.class));
+        assertTrue(mainUser.getFriendshipRequests().isEmpty());
+        assertTrue(mainUser.getFriendshipAddressees().isEmpty());
+    }
+
+    @Test
+    void acceptFriendshipRequestShouldDoNothingWhenAlreadyAccepted() {
+        FriendshipEntity acceptedRequest = new FriendshipEntity();
+        acceptedRequest.setRequester(pendingUser);
+        acceptedRequest.setAddressee(mainUser);
+        acceptedRequest.setStatus(FriendshipStatus.ACCEPTED);
+        mainUser.getFriendshipAddressees().add(acceptedRequest);
+
+        when(userRepository.findByUsername(eq(mainUsername))).thenReturn(Optional.of(mainUser));
+        when(userRepository.findByUsername(eq(pendingUsername))).thenReturn(Optional.of(pendingUser));
+        when(userRepository.save(any(UserEntity.class))).thenAnswer(i -> i.getArgument(0));
+
+        userService = new UserService(userRepository, messagingService);
+
+        UserJson result = userService.acceptFriendshipRequest(mainUsername, pendingUsername);
+
+        assertEquals(FRIEND, result.friendshipStatus());
+        assertEquals(pendingUsername, result.username());
+
+        ArgumentCaptor<UserEntity> captor = ArgumentCaptor.forClass(UserEntity.class);
+        verify(userRepository).save(captor.capture());
+
+        UserEntity savedUser = captor.getValue();
+        FriendshipEntity request = savedUser.getFriendshipAddressees().iterator().next();
+        assertEquals(FriendshipStatus.ACCEPTED, request.getStatus());
+    }
+
+    @Test
+    void createFriendshipRequestForExistingOutgoingRequestShouldNotCreateDuplicate() {
+        FriendshipEntity outgoingRequest = new FriendshipEntity();
+        outgoingRequest.setRequester(mainUser);
+        outgoingRequest.setAddressee(friendUser);
+        outgoingRequest.setStatus(FriendshipStatus.PENDING);
+        mainUser.getFriendshipRequests().add(outgoingRequest);
+        friendUser.getFriendshipAddressees().add(outgoingRequest);
+
+        when(userRepository.findByUsername(eq(mainUsername))).thenReturn(Optional.of(mainUser));
+        when(userRepository.findByUsername(eq(friendUsername))).thenReturn(Optional.of(friendUser));
+        when(userRepository.save(any(UserEntity.class))).thenAnswer(i -> i.getArgument(0));
+
+        userService = new UserService(userRepository, messagingService);
+
+        UserJson result = userService.createFriendshipRequest(mainUsername, friendUsername);
+
+        assertEquals(INVITE_SENT, result.friendshipStatus());
+
+        ArgumentCaptor<UserEntity> captor = ArgumentCaptor.forClass(UserEntity.class);
+        verify(userRepository).save(captor.capture());
+
+        UserEntity savedUser = captor.getValue();
+        assertEquals(2, savedUser.getFriendshipRequests().size());
+    }
+
+    @Test
+    void declineFriendshipRequestShouldDoNothingWhenRequestNotFound() {
+        when(userRepository.findByUsername(eq(mainUsername))).thenReturn(Optional.of(mainUser));
+        when(userRepository.findByUsername(eq(pendingUsername))).thenReturn(Optional.of(pendingUser));
+        when(userRepository.save(any(UserEntity.class))).thenAnswer(i -> i.getArgument(0));
+
+        userService = new UserService(userRepository, messagingService);
+
+        assertDoesNotThrow(() -> userService.declineFriendshipRequest(mainUsername, pendingUsername));
+
+        verify(userRepository, times(2)).save(any(UserEntity.class));
+    }
+
     private UserWithStatus createUserWithStatus(UserEntity user, FriendshipStatus status) {
         return new UserWithStatus(
                 user.getId(),
